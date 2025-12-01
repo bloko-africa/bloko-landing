@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Shield } from "lucide-react";
 import { useInView } from "framer-motion";
+import { blokoEvents } from "../analytics/GoogleAnalytics";
 import { useRef } from "react";
 
 export function StorySection() {
@@ -65,6 +66,7 @@ export function StorySection() {
                 href="https://tally.so/r/WOJkNa"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => blokoEvents.shareExperience("story_section")}
               >
                 Partager mon histoire
               </a>

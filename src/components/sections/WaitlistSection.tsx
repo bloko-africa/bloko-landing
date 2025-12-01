@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Bell, ArrowRight, AlertCircle } from "lucide-react";
 import { useInView } from "framer-motion";
 import { useRef, useState } from "react";
+import { blokoEvents } from "../analytics/GoogleAnalytics";
 import { createClient } from "@/utils/supabase/client";
 
 export function WaitlistSection() {
@@ -62,6 +63,7 @@ export function WaitlistSection() {
     }
 
     setIsSubmitted(true);
+    blokoEvents.signUpWaitlist("website");
     setIsSubmitting(false);
   };
 
