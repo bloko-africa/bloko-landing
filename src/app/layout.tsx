@@ -86,7 +86,7 @@ export const metadata: Metadata = {
   },
 
   verification: {
-    google: "votre-code-google-verification",
+    google: "google2726843557cbb860",
   },
 
   category: "technology",
