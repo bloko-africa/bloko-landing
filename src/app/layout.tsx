@@ -1,6 +1,7 @@
 import { IBM_Plex_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -131,7 +132,10 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        {children}
+        <SpeedInsights />
+      </body>
     </html>
   );
 }
