@@ -40,12 +40,12 @@ export const metadata: Metadata = {
   authors: [{ name: "Bloko" }],
   creator: "Bloko",
   publisher: "Bloko",
-  metadataBase: new URL("https://bloko.me"),
+  metadataBase: new URL("https://www.bloko.me"),
 
   openGraph: {
     type: "website",
     locale: "fr_FR",
-    url: "https://bloko.me",
+    url: "https://www.bloko.me",
     title: "Bloko - Paiements en ligne sécurisés en Afrique",
     description:
       "Achetez et vendez en toute confiance avec Bloko. Infrastructure de paiement escrow pour l'Afrique.",
@@ -91,7 +91,7 @@ export const metadata: Metadata = {
 
   category: "technology",
   alternates: {
-    canonical: "https://bloko.me",
+    canonical: "https://www.bloko.me",
   },
 };
 
@@ -114,7 +114,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebApplication",
               name: "Bloko",
-              url: "https://bloko.me",
+              url: "https://www.bloko.me",
               description:
                 "Infrastructure de paiement escrow pour l'Afrique. Achetez et vendez en toute confiance.",
               applicationCategory: "FinanceApplication",
