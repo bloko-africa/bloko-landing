@@ -1,26 +1,127 @@
 @import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+@import "tw-animate-css";
+@custom-variant dark (&:is(.dark *));
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --font-sans: var(--font-ibm-plex);
+    --font-heading: var(--font-heading);
+    --color-bloko-primary: var(--bloko-primary);
+    --color-bloko-primary-light: var(--bloko-primary-light);
+    --color-bloko-background: var(--bloko-background);
+    --color-bloko-dark: var(--bloko-dark);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+}
+:root {
+    /* Bloko Brand Colors */
+    --bloko-primary: 10 144 102; /* #0a9066 */
+    --bloko-primary-light: 136 207 187; /* #88cfbb */
+    --bloko-background: 238 248 250; /* #eef8fa */
+    --bloko-dark: 10 17 14; /* #0a110e */
+    /* Base system */
+    --radius: 0.5rem;
+    --background: 0 0% 100%; /* Blanc pur */
+    --foreground: 10 17 14; /* Bloko dark pour le texte */
+    /* Cards */
+    --card: 0 0% 100%;
+    --card-foreground: 10 17 14;
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 10 17 14;
+    /* Primary = Bloko green */
+    --primary: 10 144 102; /* #0a9066 */
+    --primary-foreground: 0 0% 100%;
+    /* Secondary = Bloko light green */
+    --secondary: 136 207 187; /* #88cfbb */
+    --secondary-foreground: 10 17 14;
+    /* Muted = Light background */
+    --muted: 238 248 250; /* #eef8fa */
+    --muted-foreground: 10 17 14;
+    /* Accent = Bloko green */
+    --accent: 10 144 102;
+    --accent-foreground: 0 0% 100%;
+    /* Destructive */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    /* Borders & Inputs */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 10 144 102; /* Focus ring = Bloko green */
+}
+.dark {
+    /* Dark mode = Fond noir Bloko */
+    --background: 10 17 14; /* #0a110e */
+    --foreground: 238 248 250; /* #eef8fa texte clair */
+    --card: 20 30 26; /* Légèrement plus clair que background */
+    --card-foreground: 238 248 250;
+    --popover: 20 30 26;
+    --popover-foreground: 238 248 250;
+    /* Primary reste vert Bloko */
+    --primary: 10 144 102;
+    --primary-foreground: 0 0% 100%;
+    /* Secondary = vert clair */
+    --secondary: 136 207 187;
+    --secondary-foreground: 10 17 14;
+    --muted: 20 30 26;
+    --muted-foreground: 136 207 187;
+    --accent: 10 144 102;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --border: 136 207 187 / 0.2; /* Vert clair transparent */
+    --input: 136 207 187 / 0.2;
+    --ring: 136 207 187;
+}
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+    body {
+        @apply bg-background text-foreground font-sans antialiased;
+    }
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @apply font-heading;
+    }
+}
+/* Utilities personnalisées Bloko */
+@layer utilities {
+    .text-gradient-bloko {
+        @apply bg-gradient-to-r from-[#0a9066] to-[#88cfbb] bg-clip-text text-transparent;
+    }
+    .bg-gradient-bloko {
+        @apply bg-gradient-to-br from-[#0a9066] to-[#88cfbb];
+    }
+    .section-padding {
+        @apply py-16 md:py-24 lg:py-32;
+    }
+    .container-bloko {
+        @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+    }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.main {
+    min-height: 100vh;
 }
