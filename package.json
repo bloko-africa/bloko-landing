@@ -10,6 +10,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
+    "setup:storage": "tsx scripts/setup-supabase-storage.ts",
     "auth:generate": "npx @better-auth/cli generate --config ./src/lib/auth/auth.ts --output ./prisma/schema.prisma"
   },
   "dependencies": {
@@ -32,6 +33,7 @@
     "react": "^19.2.0",
     "react-apexcharts": "^1.7.0",
     "react-dom": "^19.2.0",
+    "server-only": "^0.0.1",
     "sharp": "^0.35.3",
     "sonner": "^2.0.7",
     "zod": "^4.3.6"
@@ -51,6 +53,7 @@
     "prisma": "^7.8.0",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.4",
+    "tsx": "^4.22.5",
     "typescript": "^5"
   }
 }

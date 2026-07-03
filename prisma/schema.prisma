@@ -149,19 +149,92 @@ model ProductImage {
 }
 
 model ProductVariant {
-  id            String   @id @default(cuid())
-  productId     String   @map("product_id")
-  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  sku           String   @unique
+  id            String      @id @default(cuid())
+  productId     String      @map("product_id")
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku           String      @unique
   size          String? // XS, S, M, L, XL ou pointure
   color         String?
-  colorHex      String?  @map("color_hex")
-  priceOverride Decimal? @map("price_override") @db.Decimal(10, 2)
-  stock         Int      @default(0)
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  colorHex      String?     @map("color_hex")
+  priceOverride Decimal?    @map("price_override") @db.Decimal(10, 2)
+  stock         Int         @default(0)
+  orderItems    OrderItem[]
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
 
   @@unique([productId, size, color])
   @@index([productId])
   @@map("product_variant")
+}
+
+// --- Commandes & paiements ---
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  reference     String      @unique
+  customerName  String      @map("customer_name")
+  customerEmail String?     @map("customer_email")
+  customerPhone String      @map("customer_phone")
+  status        OrderStatus @default(PENDING)
+  totalAmount   Decimal     @map("total_amount") @db.Decimal(10, 2)
+  currency      String      @default("XOF")
+  items         OrderItem[]
+  payments      Payment[]
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@map("order")
+}
+
+model OrderItem {
+  id               String         @id @default(cuid())
+  orderId          String         @map("order_id")
+  order            Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productVariantId String         @map("product_variant_id")
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
+  quantity         Int
+  unitPrice        Decimal        @map("unit_price") @db.Decimal(10, 2)
+
+  @@index([orderId])
+  @@map("order_item")
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  EXPIRED
+  CANCELLED
+  REFUNDED
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  orderId       String        @map("order_id")
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider      String        @default("geniuspay")
+  reference     String        @unique
+  status        PaymentStatus @default(PENDING)
+  amount        Decimal       @db.Decimal(10, 2)
+  currency      String        @default("XOF")
+  checkoutUrl   String?       @map("checkout_url")
+  paymentMethod String?       @map("payment_method")
+  rawPayload    Json?         @map("raw_payload")
+  expiresAt     DateTime?     @map("expires_at")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  @@index([orderId])
+  @@index([status])
+  @@map("payment")
 }
