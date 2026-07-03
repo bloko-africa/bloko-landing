@@ -20,6 +20,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
   orders        Order[]
+  pushSubscriptions PushSubscription[]
 
   role       String?
   banned     Boolean?  @default(false)
@@ -256,4 +257,19 @@ model StoreSettings {
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   @@map("store_settings")
+}
+
+// --- Abonnements push (staff uniquement, notif nouvelles commandes) ---
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("push_subscription")
 }

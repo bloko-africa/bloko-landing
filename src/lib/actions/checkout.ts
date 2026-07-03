@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { getCurrentSession } from "@/lib/auth/session";
 import { buildOrderItems } from "@/lib/orders/build-order-items";
 import { createGeniusPayPayment } from "@/lib/payments/geniuspay";
+import { formatPrice } from "@/lib/format-price";
+import { notifyStaff } from "@/lib/push/send-push";
 import { getStoreSettings } from "@/lib/store-settings";
 import { z } from "zod";
 
@@ -76,6 +78,19 @@ export async function checkout(input: CheckoutInput) {
       expiresAt: payment.expires_at ? new Date(payment.expires_at) : null,
     },
   });
+
+  // Awaited (pas fire-and-forget) : sur une fonction serverless, le runtime
+  // peut couper l'execution des qu'on retourne, un .catch() sans await ne
+  // serait pas fiable pour garantir l'envoi.
+  try {
+    await notifyStaff({
+      title: "Nouvelle commande",
+      body: `${order.reference} — ${data.customerName} — ${formatPrice(total, settings.currency)}`,
+      url: `/admin/orders/${order.id}`,
+    });
+  } catch (err) {
+    console.error("Echec notification push:", err);
+  }
 
   return { checkoutUrl: payment.checkout_url, orderReference: order.reference };
 }

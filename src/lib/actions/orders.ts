@@ -7,6 +7,8 @@ import {
   getGeniusPayPaymentStatus,
 } from "@/lib/payments/geniuspay";
 import { buildOrderItems, decrementStockForOrder } from "@/lib/orders/build-order-items";
+import { formatPrice } from "@/lib/format-price";
+import { notifyStaff } from "@/lib/push/send-push";
 import { getStoreSettings } from "@/lib/store-settings";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -46,6 +48,16 @@ export async function createOrder(input: CreateOrderInput) {
       items: { create: itemsData },
     },
   });
+
+  try {
+    await notifyStaff({
+      title: "Nouvelle commande",
+      body: `${order.reference} — ${data.customerName} — ${formatPrice(total, settings.currency)}`,
+      url: `/admin/orders/${order.id}`,
+    });
+  } catch (err) {
+    console.error("Echec notification push:", err);
+  }
 
   revalidatePath("/admin/orders");
   return order.id;
