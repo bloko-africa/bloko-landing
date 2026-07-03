@@ -4,30 +4,27 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Catégories",
+  title: "Collections",
 };
 
 export const dynamic = "force-dynamic";
 
-export default async function CategoriesPage() {
-  const categories = await db.category.findMany({
-    orderBy: { name: "asc" },
-    include: {
-      parent: { select: { name: true } },
-      _count: { select: { products: true } },
-    },
+export default async function CollectionsPage() {
+  const collections = await db.collection.findMany({
+    orderBy: { createdAt: "desc" },
+    include: { _count: { select: { products: true } } },
   });
 
   return (
     <>
-      <Breadcrumb pageName="Catégories" />
+      <Breadcrumb pageName="Collections" />
 
       <div className="mb-5 flex justify-end">
         <Link
-          href="/shop/categories/new"
+          href="/admin/collections/new"
           className="rounded-lg bg-primary px-6 py-2.5 font-medium text-white hover:bg-opacity-90"
         >
-          Nouvelle catégorie
+          Nouvelle collection
         </Link>
       </div>
 
@@ -39,43 +36,57 @@ export default async function CategoriesPage() {
                 Nom
               </th>
               <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
-                Parent
+                Saison
               </th>
               <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
                 Produits
               </th>
+              <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
+                Statut
+              </th>
             </tr>
           </thead>
           <tbody>
-            {categories.map((category) => (
+            {collections.map((collection) => (
               <tr
-                key={category.id}
+                key={collection.id}
                 className="border-b border-stroke last:border-0 dark:border-dark-3"
               >
                 <td className="px-5.5 py-4">
                   <Link
-                    href={`/shop/categories/${category.id}`}
+                    href={`/admin/collections/${collection.id}`}
                     className="font-medium text-dark hover:text-primary dark:text-white"
                   >
-                    {category.name}
+                    {collection.name}
                   </Link>
                 </td>
                 <td className="px-5.5 py-4 text-dark-5 dark:text-dark-6">
-                  {category.parent?.name ?? "—"}
+                  {collection.season ?? "—"}
                 </td>
                 <td className="px-5.5 py-4 text-dark-5 dark:text-dark-6">
-                  {category._count.products}
+                  {collection._count.products}
+                </td>
+                <td className="px-5.5 py-4">
+                  <span
+                    className={
+                      collection.isActive
+                        ? "rounded-full bg-green-light-6 px-3 py-1 text-body-xs font-medium text-green-dark"
+                        : "rounded-full bg-gray-2 px-3 py-1 text-body-xs font-medium text-dark-5 dark:bg-dark-2 dark:text-dark-6"
+                    }
+                  >
+                    {collection.isActive ? "Active" : "Inactive"}
+                  </span>
                 </td>
               </tr>
             ))}
 
-            {categories.length === 0 && (
+            {collections.length === 0 && (
               <tr>
                 <td
-                  colSpan={3}
+                  colSpan={4}
                   className="px-5.5 py-8 text-center text-dark-5 dark:text-dark-6"
                 >
-                  Aucune catégorie pour le moment.
+                  Aucune collection pour le moment.
                 </td>
               </tr>
             )}

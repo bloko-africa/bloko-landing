@@ -23,7 +23,7 @@ export default function Signup() {
       <div className="mt-6 text-center">
         <p>
           Already have an account?{" "}
-          <Link href="/auth/sign-in" className="text-primary">
+          <Link href="/admin/auth/sign-in" className="text-primary">
             Sign In
           </Link>
         </p>

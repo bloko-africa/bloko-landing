@@ -29,7 +29,7 @@ export default async function OrdersPage() {
 
       <div className="mb-5 flex justify-end">
         <Link
-          href="/shop/orders/new"
+          href="/admin/orders/new"
           className="rounded-lg bg-primary px-6 py-2.5 font-medium text-white hover:bg-opacity-90"
         >
           Nouvelle commande
@@ -65,7 +65,7 @@ export default async function OrdersPage() {
               >
                 <td className="px-5.5 py-4">
                   <Link
-                    href={`/shop/orders/${order.id}`}
+                    href={`/admin/orders/${order.id}`}
                     className="font-medium text-dark hover:text-primary dark:text-white"
                   >
                     {order.reference}

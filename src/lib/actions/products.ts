@@ -48,7 +48,7 @@ export async function createProduct(formData: FormData) {
     },
   });
 
-  revalidatePath("/shop/products");
+  revalidatePath("/admin/products");
   return product.id;
 }
 
@@ -69,8 +69,8 @@ export async function updateProduct(formData: FormData) {
     },
   });
 
-  revalidatePath("/shop/products");
-  revalidatePath(`/shop/products/${data.id}`);
+  revalidatePath("/admin/products");
+  revalidatePath(`/admin/products/${data.id}`);
 }
 
 export async function deleteProduct(id: string) {
@@ -83,7 +83,7 @@ export async function deleteProduct(id: string) {
     images.map((image) => removeStoredImage(imagePathFromUrl(image.url))),
   );
 
-  revalidatePath("/shop/products");
+  revalidatePath("/admin/products");
 }
 
 const variantSchema = z.object({
@@ -109,7 +109,7 @@ export async function addProductVariant(formData: FormData) {
   });
 
   await db.productVariant.create({ data });
-  revalidatePath(`/shop/products/${data.productId}`);
+  revalidatePath(`/admin/products/${data.productId}`);
 }
 
 export async function updateVariantStock(variantId: string, stock: number) {
@@ -121,13 +121,13 @@ export async function updateVariantStock(variantId: string, stock: number) {
     data: { stock },
   });
 
-  revalidatePath(`/shop/products/${variant.productId}`);
+  revalidatePath(`/admin/products/${variant.productId}`);
 }
 
 export async function deleteProductVariant(variantId: string) {
   await requireRole(["admin"]);
   const variant = await db.productVariant.delete({ where: { id: variantId } });
-  revalidatePath(`/shop/products/${variant.productId}`);
+  revalidatePath(`/admin/products/${variant.productId}`);
 }
 
 function imagePathFromUrl(url: string): string {
@@ -157,7 +157,7 @@ export async function addProductImage(productId: string, file: File) {
     data: { productId, url, position: (lastImage?.position ?? -1) + 1 },
   });
 
-  revalidatePath(`/shop/products/${productId}`);
+  revalidatePath(`/admin/products/${productId}`);
 }
 
 export async function deleteProductImageAction(imageId: string) {
@@ -165,5 +165,5 @@ export async function deleteProductImageAction(imageId: string) {
 
   const image = await db.productImage.delete({ where: { id: imageId } });
   await removeStoredImage(imagePathFromUrl(image.url));
-  revalidatePath(`/shop/products/${image.productId}`);
+  revalidatePath(`/admin/products/${image.productId}`);
 }

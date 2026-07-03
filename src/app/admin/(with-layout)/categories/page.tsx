@@ -4,36 +4,30 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Produits",
+  title: "Catégories",
 };
 
 export const dynamic = "force-dynamic";
 
-const STATUS_LABEL: Record<string, string> = {
-  DRAFT: "Brouillon",
-  PUBLISHED: "Publié",
-  ARCHIVED: "Archivé",
-};
-
-export default async function ProductsPage() {
-  const products = await db.product.findMany({
-    orderBy: { createdAt: "desc" },
+export default async function CategoriesPage() {
+  const categories = await db.category.findMany({
+    orderBy: { name: "asc" },
     include: {
-      collection: { select: { name: true } },
-      variants: { select: { stock: true } },
+      parent: { select: { name: true } },
+      _count: { select: { products: true } },
     },
   });
 
   return (
     <>
-      <Breadcrumb pageName="Produits" />
+      <Breadcrumb pageName="Catégories" />
 
       <div className="mb-5 flex justify-end">
         <Link
-          href="/shop/products/new"
+          href="/admin/categories/new"
           className="rounded-lg bg-primary px-6 py-2.5 font-medium text-white hover:bg-opacity-90"
         >
-          Nouveau produit
+          Nouvelle catégorie
         </Link>
       </div>
 
@@ -45,57 +39,43 @@ export default async function ProductsPage() {
                 Nom
               </th>
               <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
-                Collection
+                Parent
               </th>
               <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
-                Prix de base
-              </th>
-              <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
-                Stock total
-              </th>
-              <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
-                Statut
+                Produits
               </th>
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => (
+            {categories.map((category) => (
               <tr
-                key={product.id}
+                key={category.id}
                 className="border-b border-stroke last:border-0 dark:border-dark-3"
               >
                 <td className="px-5.5 py-4">
                   <Link
-                    href={`/shop/products/${product.id}`}
+                    href={`/admin/categories/${category.id}`}
                     className="font-medium text-dark hover:text-primary dark:text-white"
                   >
-                    {product.name}
+                    {category.name}
                   </Link>
                 </td>
                 <td className="px-5.5 py-4 text-dark-5 dark:text-dark-6">
-                  {product.collection?.name ?? "—"}
+                  {category.parent?.name ?? "—"}
                 </td>
                 <td className="px-5.5 py-4 text-dark-5 dark:text-dark-6">
-                  {Number(product.basePrice).toLocaleString("fr-FR")} XOF
-                </td>
-                <td className="px-5.5 py-4 text-dark-5 dark:text-dark-6">
-                  {product.variants.reduce((sum, v) => sum + v.stock, 0)}
-                </td>
-                <td className="px-5.5 py-4">
-                  <span className="rounded-full bg-gray-2 px-3 py-1 text-body-xs font-medium text-dark-5 dark:bg-dark-2 dark:text-dark-6">
-                    {STATUS_LABEL[product.status]}
-                  </span>
+                  {category._count.products}
                 </td>
               </tr>
             ))}
 
-            {products.length === 0 && (
+            {categories.length === 0 && (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={3}
                   className="px-5.5 py-8 text-center text-dark-5 dark:text-dark-6"
                 >
-                  Aucun produit pour le moment.
+                  Aucune catégorie pour le moment.
                 </td>
               </tr>
             )}

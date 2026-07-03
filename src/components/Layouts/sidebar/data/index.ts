@@ -10,25 +10,25 @@ export const NAV_DATA = [
         items: [
           {
             title: "Produits",
-            url: "/shop/products",
+            url: "/admin/products",
           },
           {
             title: "Collections",
-            url: "/shop/collections",
+            url: "/admin/collections",
           },
           {
             title: "Catégories",
-            url: "/shop/categories",
+            url: "/admin/categories",
           },
           {
             title: "Commandes",
-            url: "/shop/orders",
+            url: "/admin/orders",
           },
         ],
       },
       {
         title: "Profile",
-        url: "/profile",
+        url: "/admin/profile",
         icon: Icons.User,
         items: [],
       },
@@ -38,7 +38,7 @@ export const NAV_DATA = [
         items: [
           {
             title: "Settings",
-            url: "/pages/settings",
+            url: "/admin/settings",
           },
         ],
       },

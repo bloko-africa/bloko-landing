@@ -2,29 +2,44 @@
 
 import InputGroup from "@/components/FormElements/InputGroup";
 import { TextAreaGroup } from "@/components/FormElements/InputGroup/text-area";
-import { Switch } from "@/components/FormElements/switch";
+import { Select } from "@/components/FormElements/select";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 import {
-  createCollection,
-  deleteCollection,
-  updateCollection,
-} from "@/lib/actions/collections";
+  createProduct,
+  deleteProduct,
+  updateProduct,
+} from "@/lib/actions/products";
 import { notifyPromise } from "@/lib/notify-promise";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
-type CollectionFormProps = {
+const STATUS_OPTIONS = [
+  { value: "DRAFT", label: "Brouillon" },
+  { value: "PUBLISHED", label: "Publié" },
+  { value: "ARCHIVED", label: "Archivé" },
+];
+
+type ProductFormProps = {
+  collections: { value: string; label: string }[];
+  categories: { value: string; label: string }[];
   initial?: {
     id: string;
     name: string;
-    season: string | null;
     description: string | null;
-    isActive: boolean;
+    basePrice: string;
+    status: string;
+    collectionId: string | null;
+    categoryId: string | null;
   };
   canDelete?: boolean;
 };
 
-export function CollectionForm({ initial, canDelete }: CollectionFormProps) {
+export function ProductForm({
+  collections,
+  categories,
+  initial,
+  canDelete,
+}: ProductFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -36,20 +51,20 @@ export function CollectionForm({ initial, canDelete }: CollectionFormProps) {
     try {
       if (initial) {
         formData.set("id", initial.id);
-        await notifyPromise(updateCollection(formData), {
+        await notifyPromise(updateProduct(formData), {
           loading: "Mise à jour...",
-          success: "Collection mise à jour",
+          success: "Produit mis à jour",
           error: (err) => (err instanceof Error ? err.message : "Échec"),
         });
+        router.refresh();
       } else {
-        await notifyPromise(createCollection(formData), {
+        const id = await notifyPromise(createProduct(formData), {
           loading: "Création...",
-          success: "Collection créée",
+          success: "Produit créé",
           error: (err) => (err instanceof Error ? err.message : "Échec"),
         });
+        router.push(`/admin/products/${id}`);
       }
-      router.push("/shop/collections");
-      router.refresh();
     } finally {
       setLoading(false);
     }
@@ -57,20 +72,20 @@ export function CollectionForm({ initial, canDelete }: CollectionFormProps) {
 
   async function handleDelete() {
     if (!initial) return;
-    if (!confirm(`Supprimer la collection "${initial.name}" ?`)) return;
+    if (!confirm(`Supprimer le produit "${initial.name}" ?`)) return;
 
-    await notifyPromise(deleteCollection(initial.id), {
+    await notifyPromise(deleteProduct(initial.id), {
       loading: "Suppression...",
-      success: "Collection supprimée",
+      success: "Produit supprimé",
       error: (err) => (err instanceof Error ? err.message : "Échec"),
     });
-    router.push("/shop/collections");
+    router.push("/admin/products");
     router.refresh();
   }
 
   return (
     <ShowcaseSection
-      title={initial ? "Modifier la collection" : "Nouvelle collection"}
+      title={initial ? "Informations produit" : "Nouveau produit"}
       className="space-y-5.5 p-6.5!"
     >
       <form onSubmit={handleSubmit} className="space-y-5.5">
@@ -78,36 +93,49 @@ export function CollectionForm({ initial, canDelete }: CollectionFormProps) {
           label="Nom"
           name="name"
           type="text"
-          placeholder="Ex: Prêt-à-porter Été"
+          placeholder="Ex: Robe portefeuille en soie"
           defaultValue={initial?.name}
           required
-        />
-
-        <InputGroup
-          label="Saison"
-          name="season"
-          type="text"
-          placeholder="Ex: Printemps-Été 2027"
-          defaultValue={initial?.season ?? undefined}
         />
 
         <TextAreaGroup
           label="Description"
           name="description"
-          placeholder="Description de la collection"
+          placeholder="Description du produit"
           defaultValue={initial?.description ?? undefined}
         />
 
-        <div>
-          <span className="mb-3 block text-body-sm font-medium text-dark dark:text-white">
-            Active
-          </span>
-          <Switch
-            name="isActive"
-            background="dark"
-            defaultChecked={initial ? initial.isActive : true}
-          />
-        </div>
+        <InputGroup
+          label="Prix de base (XOF)"
+          name="basePrice"
+          type="number"
+          placeholder="Ex: 25000"
+          defaultValue={initial?.basePrice}
+          required
+        />
+
+        <Select
+          label="Statut"
+          name="status"
+          items={STATUS_OPTIONS}
+          defaultValue={initial?.status ?? "DRAFT"}
+        />
+
+        <Select
+          label="Collection (optionnel)"
+          name="collectionId"
+          items={collections}
+          placeholder="Aucune"
+          defaultValue={initial?.collectionId ?? undefined}
+        />
+
+        <Select
+          label="Catégorie (optionnel)"
+          name="categoryId"
+          items={categories}
+          placeholder="Aucune"
+          defaultValue={initial?.categoryId ?? undefined}
+        />
 
         <div className="flex justify-between gap-3">
           {canDelete && initial && (
@@ -125,7 +153,7 @@ export function CollectionForm({ initial, canDelete }: CollectionFormProps) {
             disabled={loading}
             className="ml-auto flex justify-center rounded-lg bg-primary px-6 py-1.75 font-medium text-white hover:bg-opacity-90 disabled:opacity-70"
           >
-            {initial ? "Enregistrer" : "Créer"}
+            {initial ? "Enregistrer" : "Créer et continuer"}
           </button>
         </div>
       </form>

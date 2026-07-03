@@ -119,7 +119,7 @@ export function OrderForm({ variants }: { variants: VariantOption[] }) {
           error: (err) => (err instanceof Error ? err.message : "Échec"),
         },
       );
-      router.push(`/shop/orders/${id}`);
+      router.push(`/admin/orders/${id}`);
     } finally {
       setLoading(false);
     }

@@ -4,27 +4,36 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Collections",
+  title: "Produits",
 };
 
 export const dynamic = "force-dynamic";
 
-export default async function CollectionsPage() {
-  const collections = await db.collection.findMany({
+const STATUS_LABEL: Record<string, string> = {
+  DRAFT: "Brouillon",
+  PUBLISHED: "Publié",
+  ARCHIVED: "Archivé",
+};
+
+export default async function ProductsPage() {
+  const products = await db.product.findMany({
     orderBy: { createdAt: "desc" },
-    include: { _count: { select: { products: true } } },
+    include: {
+      collection: { select: { name: true } },
+      variants: { select: { stock: true } },
+    },
   });
 
   return (
     <>
-      <Breadcrumb pageName="Collections" />
+      <Breadcrumb pageName="Produits" />
 
       <div className="mb-5 flex justify-end">
         <Link
-          href="/shop/collections/new"
+          href="/admin/products/new"
           className="rounded-lg bg-primary px-6 py-2.5 font-medium text-white hover:bg-opacity-90"
         >
-          Nouvelle collection
+          Nouveau produit
         </Link>
       </div>
 
@@ -36,10 +45,13 @@ export default async function CollectionsPage() {
                 Nom
               </th>
               <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
-                Saison
+                Collection
               </th>
               <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
-                Produits
+                Prix de base
+              </th>
+              <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
+                Stock total
               </th>
               <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
                 Statut
@@ -47,46 +59,43 @@ export default async function CollectionsPage() {
             </tr>
           </thead>
           <tbody>
-            {collections.map((collection) => (
+            {products.map((product) => (
               <tr
-                key={collection.id}
+                key={product.id}
                 className="border-b border-stroke last:border-0 dark:border-dark-3"
               >
                 <td className="px-5.5 py-4">
                   <Link
-                    href={`/shop/collections/${collection.id}`}
+                    href={`/admin/products/${product.id}`}
                     className="font-medium text-dark hover:text-primary dark:text-white"
                   >
-                    {collection.name}
+                    {product.name}
                   </Link>
                 </td>
                 <td className="px-5.5 py-4 text-dark-5 dark:text-dark-6">
-                  {collection.season ?? "—"}
+                  {product.collection?.name ?? "—"}
                 </td>
                 <td className="px-5.5 py-4 text-dark-5 dark:text-dark-6">
-                  {collection._count.products}
+                  {Number(product.basePrice).toLocaleString("fr-FR")} XOF
+                </td>
+                <td className="px-5.5 py-4 text-dark-5 dark:text-dark-6">
+                  {product.variants.reduce((sum, v) => sum + v.stock, 0)}
                 </td>
                 <td className="px-5.5 py-4">
-                  <span
-                    className={
-                      collection.isActive
-                        ? "rounded-full bg-green-light-6 px-3 py-1 text-body-xs font-medium text-green-dark"
-                        : "rounded-full bg-gray-2 px-3 py-1 text-body-xs font-medium text-dark-5 dark:bg-dark-2 dark:text-dark-6"
-                    }
-                  >
-                    {collection.isActive ? "Active" : "Inactive"}
+                  <span className="rounded-full bg-gray-2 px-3 py-1 text-body-xs font-medium text-dark-5 dark:bg-dark-2 dark:text-dark-6">
+                    {STATUS_LABEL[product.status]}
                   </span>
                 </td>
               </tr>
             ))}
 
-            {collections.length === 0 && (
+            {products.length === 0 && (
               <tr>
                 <td
-                  colSpan={4}
+                  colSpan={5}
                   className="px-5.5 py-8 text-center text-dark-5 dark:text-dark-6"
                 >
-                  Aucune collection pour le moment.
+                  Aucun produit pour le moment.
                 </td>
               </tr>
             )}

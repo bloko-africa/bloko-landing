@@ -61,7 +61,7 @@ export async function createOrder(input: CreateOrderInput) {
     },
   });
 
-  revalidatePath("/shop/orders");
+  revalidatePath("/admin/orders");
   return order.id;
 }
 
@@ -95,7 +95,7 @@ export async function generatePaymentLink(orderId: string, country: "CI" | "BJ")
     },
   });
 
-  revalidatePath(`/shop/orders/${orderId}`);
+  revalidatePath(`/admin/orders/${orderId}`);
   return payment.checkout_url;
 }
 
@@ -130,5 +130,5 @@ export async function refreshPaymentStatus(paymentId: string) {
     });
   }
 
-  revalidatePath(`/shop/orders/${payment.orderId}`);
+  revalidatePath(`/admin/orders/${payment.orderId}`);
 }

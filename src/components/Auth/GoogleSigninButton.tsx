@@ -16,7 +16,7 @@ export default function GoogleSigninButton({ text }: { text: string }) {
     try {
       await signIn.social({
         provider: "google",
-        callbackURL: callbackUrl || "/",
+        callbackURL: callbackUrl || "/admin",
       });
     } catch (error) {
       toast.error(`Failed to ${text?.toLowerCase()} with Google`);

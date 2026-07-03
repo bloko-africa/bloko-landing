@@ -34,7 +34,7 @@ export default function SigninWithPassword() {
     setLoading(true);
 
     try {
-      const callbackURL = searchParams.get("callbackUrl") || "/";
+      const callbackURL = searchParams.get("callbackUrl") || "/admin";
 
       const result = await signIn.email({
         email: data.email,
@@ -99,7 +99,7 @@ export default function SigninWithPassword() {
         />
 
         <Link
-          href="/"
+          href="/admin/auth/sign-in"
           className="ring-primary outline-0 hover:text-primary focus-visible:text-primary focus-visible:ring dark:text-white dark:hover:text-primary"
         >
           Forgot Password?

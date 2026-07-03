@@ -23,7 +23,7 @@ export function Header() {
       </button>
 
       {isMobile && (
-        <Link href={"/"} className="2xsm:ml-4 ml-2 max-[430px]:hidden">
+        <Link href={"/admin"} className="2xsm:ml-4 ml-2 max-[430px]:hidden">
           <Image
             src={"/images/logo/logo-icon.svg"}
             width={32}

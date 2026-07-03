@@ -41,7 +41,7 @@ export async function createCollection(formData: FormData) {
     },
   });
 
-  revalidatePath("/shop/collections");
+  revalidatePath("/admin/collections");
 }
 
 export async function updateCollection(formData: FormData) {
@@ -60,11 +60,11 @@ export async function updateCollection(formData: FormData) {
     },
   });
 
-  revalidatePath("/shop/collections");
+  revalidatePath("/admin/collections");
 }
 
 export async function deleteCollection(id: string) {
   await requireRole(["admin"]);
   await db.collection.delete({ where: { id } });
-  revalidatePath("/shop/collections");
+  revalidatePath("/admin/collections");
 }

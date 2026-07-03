@@ -1,45 +1,32 @@
 "use client";
 
 import InputGroup from "@/components/FormElements/InputGroup";
-import { TextAreaGroup } from "@/components/FormElements/InputGroup/text-area";
 import { Select } from "@/components/FormElements/select";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 import {
-  createProduct,
-  deleteProduct,
-  updateProduct,
-} from "@/lib/actions/products";
+  createCategory,
+  deleteCategory,
+  updateCategory,
+} from "@/lib/actions/categories";
 import { notifyPromise } from "@/lib/notify-promise";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
-const STATUS_OPTIONS = [
-  { value: "DRAFT", label: "Brouillon" },
-  { value: "PUBLISHED", label: "Publié" },
-  { value: "ARCHIVED", label: "Archivé" },
-];
-
-type ProductFormProps = {
-  collections: { value: string; label: string }[];
-  categories: { value: string; label: string }[];
+type CategoryFormProps = {
+  parentOptions: { value: string; label: string }[];
   initial?: {
     id: string;
     name: string;
-    description: string | null;
-    basePrice: string;
-    status: string;
-    collectionId: string | null;
-    categoryId: string | null;
+    parentId: string | null;
   };
   canDelete?: boolean;
 };
 
-export function ProductForm({
-  collections,
-  categories,
+export function CategoryForm({
+  parentOptions,
   initial,
   canDelete,
-}: ProductFormProps) {
+}: CategoryFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -51,20 +38,20 @@ export function ProductForm({
     try {
       if (initial) {
         formData.set("id", initial.id);
-        await notifyPromise(updateProduct(formData), {
+        await notifyPromise(updateCategory(formData), {
           loading: "Mise à jour...",
-          success: "Produit mis à jour",
+          success: "Catégorie mise à jour",
           error: (err) => (err instanceof Error ? err.message : "Échec"),
         });
-        router.refresh();
       } else {
-        const id = await notifyPromise(createProduct(formData), {
+        await notifyPromise(createCategory(formData), {
           loading: "Création...",
-          success: "Produit créé",
+          success: "Catégorie créée",
           error: (err) => (err instanceof Error ? err.message : "Échec"),
         });
-        router.push(`/shop/products/${id}`);
       }
+      router.push("/admin/categories");
+      router.refresh();
     } finally {
       setLoading(false);
     }
@@ -72,20 +59,20 @@ export function ProductForm({
 
   async function handleDelete() {
     if (!initial) return;
-    if (!confirm(`Supprimer le produit "${initial.name}" ?`)) return;
+    if (!confirm(`Supprimer la catégorie "${initial.name}" ?`)) return;
 
-    await notifyPromise(deleteProduct(initial.id), {
+    await notifyPromise(deleteCategory(initial.id), {
       loading: "Suppression...",
-      success: "Produit supprimé",
+      success: "Catégorie supprimée",
       error: (err) => (err instanceof Error ? err.message : "Échec"),
     });
-    router.push("/shop/products");
+    router.push("/admin/categories");
     router.refresh();
   }
 
   return (
     <ShowcaseSection
-      title={initial ? "Informations produit" : "Nouveau produit"}
+      title={initial ? "Modifier la catégorie" : "Nouvelle catégorie"}
       className="space-y-5.5 p-6.5!"
     >
       <form onSubmit={handleSubmit} className="space-y-5.5">
@@ -93,48 +80,17 @@ export function ProductForm({
           label="Nom"
           name="name"
           type="text"
-          placeholder="Ex: Robe portefeuille en soie"
+          placeholder="Ex: Robes"
           defaultValue={initial?.name}
           required
         />
 
-        <TextAreaGroup
-          label="Description"
-          name="description"
-          placeholder="Description du produit"
-          defaultValue={initial?.description ?? undefined}
-        />
-
-        <InputGroup
-          label="Prix de base (XOF)"
-          name="basePrice"
-          type="number"
-          placeholder="Ex: 25000"
-          defaultValue={initial?.basePrice}
-          required
-        />
-
         <Select
-          label="Statut"
-          name="status"
-          items={STATUS_OPTIONS}
-          defaultValue={initial?.status ?? "DRAFT"}
-        />
-
-        <Select
-          label="Collection (optionnel)"
-          name="collectionId"
-          items={collections}
+          label="Catégorie parente (optionnel)"
+          name="parentId"
+          items={parentOptions}
           placeholder="Aucune"
-          defaultValue={initial?.collectionId ?? undefined}
-        />
-
-        <Select
-          label="Catégorie (optionnel)"
-          name="categoryId"
-          items={categories}
-          placeholder="Aucune"
-          defaultValue={initial?.categoryId ?? undefined}
+          defaultValue={initial?.parentId ?? undefined}
         />
 
         <div className="flex justify-between gap-3">
@@ -153,7 +109,7 @@ export function ProductForm({
             disabled={loading}
             className="ml-auto flex justify-center rounded-lg bg-primary px-6 py-1.75 font-medium text-white hover:bg-opacity-90 disabled:opacity-70"
           >
-            {initial ? "Enregistrer" : "Créer et continuer"}
+            {initial ? "Enregistrer" : "Créer"}
           </button>
         </div>
       </form>

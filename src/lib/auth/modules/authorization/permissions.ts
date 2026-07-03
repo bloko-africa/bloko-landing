@@ -8,6 +8,9 @@ export const ac = createAccessControl({
 });
 
 export const roles = {
+  // Compte boutique cote storefront : aucun droit sur le back-office.
+  customer: ac.newRole({}),
+
   viewer: ac.newRole({
     user: ["read"],
     content: ["read"],

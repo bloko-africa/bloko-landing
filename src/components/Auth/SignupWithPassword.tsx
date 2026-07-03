@@ -31,7 +31,7 @@ export default function SignupWithPassword() {
     setLoading(true);
 
     try {
-      const callbackURL = searchParams.get("callbackUrl") || "/";
+      const callbackURL = searchParams.get("callbackUrl") || "/admin";
 
       await signUp.email({
         name: data.name,
