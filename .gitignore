@@ -43,3 +43,6 @@ next-env.d.ts
 skills-lock.json
 
 /src/generated/prisma
+
+# Local Netlify folder
+.netlify
