@@ -15,6 +15,28 @@ export const NAV_DATA = [
         ],
       },
       {
+        title: "Boutique",
+        icon: Icons.FourCircle,
+        items: [
+          {
+            title: "Produits",
+            url: "/shop/products",
+          },
+          {
+            title: "Collections",
+            url: "/shop/collections",
+          },
+          {
+            title: "Catégories",
+            url: "/shop/categories",
+          },
+          {
+            title: "Commandes",
+            url: "/shop/orders",
+          },
+        ],
+      },
+      {
         title: "Calendar",
         url: "/calendar",
         icon: Icons.Calendar,
