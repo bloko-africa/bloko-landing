@@ -5,6 +5,12 @@ export const NAV_DATA = [
     label: "MAIN MENU",
     items: [
       {
+        title: "Tableau de bord",
+        url: "/admin",
+        icon: Icons.HomeIcon,
+        items: [],
+      },
+      {
         title: "Boutique",
         icon: Icons.FourCircle,
         items: [
@@ -27,14 +33,10 @@ export const NAV_DATA = [
         ],
       },
       {
-        title: "Pages",
+        title: "Paramètres",
+        url: "/admin/settings",
         icon: Icons.Alphabet,
-        items: [
-          {
-            title: "Settings",
-            url: "/admin/settings",
-          },
-        ],
+        items: [],
       },
     ],
   },
