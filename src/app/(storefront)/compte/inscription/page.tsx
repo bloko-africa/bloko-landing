@@ -4,10 +4,18 @@ import InputGroup from "@/components/FormElements/InputGroup";
 import { signUp } from "@/lib/auth/auth-client";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { Suspense, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 export default function InscriptionPage() {
+  return (
+    <Suspense>
+      <InscriptionForm />
+    </Suspense>
+  );
+}
+
+function InscriptionForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [name, setName] = useState("");

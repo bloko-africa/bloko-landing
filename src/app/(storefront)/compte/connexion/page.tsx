@@ -4,10 +4,18 @@ import InputGroup from "@/components/FormElements/InputGroup";
 import { signIn } from "@/lib/auth/auth-client";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { Suspense, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 export default function ConnexionPage() {
+  return (
+    <Suspense>
+      <ConnexionForm />
+    </Suspense>
+  );
+}
+
+function ConnexionForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
