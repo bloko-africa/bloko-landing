@@ -1,6 +1,7 @@
 import { DeleteRowButton } from "@/components/Admin/delete-row-button";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { deleteOrder } from "@/lib/actions/orders";
+import { getFlagEmoji } from "@/lib/countries";
 import { db } from "@/lib/db";
 import { formatPrice } from "@/lib/format-price";
 import type { Metadata } from "next";
@@ -50,6 +51,9 @@ export default async function OrdersPage() {
                 Client
               </th>
               <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
+                Pays
+              </th>
+              <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
                 Total
               </th>
               <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
@@ -81,6 +85,9 @@ export default async function OrdersPage() {
                   {order.customerName}
                   <br />
                   <span className="text-body-xs">{order.customerPhone}</span>
+                </td>
+                <td className="px-5.5 py-4 text-dark-5 dark:text-dark-6">
+                  {getFlagEmoji(order.country)} {order.country}
                 </td>
                 <td className="px-5.5 py-4 text-dark-5 dark:text-dark-6">
                   {formatPrice(Number(order.totalAmount), order.currency)}
@@ -116,7 +123,7 @@ export default async function OrdersPage() {
             {orders.length === 0 && (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="px-5.5 py-8 text-center text-dark-5 dark:text-dark-6"
                 >
                   Aucune commande pour le moment.

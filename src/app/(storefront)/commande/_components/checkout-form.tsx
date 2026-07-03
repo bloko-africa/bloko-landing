@@ -1,11 +1,11 @@
 "use client";
 
+import { CountrySelect } from "@/components/country-select";
 import InputGroup from "@/components/FormElements/InputGroup";
 import { useSession } from "@/lib/auth/auth-client";
 import { checkout } from "@/lib/actions/checkout";
 import { useCart } from "@/lib/cart/cart-context";
 import { formatPrice } from "@/lib/format-price";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
@@ -17,7 +17,7 @@ export function CheckoutForm({ currency }: { currency: string }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [country, setCountry] = useState<"CI" | "BJ">("CI");
+  const [country, setCountry] = useState("CI");
   const [loading, setLoading] = useState(false);
 
   const prefilledName = name || session.data?.user.name || "";
@@ -118,28 +118,11 @@ export function CheckoutForm({ currency }: { currency: string }) {
           handleChange={(e) => setEmail(e.target.value)}
         />
 
-        <div>
-          <span className="block text-body-sm font-medium text-dark dark:text-white">
-            Pays de livraison
-          </span>
-          <div className="mt-3 flex gap-2">
-            {(["CI", "BJ"] as const).map((code) => (
-              <button
-                key={code}
-                type="button"
-                onClick={() => setCountry(code)}
-                className={cn(
-                  "rounded-full border px-4 py-1.5 text-body-sm font-medium",
-                  country === code
-                    ? "border-primary bg-primary text-white"
-                    : "border-stroke text-dark-5 dark:border-dark-3 dark:text-dark-6",
-                )}
-              >
-                {code === "CI" ? "Côte d'Ivoire" : "Bénin"}
-              </button>
-            ))}
-          </div>
-        </div>
+        <CountrySelect
+          label="Pays de livraison"
+          value={country}
+          onChange={setCountry}
+        />
 
         <button
           type="submit"

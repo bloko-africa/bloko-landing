@@ -186,6 +186,7 @@ model Order {
   customerName  String      @map("customer_name")
   customerEmail String?     @map("customer_email")
   customerPhone String      @map("customer_phone")
+  country       String      @default("CI")
   status        OrderStatus @default(PENDING)
   totalAmount   Decimal     @map("total_amount") @db.Decimal(10, 2)
   currency      String      @default("XOF")
@@ -196,6 +197,7 @@ model Order {
 
   @@index([status])
   @@index([userId])
+  @@index([country])
   @@map("order")
 }
 

@@ -2,6 +2,7 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 import { db } from "@/lib/db";
 import { formatPrice } from "@/lib/format-price";
+import { getCountryName, getFlagEmoji } from "@/lib/countries";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { OrderPayments } from "../_components/order-payments";
@@ -53,6 +54,12 @@ export default async function OrderDetailPage({
             <p className="text-body-sm text-dark-5 dark:text-dark-6">Email</p>
             <p className="font-medium text-dark dark:text-white">
               {order.customerEmail ?? "—"}
+            </p>
+          </div>
+          <div>
+            <p className="text-body-sm text-dark-5 dark:text-dark-6">Pays</p>
+            <p className="font-medium text-dark dark:text-white">
+              {getFlagEmoji(order.country)} {getCountryName(order.country)}
             </p>
           </div>
         </div>

@@ -11,7 +11,7 @@ const checkoutSchema = z.object({
   customerName: z.string().min(1, "Nom requis"),
   customerPhone: z.string().min(6, "Téléphone requis"),
   customerEmail: z.string().email().optional().or(z.literal("")),
-  country: z.enum(["CI", "BJ"]),
+  country: z.string().length(2, "Pays requis"),
   items: z
     .array(
       z.object({
@@ -41,6 +41,7 @@ export async function checkout(input: CheckoutInput) {
       customerName: data.customerName,
       customerPhone: data.customerPhone,
       customerEmail: data.customerEmail || undefined,
+      country: data.country,
       totalAmount: total,
       currency: settings.currency,
       items: { create: itemsData },

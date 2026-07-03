@@ -1,5 +1,6 @@
 "use client";
 
+import { CountrySelect } from "@/components/country-select";
 import InputGroup from "@/components/FormElements/InputGroup";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 import { cn } from "@/lib/utils";
@@ -78,7 +79,7 @@ export function OrderForm({
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
-  const [country, setCountry] = useState<"CI" | "BJ">("CI");
+  const [country, setCountry] = useState("CI");
   const [items, setItems] = useState<ItemRow[]>([
     { productVariantId: "", quantity: 1 },
   ]);
@@ -158,14 +159,10 @@ export function OrderForm({
         />
       </div>
 
-      <LabeledSelect
-        label="Pays du client (méthodes de paiement disponibles)"
+      <CountrySelect
+        label="Pays du client"
         value={country}
-        onChange={(v) => setCountry(v as "CI" | "BJ")}
-        options={[
-          { value: "CI", label: "Côte d'Ivoire" },
-          { value: "BJ", label: "Bénin" },
-        ]}
+        onChange={setCountry}
         className="max-w-xs"
       />
 

@@ -15,7 +15,7 @@ const createOrderSchema = z.object({
   customerName: z.string().min(1, "Nom requis"),
   customerPhone: z.string().min(6, "Téléphone requis"),
   customerEmail: z.string().email().optional().or(z.literal("")),
-  country: z.enum(["CI", "BJ"]),
+  country: z.string().length(2, "Pays requis"),
   items: z
     .array(
       z.object({
@@ -40,6 +40,7 @@ export async function createOrder(input: CreateOrderInput) {
       customerName: data.customerName,
       customerPhone: data.customerPhone,
       customerEmail: data.customerEmail || undefined,
+      country: data.country,
       totalAmount: total,
       currency: settings.currency,
       items: { create: itemsData },
@@ -56,7 +57,7 @@ export async function deleteOrder(orderId: string) {
   revalidatePath("/admin/orders");
 }
 
-export async function generatePaymentLink(orderId: string, country: "CI" | "BJ") {
+export async function generatePaymentLink(orderId: string) {
   await requireRole(["editor", "admin"]);
 
   const order = await db.order.findUniqueOrThrow({ where: { id: orderId } });
@@ -69,7 +70,7 @@ export async function generatePaymentLink(orderId: string, country: "CI" | "BJ")
       name: order.customerName,
       phone: order.customerPhone,
       email: order.customerEmail ?? undefined,
-      country,
+      country: order.country,
     },
     metadata: { orderId: order.id, orderReference: order.reference },
   });

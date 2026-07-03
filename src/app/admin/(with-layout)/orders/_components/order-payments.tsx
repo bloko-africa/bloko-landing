@@ -38,13 +38,12 @@ export function OrderPayments({
   orderIsPaid: boolean;
 }) {
   const router = useRouter();
-  const [country, setCountry] = useState<"CI" | "BJ">("CI");
   const [generating, setGenerating] = useState(false);
 
   async function handleGenerate() {
     setGenerating(true);
     try {
-      const url = await notifyPromise(generatePaymentLink(orderId, country), {
+      const url = await notifyPromise(generatePaymentLink(orderId), {
         loading: "Génération du lien de paiement...",
         success: "Lien de paiement généré",
         error: (err) => (err instanceof Error ? err.message : "Échec"),
@@ -69,29 +68,7 @@ export function OrderPayments({
   return (
     <ShowcaseSection title="Paiement GeniusPay" className="space-y-5.5 p-6.5!">
       {!orderIsPaid && (
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="space-y-3">
-            <span className="block text-body-sm font-medium text-dark dark:text-white">
-              Pays du client
-            </span>
-            <div className="flex gap-2">
-              {(["CI", "BJ"] as const).map((code) => (
-                <button
-                  key={code}
-                  type="button"
-                  onClick={() => setCountry(code)}
-                  className={
-                    country === code
-                      ? "rounded-full bg-primary px-4 py-1.5 text-body-xs font-medium text-white"
-                      : "rounded-full border border-stroke px-4 py-1.5 text-body-xs font-medium text-dark-5 dark:border-dark-3 dark:text-dark-6"
-                  }
-                >
-                  {code === "CI" ? "Côte d'Ivoire" : "Bénin"}
-                </button>
-              ))}
-            </div>
-          </div>
-
+        <div>
           <button
             type="button"
             onClick={handleGenerate}

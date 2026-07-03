@@ -5,6 +5,7 @@ import { formatPrice } from "@/lib/format-price";
 import { getStoreSettings } from "@/lib/store-settings";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { OrdersWorldMap } from "./_components/orders-world-map-client";
 import { StatCard } from "./_components/stat-card";
 
 export const metadata: Metadata = { title: "Tableau de bord" };
@@ -31,6 +32,7 @@ export default async function AdminHome() {
     publishedProductsCount,
     lowStockVariants,
     recentOrders,
+    ordersByCountry,
   ] = await Promise.all([
     getStoreSettings(),
     db.order.aggregate({
@@ -50,7 +52,17 @@ export default async function AdminHome() {
       orderBy: { createdAt: "desc" },
       take: 6,
     }),
+    db.order.groupBy({
+      by: ["country"],
+      _count: { country: true },
+      orderBy: { _count: { country: "desc" } },
+    }),
   ]);
+
+  const countryStats = ordersByCountry.map((row) => ({
+    code: row.country,
+    count: row._count.country,
+  }));
 
   return (
     <>
@@ -177,6 +189,12 @@ export default async function AdminHome() {
               </li>
             )}
           </ul>
+        </ShowcaseSection>
+      </div>
+
+      <div className="mt-6">
+        <ShowcaseSection title="Commandes par pays" className="p-6.5!">
+          <OrdersWorldMap stats={countryStats} />
         </ShowcaseSection>
       </div>
     </>
