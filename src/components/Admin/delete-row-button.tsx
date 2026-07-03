@@ -5,14 +5,16 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 type DeleteRowButtonProps = {
+  id: string;
+  action: (id: string) => Promise<unknown>;
   confirmMessage: string;
-  onDelete: () => Promise<unknown>;
   successMessage?: string;
 };
 
 export function DeleteRowButton({
+  id,
+  action,
   confirmMessage,
-  onDelete,
   successMessage = "Supprimé",
 }: DeleteRowButtonProps) {
   const router = useRouter();
@@ -23,7 +25,7 @@ export function DeleteRowButton({
     setLoading(true);
 
     try {
-      await notifyPromise(onDelete(), {
+      await notifyPromise(action(id), {
         loading: "Suppression...",
         success: successMessage,
         error: (err) => (err instanceof Error ? err.message : "Échec"),

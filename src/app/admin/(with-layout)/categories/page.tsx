@@ -80,8 +80,9 @@ export default async function CategoriesPage() {
                       Modifier
                     </Link>
                     <DeleteRowButton
+                      id={category.id}
+                      action={deleteCategory}
                       confirmMessage={`Supprimer la catégorie "${category.name}" ?`}
-                      onDelete={() => deleteCategory(category.id)}
                       successMessage="Catégorie supprimée"
                     />
                   </div>

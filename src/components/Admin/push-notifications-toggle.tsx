@@ -45,7 +45,11 @@ export function PushNotificationsToggle() {
         return;
       }
 
-      const registration = await navigator.serviceWorker.register("/sw.js");
+      await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+      // register() peut resoudre avant que le SW soit "active" — pushManager
+      // exige un SW actif, d'ou l'attente explicite de `ready`.
+      const registration = await navigator.serviceWorker.ready;
+
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),

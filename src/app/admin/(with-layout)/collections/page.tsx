@@ -91,8 +91,9 @@ export default async function CollectionsPage() {
                       Modifier
                     </Link>
                     <DeleteRowButton
+                      id={collection.id}
+                      action={deleteCollection}
                       confirmMessage={`Supprimer la collection "${collection.name}" ?`}
-                      onDelete={() => deleteCollection(collection.id)}
                       successMessage="Collection supprimée"
                     />
                   </div>

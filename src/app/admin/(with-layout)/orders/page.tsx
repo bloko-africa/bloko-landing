@@ -111,8 +111,9 @@ export default async function OrdersPage() {
                       Gérer
                     </Link>
                     <DeleteRowButton
+                      id={order.id}
+                      action={deleteOrder}
                       confirmMessage={`Supprimer définitivement la commande "${order.reference}" ? Cette action supprime aussi ses paiements associés.`}
-                      onDelete={() => deleteOrder(order.id)}
                       successMessage="Commande supprimée"
                     />
                   </div>

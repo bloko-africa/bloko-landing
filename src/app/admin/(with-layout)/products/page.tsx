@@ -105,8 +105,9 @@ export default async function ProductsPage() {
                       Modifier
                     </Link>
                     <DeleteRowButton
+                      id={product.id}
+                      action={deleteProduct}
                       confirmMessage={`Supprimer le produit "${product.name}" ?`}
-                      onDelete={() => deleteProduct(product.id)}
                       successMessage="Produit supprimé"
                     />
                   </div>
