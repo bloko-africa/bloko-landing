@@ -1,0 +1,202 @@
+"use client";
+
+import { useCart } from "@/lib/cart/cart-context";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
+
+type Variant = {
+  id: string;
+  size: string | null;
+  color: string | null;
+  stock: number;
+  unitPrice: number;
+};
+
+type ProductDetailProps = {
+  product: {
+    id: string;
+    slug: string;
+    name: string;
+    description: string | null;
+    basePrice: number;
+    collectionName: string | null;
+    images: { id: string; url: string }[];
+    variants: Variant[];
+  };
+};
+
+export function ProductDetail({ product }: ProductDetailProps) {
+  const { addItem } = useCart();
+  const [activeImage, setActiveImage] = useState(0);
+  const [size, setSize] = useState<string | null>(null);
+  const [color, setColor] = useState<string | null>(null);
+
+  const sizes = useMemo(
+    () => [...new Set(product.variants.map((v) => v.size).filter(Boolean))],
+    [product.variants],
+  );
+  const colors = useMemo(
+    () => [...new Set(product.variants.map((v) => v.color).filter(Boolean))],
+    [product.variants],
+  );
+
+  const selectedVariant = useMemo(() => {
+    if (product.variants.length === 1 && !sizes.length && !colors.length) {
+      return product.variants[0];
+    }
+    return product.variants.find(
+      (v) =>
+        (sizes.length === 0 || v.size === size) &&
+        (colors.length === 0 || v.color === color),
+    );
+  }, [product.variants, size, color, sizes.length, colors.length]);
+
+  const displayPrice = selectedVariant?.unitPrice ?? product.basePrice;
+  const needsSelection = (sizes.length > 0 && !size) || (colors.length > 0 && !color);
+
+  function handleAddToCart() {
+    if (needsSelection || !selectedVariant) {
+      toast.error("Choisis une taille/couleur avant d'ajouter au panier.");
+      return;
+    }
+    if (selectedVariant.stock < 1) {
+      toast.error("Cette variante est en rupture de stock.");
+      return;
+    }
+
+    addItem({
+      variantId: selectedVariant.id,
+      productSlug: product.slug,
+      productName: product.name,
+      size: selectedVariant.size,
+      color: selectedVariant.color,
+      unitPrice: selectedVariant.unitPrice,
+      image: product.images[0]?.url ?? null,
+      stock: selectedVariant.stock,
+    });
+    toast.success("Ajouté au panier");
+  }
+
+  return (
+    <div className="mx-auto grid max-w-(--breakpoint-2xl) grid-cols-1 gap-10 px-4 py-12 md:px-8 lg:grid-cols-2">
+      <div>
+        <div className="relative aspect-3/4 overflow-hidden rounded-2xl bg-gray-2 dark:bg-dark-2">
+          {product.images[activeImage] && (
+            <Image
+              src={product.images[activeImage].url}
+              alt={product.name}
+              fill
+              className="object-cover"
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              priority
+            />
+          )}
+        </div>
+
+        {product.images.length > 1 && (
+          <div className="mt-3 flex gap-3">
+            {product.images.map((image, index) => (
+              <button
+                key={image.id}
+                onClick={() => setActiveImage(index)}
+                className={cn(
+                  "relative size-16 overflow-hidden rounded-lg border-2",
+                  index === activeImage ? "border-primary" : "border-transparent",
+                )}
+              >
+                <Image src={image.url} alt="" fill className="object-cover" sizes="64px" />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div>
+        {product.collectionName && (
+          <p className="text-body-sm font-medium uppercase tracking-widest text-primary">
+            {product.collectionName}
+          </p>
+        )}
+        <h1 className="mt-2 text-heading-5 font-medium text-dark dark:text-white">
+          {product.name}
+        </h1>
+        <p className="mt-3 text-heading-6 font-medium text-dark dark:text-white">
+          {displayPrice.toLocaleString("fr-FR")} XOF
+        </p>
+
+        {product.description && (
+          <p className="mt-6 text-body-sm text-dark-5 dark:text-dark-6">
+            {product.description}
+          </p>
+        )}
+
+        {sizes.length > 0 && (
+          <div className="mt-8">
+            <span className="text-body-sm font-medium text-dark dark:text-white">
+              Taille
+            </span>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {sizes.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setSize(s)}
+                  className={cn(
+                    "rounded-full border px-4 py-1.5 text-body-sm font-medium",
+                    size === s
+                      ? "border-primary bg-primary text-white"
+                      : "border-stroke text-dark-5 hover:border-primary dark:border-dark-3 dark:text-dark-6",
+                  )}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {colors.length > 0 && (
+          <div className="mt-6">
+            <span className="text-body-sm font-medium text-dark dark:text-white">
+              Couleur
+            </span>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {colors.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setColor(c)}
+                  className={cn(
+                    "rounded-full border px-4 py-1.5 text-body-sm font-medium",
+                    color === c
+                      ? "border-primary bg-primary text-white"
+                      : "border-stroke text-dark-5 hover:border-primary dark:border-dark-3 dark:text-dark-6",
+                  )}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {selectedVariant && selectedVariant.stock <= 5 && selectedVariant.stock > 0 && (
+          <p className="mt-4 text-body-sm text-yellow-dark-2">
+            Plus que {selectedVariant.stock} en stock
+          </p>
+        )}
+        {selectedVariant && selectedVariant.stock === 0 && (
+          <p className="mt-4 text-body-sm text-red">Rupture de stock</p>
+        )}
+
+        <button
+          onClick={handleAddToCart}
+          className="mt-8 w-full rounded-full bg-primary py-3.5 font-medium text-white hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={selectedVariant?.stock === 0}
+        >
+          Ajouter au panier
+        </button>
+      </div>
+    </div>
+  );
+}

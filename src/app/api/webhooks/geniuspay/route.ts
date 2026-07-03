@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { verifyGeniusPayWebhook } from "@/lib/payments/verify-webhook";
+import { decrementStockForOrder } from "@/lib/orders/build-order-items";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -46,6 +47,7 @@ export async function POST(request: NextRequest) {
   const event = request.headers.get("X-Webhook-Event") ?? payload.event;
   const payment = await db.payment.findUnique({
     where: { reference: payload.data.reference },
+    include: { order: true },
   });
 
   if (!payment) {
@@ -55,6 +57,7 @@ export async function POST(request: NextRequest) {
   }
 
   const mapping = event ? PAYMENT_EVENT_TO_STATUS[event] : undefined;
+  const wasAlreadyPaid = payment.order.status === "PAID";
 
   if (mapping) {
     await db.$transaction([
@@ -67,6 +70,10 @@ export async function POST(request: NextRequest) {
         data: { status: mapping.order },
       }),
     ]);
+
+    if (mapping.order === "PAID" && !wasAlreadyPaid) {
+      await decrementStockForOrder(payment.orderId);
+    }
   } else {
     await db.payment.update({
       where: { id: payment.id },

@@ -19,6 +19,7 @@ model User {
   bio           String?
   sessions      Session[]
   accounts      Account[]
+  orders        Order[]
 
   role       String?
   banned     Boolean?  @default(false)
@@ -180,6 +181,8 @@ enum OrderStatus {
 model Order {
   id            String      @id @default(cuid())
   reference     String      @unique
+  userId        String?     @map("user_id")
+  user          User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   customerName  String      @map("customer_name")
   customerEmail String?     @map("customer_email")
   customerPhone String      @map("customer_phone")
@@ -192,6 +195,7 @@ model Order {
   updatedAt     DateTime    @updatedAt @map("updated_at")
 
   @@index([status])
+  @@index([userId])
   @@map("order")
 }
 

@@ -6,6 +6,7 @@ import {
   createGeniusPayPayment,
   getGeniusPayPaymentStatus,
 } from "@/lib/payments/geniuspay";
+import { buildOrderItems, decrementStockForOrder } from "@/lib/orders/build-order-items";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -29,26 +30,7 @@ export type CreateOrderInput = z.infer<typeof createOrderSchema>;
 export async function createOrder(input: CreateOrderInput) {
   await requireRole(["editor", "admin"]);
   const data = createOrderSchema.parse(input);
-
-  const variants = await db.productVariant.findMany({
-    where: { id: { in: data.items.map((i) => i.productVariantId) } },
-    include: { product: { select: { basePrice: true } } },
-  });
-
-  let total = 0;
-  const itemsData = data.items.map((item) => {
-    const variant = variants.find((v) => v.id === item.productVariantId);
-    if (!variant) throw new Error("Variante introuvable");
-
-    const unitPrice = variant.priceOverride ?? variant.product.basePrice;
-    total += Number(unitPrice) * item.quantity;
-
-    return {
-      productVariantId: item.productVariantId,
-      quantity: item.quantity,
-      unitPrice,
-    };
-  });
+  const { itemsData, total } = await buildOrderItems(data.items);
 
   const order = await db.order.create({
     data: {
@@ -114,6 +96,7 @@ export async function refreshPaymentStatus(paymentId: string) {
 
   const payment = await db.payment.findUniqueOrThrow({
     where: { id: paymentId },
+    include: { order: true },
   });
   const remote = await getGeniusPayPaymentStatus(payment.reference);
   const newStatus = STATUS_MAP[remote.status];
@@ -123,11 +106,12 @@ export async function refreshPaymentStatus(paymentId: string) {
     data: { status: newStatus },
   });
 
-  if (newStatus === "COMPLETED") {
+  if (newStatus === "COMPLETED" && payment.order.status !== "PAID") {
     await db.order.update({
       where: { id: payment.orderId },
       data: { status: "PAID" },
     });
+    await decrementStockForOrder(payment.orderId);
   }
 
   revalidatePath(`/admin/orders/${payment.orderId}`);
