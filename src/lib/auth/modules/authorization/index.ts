@@ -6,9 +6,9 @@ export const authorizationPlugins = [
   admin({
     ac,
     roles,
-    // Toute inscription (storefront ou /admin/auth/sign-up) obtient "customer"
-    // par defaut : aucun acces back-office. Les comptes staff sont promus
-    // manuellement (viewer/editor/admin) apres verification.
+    // Toute inscription via /compte/inscription obtient "customer" par defaut :
+    // aucun acces back-office. Il n'y a pas d'auto-inscription admin — les
+    // comptes staff (viewer/editor/admin) sont promus manuellement en base.
     defaultRole: "customer",
     adminRole: "admin",
   }),

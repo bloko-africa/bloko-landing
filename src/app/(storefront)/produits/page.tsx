@@ -1,4 +1,6 @@
 import { db } from "@/lib/db";
+import { formatPrice } from "@/lib/format-price";
+import { getStoreSettings } from "@/lib/store-settings";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,7 +16,8 @@ export default async function CatalogPage({
   const { collection: collectionSlug, category: categorySlug } =
     await searchParams;
 
-  const [collections, categories, products] = await Promise.all([
+  const [settings, collections, categories, products] = await Promise.all([
+    getStoreSettings(),
     db.collection.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
     db.category.findMany({ orderBy: { name: "asc" } }),
     db.product.findMany({
@@ -81,7 +84,7 @@ export default async function CatalogPage({
                 {product.name}
               </p>
               <p className="text-body-sm text-dark-5 dark:text-dark-6">
-                {Number(product.basePrice).toLocaleString("fr-FR")} XOF
+                {formatPrice(Number(product.basePrice), settings.currency)}
               </p>
             </Link>
           ))}

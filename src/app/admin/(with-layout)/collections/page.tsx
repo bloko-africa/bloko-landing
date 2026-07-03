@@ -1,4 +1,6 @@
+import { DeleteRowButton } from "@/components/Admin/delete-row-button";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import { deleteCollection } from "@/lib/actions/collections";
 import { db } from "@/lib/db";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -44,6 +46,9 @@ export default async function CollectionsPage() {
               <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
                 Statut
               </th>
+              <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -77,13 +82,28 @@ export default async function CollectionsPage() {
                     {collection.isActive ? "Active" : "Inactive"}
                   </span>
                 </td>
+                <td className="px-5.5 py-4">
+                  <div className="flex items-center gap-3">
+                    <Link
+                      href={`/admin/collections/${collection.id}`}
+                      className="text-body-sm text-dark-5 hover:text-primary dark:text-dark-6"
+                    >
+                      Modifier
+                    </Link>
+                    <DeleteRowButton
+                      confirmMessage={`Supprimer la collection "${collection.name}" ?`}
+                      onDelete={() => deleteCollection(collection.id)}
+                      successMessage="Collection supprimée"
+                    />
+                  </div>
+                </td>
               </tr>
             ))}
 
             {collections.length === 0 && (
               <tr>
                 <td
-                  colSpan={4}
+                  colSpan={5}
                   className="px-5.5 py-8 text-center text-dark-5 dark:text-dark-6"
                 >
                   Aucune collection pour le moment.

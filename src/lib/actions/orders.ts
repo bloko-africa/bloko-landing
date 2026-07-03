@@ -7,6 +7,7 @@ import {
   getGeniusPayPaymentStatus,
 } from "@/lib/payments/geniuspay";
 import { buildOrderItems, decrementStockForOrder } from "@/lib/orders/build-order-items";
+import { getStoreSettings } from "@/lib/store-settings";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -31,6 +32,7 @@ export async function createOrder(input: CreateOrderInput) {
   await requireRole(["editor", "admin"]);
   const data = createOrderSchema.parse(input);
   const { itemsData, total } = await buildOrderItems(data.items);
+  const settings = await getStoreSettings();
 
   const order = await db.order.create({
     data: {
@@ -39,12 +41,19 @@ export async function createOrder(input: CreateOrderInput) {
       customerPhone: data.customerPhone,
       customerEmail: data.customerEmail || undefined,
       totalAmount: total,
+      currency: settings.currency,
       items: { create: itemsData },
     },
   });
 
   revalidatePath("/admin/orders");
   return order.id;
+}
+
+export async function deleteOrder(orderId: string) {
+  await requireRole(["admin"]);
+  await db.order.delete({ where: { id: orderId } });
+  revalidatePath("/admin/orders");
 }
 
 export async function generatePaymentLink(orderId: string, country: "CI" | "BJ") {

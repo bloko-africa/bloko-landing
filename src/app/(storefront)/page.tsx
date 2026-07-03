@@ -1,11 +1,14 @@
+import { formatPrice } from "@/lib/format-price";
 import { db } from "@/lib/db";
+import { getStoreSettings } from "@/lib/store-settings";
 import Image from "next/image";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
 export default async function StorefrontHome() {
-  const [collections, products] = await Promise.all([
+  const [settings, collections, products] = await Promise.all([
+    getStoreSettings(),
     db.collection.findMany({
       where: { isActive: true },
       orderBy: { createdAt: "desc" },
@@ -27,16 +30,16 @@ export default async function StorefrontHome() {
             Nouvelle collection
           </p>
           <h1 className="mx-auto mt-4 max-w-2xl text-heading-3 font-medium text-dark dark:text-white md:text-heading-1">
-            Le prêt-à-porter, pensé pour vous
+            {settings.heroTitle}
           </h1>
           <p className="mx-auto mt-5 max-w-lg text-body-sm text-dark-5 dark:text-dark-6">
-            Des pièces sélectionnées, livrées depuis Cotonou et Abidjan.
+            {settings.heroSubtitle}
           </p>
           <Link
             href="/produits"
             className="mt-8 inline-block rounded-full bg-primary px-8 py-3 font-medium text-white hover:bg-opacity-90"
           >
-            Découvrir la boutique
+            {settings.heroCtaLabel}
           </Link>
         </div>
       </section>
@@ -100,7 +103,7 @@ export default async function StorefrontHome() {
                   {product.name}
                 </p>
                 <p className="text-body-sm text-dark-5 dark:text-dark-6">
-                  {Number(product.basePrice).toLocaleString("fr-FR")} XOF
+                  {formatPrice(Number(product.basePrice), settings.currency)}
                 </p>
               </Link>
             ))}

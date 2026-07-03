@@ -1,4 +1,6 @@
+import { DeleteRowButton } from "@/components/Admin/delete-row-button";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import { deleteCategory } from "@/lib/actions/categories";
 import { db } from "@/lib/db";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -44,6 +46,9 @@ export default async function CategoriesPage() {
               <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
                 Produits
               </th>
+              <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -66,13 +71,28 @@ export default async function CategoriesPage() {
                 <td className="px-5.5 py-4 text-dark-5 dark:text-dark-6">
                   {category._count.products}
                 </td>
+                <td className="px-5.5 py-4">
+                  <div className="flex items-center gap-3">
+                    <Link
+                      href={`/admin/categories/${category.id}`}
+                      className="text-body-sm text-dark-5 hover:text-primary dark:text-dark-6"
+                    >
+                      Modifier
+                    </Link>
+                    <DeleteRowButton
+                      confirmMessage={`Supprimer la catégorie "${category.name}" ?`}
+                      onDelete={() => deleteCategory(category.id)}
+                      successMessage="Catégorie supprimée"
+                    />
+                  </div>
+                </td>
               </tr>
             ))}
 
             {categories.length === 0 && (
               <tr>
                 <td
-                  colSpan={3}
+                  colSpan={4}
                   className="px-5.5 py-8 text-center text-dark-5 dark:text-dark-6"
                 >
                   Aucune catégorie pour le moment.

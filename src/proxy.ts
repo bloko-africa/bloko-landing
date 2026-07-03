@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const STAFF_ROLES: AppRole[] = ["viewer", "editor", "admin"];
 
-const ADMIN_AUTH_PATHS = ["/admin/auth/sign-in", "/admin/auth/sign-up"];
+const ADMIN_AUTH_PATHS = ["/admin/auth/sign-in"];
 const CUSTOMER_AUTH_PATHS = ["/compte/connexion", "/compte/inscription"];
 const AUTH_ONLY_PATHS = [...ADMIN_AUTH_PATHS, ...CUSTOMER_AUTH_PATHS];
 

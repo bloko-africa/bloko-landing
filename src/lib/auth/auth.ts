@@ -11,7 +11,7 @@ const hasGoogleOAuth =
   !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET;
 
 export const auth = betterAuth({
-  appName: "NextAdmin",
+  appName: "Mode Shop Admin",
   baseURL: process.env.BETTER_AUTH_URL!,
 
   user: {

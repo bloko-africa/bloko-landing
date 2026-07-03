@@ -1,6 +1,7 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 import { db } from "@/lib/db";
+import { formatPrice } from "@/lib/format-price";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { OrderPayments } from "../_components/order-payments";
@@ -83,7 +84,7 @@ export default async function OrderDetailPage({
                 </td>
                 <td className="px-3 py-2">{item.quantity}</td>
                 <td className="px-3 py-2">
-                  {Number(item.unitPrice).toLocaleString("fr-FR")} XOF
+                  {formatPrice(Number(item.unitPrice), order.currency)}
                 </td>
               </tr>
             ))}
@@ -91,8 +92,7 @@ export default async function OrderDetailPage({
         </table>
 
         <p className="mt-4 text-right text-lg font-semibold text-dark dark:text-white">
-          Total : {Number(order.totalAmount).toLocaleString("fr-FR")}{" "}
-          {order.currency}
+          Total : {formatPrice(Number(order.totalAmount), order.currency)}
         </p>
       </ShowcaseSection>
 
@@ -104,6 +104,7 @@ export default async function OrderDetailPage({
           reference: p.reference,
           status: p.status,
           amount: p.amount.toString(),
+          currency: p.currency,
           checkoutUrl: p.checkoutUrl,
           createdAt: p.createdAt.toISOString(),
         }))}

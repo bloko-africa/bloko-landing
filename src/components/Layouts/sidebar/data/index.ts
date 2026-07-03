@@ -27,12 +27,6 @@ export const NAV_DATA = [
         ],
       },
       {
-        title: "Profile",
-        url: "/admin/profile",
-        icon: Icons.User,
-        items: [],
-      },
-      {
         title: "Pages",
         icon: Icons.Alphabet,
         items: [

@@ -242,3 +242,16 @@ model Payment {
   @@index([status])
   @@map("payment")
 }
+
+// --- Parametres boutique (singleton, id fixe "default") ---
+
+model StoreSettings {
+  id           String   @id @default("default")
+  currency     String   @default("XOF")
+  heroTitle    String   @default("Le prêt-à-porter, pensé pour vous") @map("hero_title")
+  heroSubtitle String   @default("Des pièces sélectionnées, livrées depuis Cotonou et Abidjan.") @map("hero_subtitle")
+  heroCtaLabel String   @default("Découvrir la boutique") @map("hero_cta_label")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("store_settings")
+}

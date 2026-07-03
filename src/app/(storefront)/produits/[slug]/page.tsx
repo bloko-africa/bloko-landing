@@ -1,4 +1,6 @@
 import { db } from "@/lib/db";
+import { formatPrice } from "@/lib/format-price";
+import { getStoreSettings } from "@/lib/store-settings";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -27,14 +29,17 @@ export default async function ProductPage({
 }) {
   const { slug } = await params;
 
-  const product = await db.product.findFirst({
-    where: { slug, status: "PUBLISHED" },
-    include: {
-      images: { orderBy: { position: "asc" } },
-      variants: { orderBy: { createdAt: "asc" } },
-      collection: { select: { name: true, slug: true } },
-    },
-  });
+  const [settings, product] = await Promise.all([
+    getStoreSettings(),
+    db.product.findFirst({
+      where: { slug, status: "PUBLISHED" },
+      include: {
+        images: { orderBy: { position: "asc" } },
+        variants: { orderBy: { createdAt: "asc" } },
+        collection: { select: { name: true, slug: true } },
+      },
+    }),
+  ]);
 
   if (!product) notFound();
 
@@ -60,6 +65,7 @@ export default async function ProductPage({
   return (
     <>
       <ProductDetail
+        currency={settings.currency}
         product={{
           id: product.id,
           slug: product.slug,
@@ -80,6 +86,7 @@ export default async function ProductPage({
 
       {related.length > 0 && (
         <RelatedProducts
+          currency={settings.currency}
           products={related.map((p) => ({
             slug: p.slug,
             name: p.name,
@@ -94,8 +101,10 @@ export default async function ProductPage({
 
 function RelatedProducts({
   products,
+  currency,
 }: {
   products: { slug: string; name: string; basePrice: number; image: string | null }[];
+  currency: string;
 }) {
   return (
     <section className="mx-auto max-w-(--breakpoint-2xl) border-t border-stroke px-4 py-16 dark:border-dark-3 md:px-8">
@@ -121,7 +130,7 @@ function RelatedProducts({
               {product.name}
             </p>
             <p className="text-body-sm text-dark-5 dark:text-dark-6">
-              {product.basePrice.toLocaleString("fr-FR")} XOF
+              {formatPrice(product.basePrice, currency)}
             </p>
           </Link>
         ))}

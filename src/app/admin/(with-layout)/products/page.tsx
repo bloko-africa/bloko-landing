@@ -1,5 +1,9 @@
+import { DeleteRowButton } from "@/components/Admin/delete-row-button";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import { deleteProduct } from "@/lib/actions/products";
 import { db } from "@/lib/db";
+import { formatPrice } from "@/lib/format-price";
+import { getStoreSettings } from "@/lib/store-settings";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -16,13 +20,16 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export default async function ProductsPage() {
-  const products = await db.product.findMany({
-    orderBy: { createdAt: "desc" },
-    include: {
-      collection: { select: { name: true } },
-      variants: { select: { stock: true } },
-    },
-  });
+  const [settings, products] = await Promise.all([
+    getStoreSettings(),
+    db.product.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        collection: { select: { name: true } },
+        variants: { select: { stock: true } },
+      },
+    }),
+  ]);
 
   return (
     <>
@@ -56,6 +63,9 @@ export default async function ProductsPage() {
               <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
                 Statut
               </th>
+              <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -76,7 +86,7 @@ export default async function ProductsPage() {
                   {product.collection?.name ?? "—"}
                 </td>
                 <td className="px-5.5 py-4 text-dark-5 dark:text-dark-6">
-                  {Number(product.basePrice).toLocaleString("fr-FR")} XOF
+                  {formatPrice(Number(product.basePrice), settings.currency)}
                 </td>
                 <td className="px-5.5 py-4 text-dark-5 dark:text-dark-6">
                   {product.variants.reduce((sum, v) => sum + v.stock, 0)}
@@ -86,13 +96,28 @@ export default async function ProductsPage() {
                     {STATUS_LABEL[product.status]}
                   </span>
                 </td>
+                <td className="px-5.5 py-4">
+                  <div className="flex items-center gap-3">
+                    <Link
+                      href={`/admin/products/${product.id}`}
+                      className="text-body-sm text-dark-5 hover:text-primary dark:text-dark-6"
+                    >
+                      Modifier
+                    </Link>
+                    <DeleteRowButton
+                      confirmMessage={`Supprimer le produit "${product.name}" ?`}
+                      onDelete={() => deleteProduct(product.id)}
+                      successMessage="Produit supprimé"
+                    />
+                  </div>
+                </td>
               </tr>
             ))}
 
             {products.length === 0 && (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="px-5.5 py-8 text-center text-dark-5 dark:text-dark-6"
                 >
                   Aucun produit pour le moment.

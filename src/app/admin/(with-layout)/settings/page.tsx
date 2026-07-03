@@ -1,38 +1,29 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import { auth } from "@/lib/auth";
+import { getStoreSettings } from "@/lib/store-settings";
 import type { Metadata } from "next";
-import { headers } from "next/headers";
-import { PersonalInfoForm } from "./_components/personal-info";
-import { UploadPhotoForm } from "./_components/upload-photo";
+import { StoreSettingsForm } from "./_components/store-settings-form";
 
 export const metadata: Metadata = {
-  title: "Settings Page",
+  title: "Paramètres",
 };
 
-export default async function SettingsPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+export const dynamic = "force-dynamic";
 
-  const user = session?.user;
+export default async function SettingsPage() {
+  const settings = await getStoreSettings();
 
   return (
-    <div className="mx-auto w-full max-w-270">
-      <Breadcrumb pageName="Settings" />
+    <div className="mx-auto w-full max-w-180">
+      <Breadcrumb pageName="Paramètres" />
 
-      <div className="grid grid-cols-5 gap-8">
-        <div className="col-span-5 xl:col-span-3">
-          <PersonalInfoForm
-            name={user?.name!}
-            email={user?.email!}
-            bio={user?.bio ?? undefined}
-            phoneNumber={user?.phoneNumber?.toString()}
-          />
-        </div>
-        <div className="col-span-5 xl:col-span-2">
-          <UploadPhotoForm initialImage={user?.image ?? null} />
-        </div>
-      </div>
+      <StoreSettingsForm
+        initial={{
+          currency: settings.currency,
+          heroTitle: settings.heroTitle,
+          heroSubtitle: settings.heroSubtitle,
+          heroCtaLabel: settings.heroCtaLabel,
+        }}
+      />
     </div>
   );
 }

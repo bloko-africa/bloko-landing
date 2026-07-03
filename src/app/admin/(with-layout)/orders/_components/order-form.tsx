@@ -4,6 +4,7 @@ import InputGroup from "@/components/FormElements/InputGroup";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 import { cn } from "@/lib/utils";
 import { createOrder } from "@/lib/actions/orders";
+import { formatPrice } from "@/lib/format-price";
 import { notifyPromise } from "@/lib/notify-promise";
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
@@ -66,7 +67,13 @@ function LabeledSelect({
   );
 }
 
-export function OrderForm({ variants }: { variants: VariantOption[] }) {
+export function OrderForm({
+  variants,
+  currency,
+}: {
+  variants: VariantOption[];
+  currency: string;
+}) {
   const router = useRouter();
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -210,7 +217,7 @@ export function OrderForm({ variants }: { variants: VariantOption[] }) {
 
       <div className="flex items-center justify-between border-t border-stroke pt-5.5 dark:border-dark-3">
         <span className="text-lg font-semibold text-dark dark:text-white">
-          Total : {total.toLocaleString("fr-FR")} XOF
+          Total : {formatPrice(total, currency)}
         </span>
 
         <button

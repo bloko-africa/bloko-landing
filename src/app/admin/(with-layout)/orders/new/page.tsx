@@ -1,5 +1,7 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { db } from "@/lib/db";
+import { formatPrice } from "@/lib/format-price";
+import { getStoreSettings } from "@/lib/store-settings";
 import type { Metadata } from "next";
 import { OrderForm } from "../_components/order-form";
 
@@ -10,10 +12,13 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function NewOrderPage() {
-  const variants = await db.productVariant.findMany({
-    include: { product: { select: { name: true, basePrice: true } } },
-    orderBy: { createdAt: "desc" },
-  });
+  const [settings, variants] = await Promise.all([
+    getStoreSettings(),
+    db.productVariant.findMany({
+      include: { product: { select: { name: true, basePrice: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
 
   const options = variants.map((v) => {
     const unitPrice = Number(v.priceOverride ?? v.product.basePrice);
@@ -21,14 +26,14 @@ export default async function NewOrderPage() {
     return {
       id: v.id,
       unitPrice,
-      label: `${v.product.name}${attrs ? ` — ${attrs}` : ""} (${unitPrice.toLocaleString("fr-FR")} XOF, stock: ${v.stock})`,
+      label: `${v.product.name}${attrs ? ` — ${attrs}` : ""} (${formatPrice(unitPrice, settings.currency)}, stock: ${v.stock})`,
     };
   });
 
   return (
     <div className="mx-auto w-full max-w-270">
       <Breadcrumb pageName="Nouvelle commande" />
-      <OrderForm variants={options} />
+      <OrderForm variants={options} currency={settings.currency} />
     </div>
   );
 }

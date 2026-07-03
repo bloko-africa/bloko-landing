@@ -2,6 +2,7 @@
 
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 import { generatePaymentLink, refreshPaymentStatus } from "@/lib/actions/orders";
+import { formatPrice } from "@/lib/format-price";
 import { notifyPromise } from "@/lib/notify-promise";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -12,6 +13,7 @@ type Payment = {
   reference: string;
   status: string;
   amount: string;
+  currency: string;
   checkoutUrl: string | null;
   createdAt: string;
 };
@@ -112,7 +114,7 @@ export function OrderPayments({
                 {payment.reference}
               </p>
               <p className="text-body-sm text-dark-5 dark:text-dark-6">
-                {Number(payment.amount).toLocaleString("fr-FR")} XOF —{" "}
+                {formatPrice(Number(payment.amount), payment.currency)} —{" "}
                 {new Date(payment.createdAt).toLocaleString("fr-FR")}
               </p>
             </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCart } from "@/lib/cart/cart-context";
+import { formatPrice } from "@/lib/format-price";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { useMemo, useState } from "react";
@@ -15,6 +16,7 @@ type Variant = {
 };
 
 type ProductDetailProps = {
+  currency: string;
   product: {
     id: string;
     slug: string;
@@ -27,7 +29,7 @@ type ProductDetailProps = {
   };
 };
 
-export function ProductDetail({ product }: ProductDetailProps) {
+export function ProductDetail({ product, currency }: ProductDetailProps) {
   const { addItem } = useCart();
   const [activeImage, setActiveImage] = useState(0);
   const [size, setSize] = useState<string | null>(null);
@@ -123,7 +125,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
           {product.name}
         </h1>
         <p className="mt-3 text-heading-6 font-medium text-dark dark:text-white">
-          {displayPrice.toLocaleString("fr-FR")} XOF
+          {formatPrice(displayPrice, currency)}
         </p>
 
         {product.description && (

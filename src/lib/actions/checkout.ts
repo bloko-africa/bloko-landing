@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { getCurrentSession } from "@/lib/auth/session";
 import { buildOrderItems } from "@/lib/orders/build-order-items";
 import { createGeniusPayPayment } from "@/lib/payments/geniuspay";
+import { getStoreSettings } from "@/lib/store-settings";
 import { z } from "zod";
 
 const checkoutSchema = z.object({
@@ -31,6 +32,7 @@ export async function checkout(input: CheckoutInput) {
 
   const data = checkoutSchema.parse(input);
   const { itemsData, total } = await buildOrderItems(data.items);
+  const settings = await getStoreSettings();
 
   const order = await db.order.create({
     data: {
@@ -40,6 +42,7 @@ export async function checkout(input: CheckoutInput) {
       customerPhone: data.customerPhone,
       customerEmail: data.customerEmail || undefined,
       totalAmount: total,
+      currency: settings.currency,
       items: { create: itemsData },
     },
   });
@@ -48,7 +51,7 @@ export async function checkout(input: CheckoutInput) {
 
   const payment = await createGeniusPayPayment({
     amount: total,
-    currency: "XOF",
+    currency: settings.currency,
     description: `Commande ${order.reference}`,
     customer: {
       name: data.customerName,

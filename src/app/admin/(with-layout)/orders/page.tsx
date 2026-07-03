@@ -1,5 +1,8 @@
+import { DeleteRowButton } from "@/components/Admin/delete-row-button";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import { deleteOrder } from "@/lib/actions/orders";
 import { db } from "@/lib/db";
+import { formatPrice } from "@/lib/format-price";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -55,6 +58,9 @@ export default async function OrdersPage() {
               <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
                 Date
               </th>
+              <th className="px-5.5 py-4 font-medium text-dark dark:text-white">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -77,7 +83,7 @@ export default async function OrdersPage() {
                   <span className="text-body-xs">{order.customerPhone}</span>
                 </td>
                 <td className="px-5.5 py-4 text-dark-5 dark:text-dark-6">
-                  {Number(order.totalAmount).toLocaleString("fr-FR")} XOF
+                  {formatPrice(Number(order.totalAmount), order.currency)}
                 </td>
                 <td className="px-5.5 py-4">
                   <span
@@ -89,13 +95,28 @@ export default async function OrdersPage() {
                 <td className="px-5.5 py-4 text-dark-5 dark:text-dark-6">
                   {order.createdAt.toLocaleDateString("fr-FR")}
                 </td>
+                <td className="px-5.5 py-4">
+                  <div className="flex items-center gap-3">
+                    <Link
+                      href={`/admin/orders/${order.id}`}
+                      className="text-body-sm text-dark-5 hover:text-primary dark:text-dark-6"
+                    >
+                      Gérer
+                    </Link>
+                    <DeleteRowButton
+                      confirmMessage={`Supprimer définitivement la commande "${order.reference}" ? Cette action supprime aussi ses paiements associés.`}
+                      onDelete={() => deleteOrder(order.id)}
+                      successMessage="Commande supprimée"
+                    />
+                  </div>
+                </td>
               </tr>
             ))}
 
             {orders.length === 0 && (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="px-5.5 py-8 text-center text-dark-5 dark:text-dark-6"
                 >
                   Aucune commande pour le moment.
