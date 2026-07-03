@@ -7,6 +7,7 @@ import {
   deleteProductVariant,
   updateVariantStock,
 } from "@/lib/actions/products";
+import { notifyPromise } from "@/lib/notify-promise";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { toast } from "sonner";
@@ -37,7 +38,7 @@ export function ProductVariants({
     setAdding(true);
 
     try {
-      await toast.promise(addProductVariant(formData), {
+      await notifyPromise(addProductVariant(formData), {
         loading: "Ajout de la variante...",
         success: "Variante ajoutée",
         error: (err) => (err instanceof Error ? err.message : "Échec"),
@@ -64,7 +65,7 @@ export function ProductVariants({
   async function handleDelete(variantId: string) {
     if (!confirm("Supprimer cette variante ?")) return;
 
-    await toast.promise(deleteProductVariant(variantId), {
+    await notifyPromise(deleteProductVariant(variantId), {
       loading: "Suppression...",
       success: "Variante supprimée",
       error: (err) => (err instanceof Error ? err.message : "Échec"),

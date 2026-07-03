@@ -9,9 +9,9 @@ import {
   deleteCollection,
   updateCollection,
 } from "@/lib/actions/collections";
+import { notifyPromise } from "@/lib/notify-promise";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { toast } from "sonner";
 
 type CollectionFormProps = {
   initial?: {
@@ -36,13 +36,13 @@ export function CollectionForm({ initial, canDelete }: CollectionFormProps) {
     try {
       if (initial) {
         formData.set("id", initial.id);
-        await toast.promise(updateCollection(formData), {
+        await notifyPromise(updateCollection(formData), {
           loading: "Mise à jour...",
           success: "Collection mise à jour",
           error: (err) => (err instanceof Error ? err.message : "Échec"),
         });
       } else {
-        await toast.promise(createCollection(formData), {
+        await notifyPromise(createCollection(formData), {
           loading: "Création...",
           success: "Collection créée",
           error: (err) => (err instanceof Error ? err.message : "Échec"),
@@ -59,7 +59,7 @@ export function CollectionForm({ initial, canDelete }: CollectionFormProps) {
     if (!initial) return;
     if (!confirm(`Supprimer la collection "${initial.name}" ?`)) return;
 
-    await toast.promise(deleteCollection(initial.id), {
+    await notifyPromise(deleteCollection(initial.id), {
       loading: "Suppression...",
       success: "Collection supprimée",
       error: (err) => (err instanceof Error ? err.message : "Échec"),

@@ -3,10 +3,10 @@
 import { UploadIcon } from "@/assets/icons";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 import { addProductImage, deleteProductImageAction } from "@/lib/actions/products";
+import { notifyPromise } from "@/lib/notify-promise";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useId, useRef, useState, type ChangeEvent } from "react";
-import { toast } from "sonner";
 
 type ProductImage = { id: string; url: string };
 
@@ -28,7 +28,7 @@ export function ProductImages({
     setUploading(true);
 
     try {
-      await toast.promise(addProductImage(productId, file), {
+      await notifyPromise(addProductImage(productId, file), {
         loading: "Compression et upload...",
         success: "Image ajoutée",
         error: (err) => (err instanceof Error ? err.message : "Échec upload"),
@@ -43,7 +43,7 @@ export function ProductImages({
   async function handleDelete(imageId: string) {
     if (!confirm("Supprimer cette image ?")) return;
 
-    await toast.promise(deleteProductImageAction(imageId), {
+    await notifyPromise(deleteProductImageAction(imageId), {
       loading: "Suppression...",
       success: "Image supprimée",
       error: (err) => (err instanceof Error ? err.message : "Échec"),

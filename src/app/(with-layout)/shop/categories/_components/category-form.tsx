@@ -8,9 +8,9 @@ import {
   deleteCategory,
   updateCategory,
 } from "@/lib/actions/categories";
+import { notifyPromise } from "@/lib/notify-promise";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { toast } from "sonner";
 
 type CategoryFormProps = {
   parentOptions: { value: string; label: string }[];
@@ -38,13 +38,13 @@ export function CategoryForm({
     try {
       if (initial) {
         formData.set("id", initial.id);
-        await toast.promise(updateCategory(formData), {
+        await notifyPromise(updateCategory(formData), {
           loading: "Mise à jour...",
           success: "Catégorie mise à jour",
           error: (err) => (err instanceof Error ? err.message : "Échec"),
         });
       } else {
-        await toast.promise(createCategory(formData), {
+        await notifyPromise(createCategory(formData), {
           loading: "Création...",
           success: "Catégorie créée",
           error: (err) => (err instanceof Error ? err.message : "Échec"),
@@ -61,7 +61,7 @@ export function CategoryForm({
     if (!initial) return;
     if (!confirm(`Supprimer la catégorie "${initial.name}" ?`)) return;
 
-    await toast.promise(deleteCategory(initial.id), {
+    await notifyPromise(deleteCategory(initial.id), {
       loading: "Suppression...",
       success: "Catégorie supprimée",
       error: (err) => (err instanceof Error ? err.message : "Échec"),

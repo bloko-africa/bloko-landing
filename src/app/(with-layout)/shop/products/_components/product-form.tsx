@@ -9,9 +9,9 @@ import {
   deleteProduct,
   updateProduct,
 } from "@/lib/actions/products";
+import { notifyPromise } from "@/lib/notify-promise";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { toast } from "sonner";
 
 const STATUS_OPTIONS = [
   { value: "DRAFT", label: "Brouillon" },
@@ -51,14 +51,14 @@ export function ProductForm({
     try {
       if (initial) {
         formData.set("id", initial.id);
-        await toast.promise(updateProduct(formData), {
+        await notifyPromise(updateProduct(formData), {
           loading: "Mise à jour...",
           success: "Produit mis à jour",
           error: (err) => (err instanceof Error ? err.message : "Échec"),
         });
         router.refresh();
       } else {
-        const id = await toast.promise(createProduct(formData), {
+        const id = await notifyPromise(createProduct(formData), {
           loading: "Création...",
           success: "Produit créé",
           error: (err) => (err instanceof Error ? err.message : "Échec"),
@@ -74,7 +74,7 @@ export function ProductForm({
     if (!initial) return;
     if (!confirm(`Supprimer le produit "${initial.name}" ?`)) return;
 
-    await toast.promise(deleteProduct(initial.id), {
+    await notifyPromise(deleteProduct(initial.id), {
       loading: "Suppression...",
       success: "Produit supprimé",
       error: (err) => (err instanceof Error ? err.message : "Échec"),
