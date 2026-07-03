@@ -77,3 +77,91 @@ model Verification {
   @@index([identifier], map: "verification_identifier_idx")
   @@map("verification")
 }
+
+// --- Catalogue mode ---
+
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Collection {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  season      String? // ex: "Printemps-Été 2027"
+  description String?
+  coverImage  String?   @map("cover_image")
+  isActive    Boolean   @default(true) @map("is_active")
+  products    Product[]
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("collection")
+}
+
+model Category {
+  id       String     @id @default(cuid())
+  name     String
+  slug     String     @unique
+  parentId String?    @map("parent_id")
+  parent   Category?  @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryToCategory")
+  products Product[]
+
+  @@index([parentId])
+  @@map("category")
+}
+
+model Product {
+  id           String         @id @default(cuid())
+  name         String
+  slug         String         @unique
+  description  String?
+  basePrice    Decimal        @map("base_price") @db.Decimal(10, 2)
+  status       ProductStatus  @default(DRAFT)
+  collectionId String?        @map("collection_id")
+  collection   Collection?    @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  categoryId   String?        @map("category_id")
+  category     Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  images       ProductImage[]
+  variants     ProductVariant[]
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  @@index([collectionId])
+  @@index([categoryId])
+  @@index([status])
+  @@map("product")
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String  @map("product_id")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  position  Int     @default(0)
+
+  @@index([productId])
+  @@map("product_image")
+}
+
+model ProductVariant {
+  id            String   @id @default(cuid())
+  productId     String   @map("product_id")
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku           String   @unique
+  size          String? // XS, S, M, L, XL ou pointure
+  color         String?
+  colorHex      String?  @map("color_hex")
+  priceOverride Decimal? @map("price_override") @db.Decimal(10, 2)
+  stock         Int      @default(0)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@unique([productId, size, color])
+  @@index([productId])
+  @@map("product_variant")
+}

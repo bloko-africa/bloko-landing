@@ -29,7 +29,7 @@ export function ThemeToggleSwitch() {
   return (
     <button
       onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-      className="group cursor-pointer rounded-full bg-gray-3 p-1.25 text-dark outline-0 hover:outline-primary focus:outline-primary focus-visible:outline dark:bg-[#020D1A] dark:text-current"
+      className="group cursor-pointer rounded-full bg-gray-3 p-1.25 text-dark outline-0 hover:outline-primary focus:outline-primary focus-visible:outline dark:bg-[#0d0c0a] dark:text-current"
     >
       <span className="sr-only">
         Switch to {theme === "light" ? "dark" : "light"} mode

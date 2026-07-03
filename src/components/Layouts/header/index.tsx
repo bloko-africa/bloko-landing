@@ -16,7 +16,7 @@ export function Header() {
     <header className="border-stroke shadow-1 dark:border-stroke-dark dark:bg-gray-dark sticky top-0 z-30 flex items-center justify-between border-b bg-white px-4 py-5 md:px-5 2xl:px-10">
       <button
         onClick={toggleSidebar}
-        className="dark:border-stroke-dark rounded-lg border px-1.5 py-1 lg:hidden dark:bg-[#020D1A] hover:dark:bg-[#FFFFFF1A]"
+        className="dark:border-stroke-dark rounded-lg border px-1.5 py-1 lg:hidden dark:bg-[#0d0c0a] hover:dark:bg-[#FFFFFF1A]"
       >
         <MenuIcon />
         <span className="sr-only">Toggle Sidebar</span>
