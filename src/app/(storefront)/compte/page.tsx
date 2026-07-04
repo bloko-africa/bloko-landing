@@ -1,6 +1,7 @@
 import { getCurrentSession } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LogoutButton } from "./_logout-button";
 
 export const metadata: Metadata = { title: "Mon compte" };
@@ -47,9 +48,10 @@ export default async function AccountPage() {
       ) : (
         <div className="mt-4 space-y-3">
           {orders.map((order) => (
-            <div
+            <Link
               key={order.id}
-              className="flex items-center justify-between rounded-lg border border-stroke p-4 dark:border-dark-3"
+              href={`/compte/commandes/${order.id}`}
+              className="flex items-center justify-between rounded-lg border border-stroke p-4 hover:border-primary dark:border-dark-3"
             >
               <div>
                 <p className="font-medium text-dark dark:text-white">
@@ -63,7 +65,7 @@ export default async function AccountPage() {
               <span className="rounded-full bg-gray-2 px-3 py-1 text-body-xs font-medium text-dark-5 dark:bg-dark-2 dark:text-dark-6">
                 {STATUS_LABEL[order.status] ?? order.status}
               </span>
-            </div>
+            </Link>
           ))}
         </div>
       )}

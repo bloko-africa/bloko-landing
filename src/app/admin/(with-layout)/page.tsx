@@ -68,7 +68,7 @@ export default async function AdminHome() {
     <>
       <Breadcrumb pageName="Tableau de bord" />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Chiffre d'affaires (mois en cours)"
           value={formatPrice(
@@ -76,16 +76,25 @@ export default async function AdminHome() {
             settings.currency,
           )}
           hint="Commandes payées uniquement"
+          icon={<CashIcon />}
         />
         <StatCard
           label="Commandes en attente"
           value={String(pendingCount)}
           hint="Paiement non confirmé"
+          icon={<ClockIcon />}
         />
-        <StatCard label="Commandes totales" value={String(totalOrdersCount)} />
+        <StatCard
+          label="Commandes totales"
+          value={String(totalOrdersCount)}
+          hint="Depuis l'ouverture"
+          icon={<ListIcon />}
+        />
         <StatCard
           label="Produits publiés"
           value={String(publishedProductsCount)}
+          hint="Visibles sur la boutique"
+          icon={<TagIcon />}
         />
       </div>
 
@@ -198,5 +207,42 @@ export default async function AdminHome() {
         </ShowcaseSection>
       </div>
     </>
+  );
+}
+
+function CashIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <rect x="2" y="6" width="20" height="12" rx="2" />
+      <circle cx="12" cy="12" r="3" />
+      <path d="M6 6v0M18 18v0" />
+    </svg>
+  );
+}
+
+function ClockIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3.5 2" />
+    </svg>
+  );
+}
+
+function ListIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M8 6h13M8 12h13M8 18h13" />
+      <path d="M3 6h.01M3 12h.01M3 18h.01" />
+    </svg>
+  );
+}
+
+function TagIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M20 12.5 12.5 20a1.5 1.5 0 0 1-2.1 0L4 13.6a1.5 1.5 0 0 1 0-2.1L11.5 4H18a2 2 0 0 1 2 2v6.5Z" />
+      <circle cx="15" cy="9" r="1.3" fill="currentColor" stroke="none" />
+    </svg>
   );
 }
