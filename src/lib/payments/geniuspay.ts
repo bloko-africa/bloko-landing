@@ -76,11 +76,21 @@ async function geniusPayFetch<T>(
     headers: { ...headers(), ...init.headers },
   });
 
-  const body = await response.json();
+  const rawBody = await response.text();
+  let body: { success?: boolean; data?: T; message?: string };
+  try {
+    body = JSON.parse(rawBody);
+  } catch {
+    // L'API a repondu avec du HTML (page d'erreur, compte non active, etc.)
+    // au lieu de JSON — on evite de planter avec une SyntaxError opaque.
+    throw new Error(
+      `GeniusPay ${path} a renvoyé une réponse invalide (${response.status}). Vérifie que le compte marchand est bien activé.`,
+    );
+  }
 
   if (!response.ok || body.success === false) {
     throw new Error(
-      `GeniusPay ${path} a échoué (${response.status}): ${JSON.stringify(body)}`,
+      `GeniusPay ${path} a échoué (${response.status}): ${body.message ?? JSON.stringify(body)}`,
     );
   }
 

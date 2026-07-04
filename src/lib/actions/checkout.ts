@@ -1,5 +1,6 @@
 "use server";
 
+import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getCurrentSession } from "@/lib/auth/session";
 import { buildOrderItems } from "@/lib/orders/build-order-items";
@@ -10,9 +11,10 @@ import { getStoreSettings } from "@/lib/store-settings";
 import { z } from "zod";
 
 const checkoutSchema = z.object({
+  email: z.string().email("Email invalide"),
+  password: z.string().min(8).optional(),
   customerName: z.string().min(1, "Nom requis"),
   customerPhone: z.string().min(6, "Téléphone requis"),
-  customerEmail: z.string().email().optional().or(z.literal("")),
   country: z.string().length(2, "Pays requis"),
   items: z
     .array(
@@ -26,23 +28,46 @@ const checkoutSchema = z.object({
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
 
+/**
+ * Checkout sans exiger de session prealable :
+ * - deja connecte -> commande liee au compte actif.
+ * - email inconnu -> compte cree a la volee (mot de passe requis cote client).
+ * - email deja utilise mais pas connecte -> commande "invitee" (pas de lien
+ *   de compte, on ne verifie pas l'identite juste via l'email).
+ */
 export async function checkout(input: CheckoutInput) {
-  const session = await getCurrentSession();
-  if (!session?.user) {
-    throw new Error("Tu dois être connecté pour passer commande.");
-  }
-
   const data = checkoutSchema.parse(input);
   const { itemsData, total } = await buildOrderItems(data.items);
   const settings = await getStoreSettings();
 
+  const session = await getCurrentSession();
+  let userId: string | undefined = session?.user?.id;
+
+  if (!userId) {
+    const existingUser = await db.user.findUnique({
+      where: { email: data.email },
+      select: { id: true },
+    });
+
+    if (!existingUser) {
+      if (!data.password) {
+        throw new Error("Choisis un mot de passe pour créer ton compte.");
+      }
+      const { user } = await auth.api.signUpEmail({
+        body: { name: data.customerName, email: data.email, password: data.password },
+      });
+      userId = user.id;
+    }
+    // existingUser trouve sans session active -> commande invitee (pas de userId)
+  }
+
   const order = await db.order.create({
     data: {
       reference: `ORD-${Date.now().toString(36).toUpperCase()}`,
-      userId: session.user.id,
+      userId,
       customerName: data.customerName,
       customerPhone: data.customerPhone,
-      customerEmail: data.customerEmail || undefined,
+      customerEmail: data.email,
       country: data.country,
       totalAmount: total,
       currency: settings.currency,
@@ -59,7 +84,7 @@ export async function checkout(input: CheckoutInput) {
     customer: {
       name: data.customerName,
       phone: data.customerPhone,
-      email: data.customerEmail || undefined,
+      email: data.email,
       country: data.country,
     },
     metadata: { orderId: order.id, orderReference: order.reference },

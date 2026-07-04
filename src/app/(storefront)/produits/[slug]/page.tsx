@@ -1,9 +1,7 @@
+import { ProductCard } from "@/components/Storefront/product-card";
 import { db } from "@/lib/db";
-import { formatPrice } from "@/lib/format-price";
 import { getStoreSettings } from "@/lib/store-settings";
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProductDetail } from "./_components/product-detail";
 
@@ -59,7 +57,12 @@ export default async function ProductPage({
           },
           take: 4,
           orderBy: { createdAt: "desc" },
-          include: { images: { orderBy: { position: "asc" }, take: 1 } },
+          include: {
+            images: { orderBy: { position: "asc" }, take: 1 },
+            variants: {
+              select: { id: true, size: true, color: true, stock: true, priceOverride: true },
+            },
+          },
         });
 
   return (
@@ -85,56 +88,32 @@ export default async function ProductPage({
       />
 
       {related.length > 0 && (
-        <RelatedProducts
-          currency={settings.currency}
-          products={related.map((p) => ({
-            slug: p.slug,
-            name: p.name,
-            basePrice: Number(p.basePrice),
-            image: p.images[0]?.url ?? null,
-          }))}
-        />
+        <section className="mx-auto max-w-(--breakpoint-2xl) border-t border-stroke px-4 py-16 dark:border-dark-3 md:px-8">
+          <h2 className="text-heading-6 font-medium text-dark dark:text-white">
+            Vous aimerez aussi
+          </h2>
+
+          <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-4">
+            {related.map((p) => (
+              <ProductCard
+                key={p.id}
+                slug={p.slug}
+                name={p.name}
+                image={p.images[0]?.url ?? null}
+                basePrice={Number(p.basePrice)}
+                currency={settings.currency}
+                variants={p.variants.map((v) => ({
+                  id: v.id,
+                  size: v.size,
+                  color: v.color,
+                  stock: v.stock,
+                  unitPrice: Number(v.priceOverride ?? p.basePrice),
+                }))}
+              />
+            ))}
+          </div>
+        </section>
       )}
     </>
-  );
-}
-
-function RelatedProducts({
-  products,
-  currency,
-}: {
-  products: { slug: string; name: string; basePrice: number; image: string | null }[];
-  currency: string;
-}) {
-  return (
-    <section className="mx-auto max-w-(--breakpoint-2xl) border-t border-stroke px-4 py-16 dark:border-dark-3 md:px-8">
-      <h2 className="text-heading-6 font-medium text-dark dark:text-white">
-        Vous aimerez aussi
-      </h2>
-
-      <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-4">
-        {products.map((product) => (
-          <Link key={product.slug} href={`/produits/${product.slug}`} className="group">
-            <div className="relative aspect-3/4 overflow-hidden rounded-xl bg-gray-2 dark:bg-dark-2">
-              {product.image && (
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  fill
-                  className="object-cover transition group-hover:scale-105"
-                  sizes="(min-width: 640px) 25vw, 50vw"
-                />
-              )}
-            </div>
-            <p className="mt-3 text-body-sm font-medium text-dark dark:text-white">
-              {product.name}
-            </p>
-            <p className="text-body-sm text-dark-5 dark:text-dark-6">
-              {formatPrice(product.basePrice, currency)}
-            </p>
-          </Link>
-        ))}
-      </div>
-    </section>
   );
 }

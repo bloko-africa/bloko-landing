@@ -9,7 +9,9 @@ const CUSTOMER_AUTH_PATHS = ["/compte/connexion", "/compte/inscription"];
 const AUTH_ONLY_PATHS = [...ADMIN_AUTH_PATHS, ...CUSTOMER_AUTH_PATHS];
 
 // Routes needing a logged-in session (any role) but not staff privileges.
-const CUSTOMER_PROTECTED_PREFIXES = ["/compte", "/commande"];
+// /commande n'est plus protege : le checkout gere lui-meme l'auth (compte
+// cree a la volee ou commande invitee si l'email existe deja).
+const CUSTOMER_PROTECTED_PREFIXES = ["/compte"];
 
 const SESSION_COOKIE_NAME =
   process.env.NODE_ENV === "development"

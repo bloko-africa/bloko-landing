@@ -1,4 +1,4 @@
-import { formatPrice } from "@/lib/format-price";
+import { ProductCard } from "@/components/Storefront/product-card";
 import { db } from "@/lib/db";
 import { getStoreSettings } from "@/lib/store-settings";
 import Image from "next/image";
@@ -18,7 +18,12 @@ export default async function StorefrontHome() {
       where: { status: "PUBLISHED" },
       orderBy: { createdAt: "desc" },
       take: 8,
-      include: { images: { orderBy: { position: "asc" }, take: 1 } },
+      include: {
+        images: { orderBy: { position: "asc" }, take: 1 },
+        variants: {
+          select: { id: true, size: true, color: true, stock: true, priceOverride: true },
+        },
+      },
     }),
   ]);
 
@@ -87,25 +92,21 @@ export default async function StorefrontHome() {
         ) : (
           <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
             {products.map((product) => (
-              <Link key={product.id} href={`/produits/${product.slug}`} className="group">
-                <div className="relative aspect-3/4 overflow-hidden rounded-xl bg-gray-2 dark:bg-dark-2">
-                  {product.images[0] && (
-                    <Image
-                      src={product.images[0].url}
-                      alt={product.name}
-                      fill
-                      className="object-cover transition group-hover:scale-105"
-                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                    />
-                  )}
-                </div>
-                <p className="mt-3 text-body-sm font-medium text-dark dark:text-white">
-                  {product.name}
-                </p>
-                <p className="text-body-sm text-dark-5 dark:text-dark-6">
-                  {formatPrice(Number(product.basePrice), settings.currency)}
-                </p>
-              </Link>
+              <ProductCard
+                key={product.id}
+                slug={product.slug}
+                name={product.name}
+                image={product.images[0]?.url ?? null}
+                basePrice={Number(product.basePrice)}
+                currency={settings.currency}
+                variants={product.variants.map((v) => ({
+                  id: v.id,
+                  size: v.size,
+                  color: v.color,
+                  stock: v.stock,
+                  unitPrice: Number(v.priceOverride ?? product.basePrice),
+                }))}
+              />
             ))}
           </div>
         )}

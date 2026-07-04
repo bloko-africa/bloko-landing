@@ -1,35 +1,63 @@
+import { ProductCard } from "@/components/Storefront/product-card";
 import { db } from "@/lib/db";
-import { formatPrice } from "@/lib/format-price";
 import { getStoreSettings } from "@/lib/store-settings";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = { title: "Boutique" };
 export const dynamic = "force-dynamic";
 
+const PAGE_SIZE = 24;
+
 export default async function CatalogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ collection?: string; category?: string }>;
+  searchParams: Promise<{ collection?: string; category?: string; page?: string }>;
 }) {
-  const { collection: collectionSlug, category: categorySlug } =
-    await searchParams;
+  const {
+    collection: collectionSlug,
+    category: categorySlug,
+    page: pageParam,
+  } = await searchParams;
 
-  const [settings, collections, categories, products] = await Promise.all([
-    getStoreSettings(),
-    db.collection.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
-    db.category.findMany({ orderBy: { name: "asc" } }),
-    db.product.findMany({
-      where: {
-        status: "PUBLISHED",
-        collection: collectionSlug ? { slug: collectionSlug } : undefined,
-        category: categorySlug ? { slug: categorySlug } : undefined,
-      },
-      orderBy: { createdAt: "desc" },
-      include: { images: { orderBy: { position: "asc" }, take: 1 } },
-    }),
-  ]);
+  const page = Math.max(1, Number(pageParam) || 1);
+
+  const where = {
+    status: "PUBLISHED" as const,
+    collection: collectionSlug ? { slug: collectionSlug } : undefined,
+    category: categorySlug ? { slug: categorySlug } : undefined,
+  };
+
+  const [settings, collections, categories, totalCount, products] =
+    await Promise.all([
+      getStoreSettings(),
+      db.collection.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
+      db.category.findMany({ orderBy: { name: "asc" } }),
+      db.product.count({ where }),
+      db.product.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * PAGE_SIZE,
+        take: PAGE_SIZE,
+        include: {
+          images: { orderBy: { position: "asc" }, take: 1 },
+          variants: {
+            select: { id: true, size: true, color: true, stock: true, priceOverride: true },
+          },
+        },
+      }),
+    ]);
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+  function pageHref(targetPage: number) {
+    const params = new URLSearchParams();
+    if (collectionSlug) params.set("collection", collectionSlug);
+    if (categorySlug) params.set("category", categorySlug);
+    if (targetPage > 1) params.set("page", String(targetPage));
+    const query = params.toString();
+    return query ? `/produits?${query}` : "/produits";
+  }
 
   return (
     <div className="mx-auto max-w-(--breakpoint-2xl) px-4 py-12 md:px-8">
@@ -66,29 +94,59 @@ export default async function CatalogPage({
           Aucun produit ne correspond à ce filtre pour le moment.
         </p>
       ) : (
-        <div className="mt-10 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
-          {products.map((product) => (
-            <Link key={product.id} href={`/produits/${product.slug}`} className="group">
-              <div className="relative aspect-3/4 overflow-hidden rounded-xl bg-gray-2 dark:bg-dark-2">
-                {product.images[0] && (
-                  <Image
-                    src={product.images[0].url}
-                    alt={product.name}
-                    fill
-                    className="object-cover transition group-hover:scale-105"
-                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                  />
-                )}
-              </div>
-              <p className="mt-3 text-body-sm font-medium text-dark dark:text-white">
-                {product.name}
-              </p>
-              <p className="text-body-sm text-dark-5 dark:text-dark-6">
-                {formatPrice(Number(product.basePrice), settings.currency)}
-              </p>
-            </Link>
-          ))}
-        </div>
+        <>
+          <div className="mt-10 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+            {products.map((product) => (
+              <ProductCard
+                key={product.id}
+                slug={product.slug}
+                name={product.name}
+                image={product.images[0]?.url ?? null}
+                basePrice={Number(product.basePrice)}
+                currency={settings.currency}
+                variants={product.variants.map((v) => ({
+                  id: v.id,
+                  size: v.size,
+                  color: v.color,
+                  stock: v.stock,
+                  unitPrice: Number(v.priceOverride ?? product.basePrice),
+                }))}
+              />
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <nav className="mt-12 flex items-center justify-center gap-2">
+              <Link
+                href={pageHref(Math.max(1, page - 1))}
+                aria-disabled={page === 1}
+                className={
+                  page === 1
+                    ? "pointer-events-none rounded-full border border-stroke px-4 py-2 text-body-sm text-dark-5 opacity-40 dark:border-dark-3 dark:text-dark-6"
+                    : "rounded-full border border-stroke px-4 py-2 text-body-sm text-dark-5 hover:border-primary hover:text-primary dark:border-dark-3 dark:text-dark-6"
+                }
+              >
+                Précédent
+              </Link>
+
+              <span className="text-body-sm text-dark-5 dark:text-dark-6">
+                Page {page} / {totalPages}
+              </span>
+
+              <Link
+                href={pageHref(Math.min(totalPages, page + 1))}
+                aria-disabled={page === totalPages}
+                className={
+                  page === totalPages
+                    ? "pointer-events-none rounded-full border border-stroke px-4 py-2 text-body-sm text-dark-5 opacity-40 dark:border-dark-3 dark:text-dark-6"
+                    : "rounded-full border border-stroke px-4 py-2 text-body-sm text-dark-5 hover:border-primary hover:text-primary dark:border-dark-3 dark:text-dark-6"
+                }
+              >
+                Suivant
+              </Link>
+            </nav>
+          )}
+        </>
       )}
     </div>
   );

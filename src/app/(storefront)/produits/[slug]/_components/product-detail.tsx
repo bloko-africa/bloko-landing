@@ -4,6 +4,7 @@ import { useCart } from "@/lib/cart/cart-context";
 import { formatPrice } from "@/lib/format-price";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -31,6 +32,7 @@ type ProductDetailProps = {
 
 export function ProductDetail({ product, currency }: ProductDetailProps) {
   const { addItem } = useCart();
+  const router = useRouter();
   const [activeImage, setActiveImage] = useState(0);
   const [size, setSize] = useState<string | null>(null);
   const [color, setColor] = useState<string | null>(null);
@@ -58,14 +60,14 @@ export function ProductDetail({ product, currency }: ProductDetailProps) {
   const displayPrice = selectedVariant?.unitPrice ?? product.basePrice;
   const needsSelection = (sizes.length > 0 && !size) || (colors.length > 0 && !color);
 
-  function handleAddToCart() {
+  function addSelectedToCart(): boolean {
     if (needsSelection || !selectedVariant) {
-      toast.error("Choisis une taille/couleur avant d'ajouter au panier.");
-      return;
+      toast.error("Choisis une taille/couleur avant de continuer.");
+      return false;
     }
     if (selectedVariant.stock < 1) {
       toast.error("Cette variante est en rupture de stock.");
-      return;
+      return false;
     }
 
     addItem({
@@ -78,7 +80,15 @@ export function ProductDetail({ product, currency }: ProductDetailProps) {
       image: product.images[0]?.url ?? null,
       stock: selectedVariant.stock,
     });
-    toast.success("Ajouté au panier");
+    return true;
+  }
+
+  function handleAddToCart() {
+    if (addSelectedToCart()) toast.success("Ajouté au panier");
+  }
+
+  function handleBuyNow() {
+    if (addSelectedToCart()) router.push("/commande");
   }
 
   return (
@@ -191,13 +201,22 @@ export function ProductDetail({ product, currency }: ProductDetailProps) {
           <p className="mt-4 text-body-sm text-red">Rupture de stock</p>
         )}
 
-        <button
-          onClick={handleAddToCart}
-          className="mt-8 w-full rounded-full bg-primary py-3.5 font-medium text-white hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={selectedVariant?.stock === 0}
-        >
-          Ajouter au panier
-        </button>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <button
+            onClick={handleAddToCart}
+            className="w-full rounded-full border border-primary py-3.5 font-medium text-primary hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={selectedVariant?.stock === 0}
+          >
+            Ajouter au panier
+          </button>
+          <button
+            onClick={handleBuyNow}
+            className="w-full rounded-full bg-primary py-3.5 font-medium text-white hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={selectedVariant?.stock === 0}
+          >
+            Acheter maintenant
+          </button>
+        </div>
       </div>
     </div>
   );
