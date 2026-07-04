@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth/session";
+import { sanitizeRichText } from "@/lib/sanitize-html";
 import { slugify } from "@/lib/utils";
 import {
   deleteProductImage as removeStoredImage,
@@ -21,7 +22,7 @@ const productSchema = z.object({
 });
 
 function parseForm(formData: FormData) {
-  return productSchema.parse({
+  const data = productSchema.parse({
     id: formData.get("id")?.toString() || undefined,
     name: formData.get("name")?.toString() ?? "",
     description: formData.get("description")?.toString() || undefined,
@@ -30,6 +31,11 @@ function parseForm(formData: FormData) {
     collectionId: formData.get("collectionId")?.toString() || undefined,
     categoryId: formData.get("categoryId")?.toString() || undefined,
   });
+
+  return {
+    ...data,
+    description: data.description ? sanitizeRichText(data.description) : undefined,
+  };
 }
 
 export async function createProduct(formData: FormData) {

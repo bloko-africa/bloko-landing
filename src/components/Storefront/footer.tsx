@@ -1,18 +1,23 @@
 import Link from "next/link";
 
-// Remplace ces "#" par les vraies URLs des réseaux de la boutique.
-const SOCIAL_LINKS = [
-  { name: "Facebook", href: "#", icon: FacebookIcon },
-  { name: "Instagram", href: "#", icon: InstagramIcon },
-  { name: "TikTok", href: "#", icon: TikTokIcon },
-  { name: "WhatsApp", href: "#", icon: WhatsAppIcon },
-];
-
 type StorefrontFooterProps = {
   storeName: string;
+  social: {
+    facebook: string;
+    instagram: string;
+    tiktok: string;
+    whatsapp: string;
+  };
 };
 
-export function StorefrontFooter({ storeName }: StorefrontFooterProps) {
+export function StorefrontFooter({ storeName, social }: StorefrontFooterProps) {
+  const socialLinks = [
+    { name: "Facebook", href: social.facebook, icon: FacebookIcon },
+    { name: "Instagram", href: social.instagram, icon: InstagramIcon },
+    { name: "TikTok", href: social.tiktok, icon: TikTokIcon },
+    { name: "WhatsApp", href: social.whatsapp, icon: WhatsAppIcon },
+  ].filter((link) => link.href);
+
   return (
     <footer className="border-t border-stroke bg-gray-1 dark:border-dark-3 dark:bg-dark-2">
       <div className="mx-auto max-w-(--breakpoint-2xl) px-4 py-10 md:px-8">
@@ -26,20 +31,22 @@ export function StorefrontFooter({ storeName }: StorefrontFooterProps) {
             </p>
           </div>
 
-          <div className="flex gap-3">
-            {SOCIAL_LINKS.map(({ name, href, icon: Icon }) => (
-              <a
-                key={name}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={name}
-                className="flex size-10 items-center justify-center rounded-full border border-stroke text-dark-5 hover:border-primary hover:text-primary dark:border-dark-3 dark:text-dark-6"
-              >
-                <Icon />
-              </a>
-            ))}
-          </div>
+          {socialLinks.length > 0 && (
+            <div className="flex gap-3">
+              {socialLinks.map(({ name, href, icon: Icon }) => (
+                <a
+                  key={name}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={name}
+                  className="flex size-10 items-center justify-center rounded-full border border-stroke text-dark-5 hover:border-primary hover:text-primary dark:border-dark-3 dark:text-dark-6"
+                >
+                  <Icon />
+                </a>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-stroke pt-6 text-body-sm dark:border-dark-3">

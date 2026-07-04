@@ -1,5 +1,6 @@
 "use client";
 
+import { RichTextEditor } from "@/components/Admin/rich-text-editor";
 import InputGroup from "@/components/FormElements/InputGroup";
 import { TextAreaGroup } from "@/components/FormElements/InputGroup/text-area";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
@@ -31,6 +32,12 @@ type StoreSettingsFormProps = {
     heroSubtitle: string;
     heroCtaLabel: string;
     featuredCollectionId: string | null;
+    socialFacebook: string;
+    socialInstagram: string;
+    socialTiktok: string;
+    socialWhatsapp: string;
+    legalMentions: string;
+    cgvContent: string;
   };
 };
 
@@ -187,6 +194,58 @@ export function StoreSettingsForm({ collections, initial }: StoreSettingsFormPro
             titre principal.
           </p>
         </div>
+      </ShowcaseSection>
+
+      <ShowcaseSection title="Réseaux sociaux" className="space-y-5.5 p-6.5!">
+        <InputGroup
+          label="Facebook"
+          name="socialFacebook"
+          type="url"
+          placeholder="https://facebook.com/..."
+          defaultValue={initial.socialFacebook}
+        />
+        <InputGroup
+          label="Instagram"
+          name="socialInstagram"
+          type="url"
+          placeholder="https://instagram.com/..."
+          defaultValue={initial.socialInstagram}
+        />
+        <InputGroup
+          label="TikTok"
+          name="socialTiktok"
+          type="url"
+          placeholder="https://tiktok.com/@..."
+          defaultValue={initial.socialTiktok}
+        />
+        <InputGroup
+          label="WhatsApp"
+          name="socialWhatsapp"
+          type="url"
+          placeholder="https://wa.me/229..."
+          defaultValue={initial.socialWhatsapp}
+        />
+        <p className="text-body-xs text-dark-5 dark:text-dark-6">
+          Laisse un champ vide pour masquer l&apos;icône correspondante dans le
+          pied de page.
+        </p>
+      </ShowcaseSection>
+
+      <ShowcaseSection title="Contenu légal" className="space-y-5.5 p-6.5!">
+        <RichTextEditor
+          label="Mentions légales"
+          name="legalMentions"
+          defaultValue={initial.legalMentions}
+        />
+        <RichTextEditor
+          label="Conditions générales de vente"
+          name="cgvContent"
+          defaultValue={initial.cgvContent}
+        />
+        <p className="text-body-xs text-dark-5 dark:text-dark-6">
+          Remplace les [crochets] par les vraies informations de
+          l&apos;entreprise (RCCM, IFU, adresse...).
+        </p>
       </ShowcaseSection>
 
       <button

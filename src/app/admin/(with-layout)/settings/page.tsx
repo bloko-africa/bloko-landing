@@ -37,6 +37,12 @@ export default async function SettingsPage() {
           heroSubtitle: settings.heroSubtitle,
           heroCtaLabel: settings.heroCtaLabel,
           featuredCollectionId: settings.featuredCollectionId,
+          socialFacebook: settings.socialFacebook,
+          socialInstagram: settings.socialInstagram,
+          socialTiktok: settings.socialTiktok,
+          socialWhatsapp: settings.socialWhatsapp,
+          legalMentions: settings.legalMentions,
+          cgvContent: settings.cgvContent,
         }}
       />
 

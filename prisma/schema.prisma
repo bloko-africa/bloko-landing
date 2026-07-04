@@ -260,6 +260,12 @@ model StoreSettings {
   heroCtaLabel         String      @default("Découvrir la boutique") @map("hero_cta_label")
   featuredCollectionId String?     @map("featured_collection_id")
   featuredCollection   Collection? @relation(fields: [featuredCollectionId], references: [id], onDelete: SetNull)
+  socialFacebook       String?     @map("social_facebook")
+  socialInstagram      String?     @map("social_instagram")
+  socialTiktok         String?     @map("social_tiktok")
+  socialWhatsapp       String?     @map("social_whatsapp")
+  legalMentions        String?     @map("legal_mentions")
+  cgvContent           String?     @map("cgv_content")
   updatedAt            DateTime    @updatedAt @map("updated_at")
 
   @@map("store_settings")

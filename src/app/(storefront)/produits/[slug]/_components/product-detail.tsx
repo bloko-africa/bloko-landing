@@ -139,9 +139,10 @@ export function ProductDetail({ product, currency }: ProductDetailProps) {
         </p>
 
         {product.description && (
-          <p className="mt-6 text-body-sm text-dark-5 dark:text-dark-6">
-            {product.description}
-          </p>
+          <div
+            className="rich-text mt-6 text-body-sm text-dark-5 dark:text-dark-6"
+            dangerouslySetInnerHTML={{ __html: product.description }}
+          />
         )}
 
         {sizes.length > 0 && (

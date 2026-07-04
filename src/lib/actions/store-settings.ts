@@ -3,8 +3,18 @@
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth/session";
 import { SUPPORTED_CURRENCIES } from "@/lib/currencies";
+import { sanitizeRichText } from "@/lib/sanitize-html";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+
+const optionalUrl = z
+  .string()
+  .trim()
+  .optional()
+  .transform((v) => (v ? v : undefined))
+  .refine((v) => !v || /^https?:\/\//.test(v), {
+    message: "URL invalide (doit commencer par http(s)://)",
+  });
 
 const storeSettingsSchema = z.object({
   storeName: z.string().min(1, "Nom requis"),
@@ -17,6 +27,12 @@ const storeSettingsSchema = z.object({
   heroSubtitle: z.string().min(1, "Sous-titre requis"),
   heroCtaLabel: z.string().min(1, "Libellé du bouton requis"),
   featuredCollectionId: z.string().optional(),
+  socialFacebook: optionalUrl,
+  socialInstagram: optionalUrl,
+  socialTiktok: optionalUrl,
+  socialWhatsapp: optionalUrl,
+  legalMentions: z.string().optional(),
+  cgvContent: z.string().optional(),
 });
 
 export async function updateStoreSettings(formData: FormData) {
@@ -31,16 +47,35 @@ export async function updateStoreSettings(formData: FormData) {
     heroSubtitle: formData.get("heroSubtitle"),
     heroCtaLabel: formData.get("heroCtaLabel"),
     featuredCollectionId: formData.get("featuredCollectionId") || undefined,
+    socialFacebook: formData.get("socialFacebook"),
+    socialInstagram: formData.get("socialInstagram"),
+    socialTiktok: formData.get("socialTiktok"),
+    socialWhatsapp: formData.get("socialWhatsapp"),
+    legalMentions: formData.get("legalMentions"),
+    cgvContent: formData.get("cgvContent"),
   });
 
-  const { featuredCollectionId, ...rest } = data;
+  const { featuredCollectionId, legalMentions, cgvContent, ...rest } = data;
 
   await db.storeSettings.upsert({
     where: { id: "default" },
-    create: { id: "default", ...rest, featuredCollectionId: featuredCollectionId ?? null },
-    update: { ...rest, featuredCollectionId: featuredCollectionId ?? null },
+    create: {
+      id: "default",
+      ...rest,
+      featuredCollectionId: featuredCollectionId ?? null,
+      legalMentions: legalMentions ? sanitizeRichText(legalMentions) : null,
+      cgvContent: cgvContent ? sanitizeRichText(cgvContent) : null,
+    },
+    update: {
+      ...rest,
+      featuredCollectionId: featuredCollectionId ?? null,
+      legalMentions: legalMentions ? sanitizeRichText(legalMentions) : null,
+      cgvContent: cgvContent ? sanitizeRichText(cgvContent) : null,
+    },
   });
 
   revalidatePath("/admin/settings");
   revalidatePath("/");
+  revalidatePath("/mentions-legales");
+  revalidatePath("/cgv");
 }

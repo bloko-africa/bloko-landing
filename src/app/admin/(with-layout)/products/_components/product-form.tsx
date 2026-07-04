@@ -1,7 +1,7 @@
 "use client";
 
+import { RichTextEditor } from "@/components/Admin/rich-text-editor";
 import InputGroup from "@/components/FormElements/InputGroup";
-import { TextAreaGroup } from "@/components/FormElements/InputGroup/text-area";
 import { Select } from "@/components/FormElements/select";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 import {
@@ -98,7 +98,7 @@ export function ProductForm({
           required
         />
 
-        <TextAreaGroup
+        <RichTextEditor
           label="Description"
           name="description"
           placeholder="Description du produit"
