@@ -2,6 +2,7 @@
 
 import { getCountryName, getFlagEmoji } from "@/lib/countries";
 import countries from "i18n-iso-countries";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import {
   ComposableMap,
   Geographies,
@@ -15,6 +16,12 @@ import {
 import worldTopoJson from "world-atlas/countries-110m.json";
 
 type CountryStat = { code: string; count: number };
+type Rotation = [number, number, number];
+
+const AUTO_ROTATE_STEP = 0.15; // degres par tick (~20 fois/s)
+const AUTO_ROTATE_INTERVAL = 50; // ms
+const DRAG_SENSITIVITY = 0.35; // degres par pixel
+const RESUME_AUTO_ROTATE_AFTER = 4000; // ms d'inactivite avant de reprendre la rotation auto
 
 export function OrdersWorldMap({ stats }: { stats: CountryStat[] }) {
   const maxCount = Math.max(1, ...stats.map((s) => s.count));
@@ -24,13 +31,59 @@ export function OrdersWorldMap({ stats }: { stats: CountryStat[] }) {
       .filter((entry): entry is [string, number] => Boolean(entry[0])),
   );
 
+  const [rotation, setRotation] = useState<Rotation>([-2, -8, 0]);
+  const draggingRef = useRef(false);
+  const lastPointerRef = useRef<{ x: number; y: number } | null>(null);
+  const resumeAtRef = useRef(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (draggingRef.current || Date.now() < resumeAtRef.current) return;
+      setRotation(([lambda, phi, gamma]) => [lambda - AUTO_ROTATE_STEP, phi, gamma]);
+    }, AUTO_ROTATE_INTERVAL);
+    return () => clearInterval(id);
+  }, []);
+
+  function handlePointerDown(e: ReactPointerEvent<HTMLDivElement>) {
+    draggingRef.current = true;
+    lastPointerRef.current = { x: e.clientX, y: e.clientY };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }
+
+  function handlePointerMove(e: ReactPointerEvent<HTMLDivElement>) {
+    if (!draggingRef.current || !lastPointerRef.current) return;
+    const dx = e.clientX - lastPointerRef.current.x;
+    const dy = e.clientY - lastPointerRef.current.y;
+    lastPointerRef.current = { x: e.clientX, y: e.clientY };
+
+    setRotation(([lambda, phi, gamma]) => [
+      lambda + dx * DRAG_SENSITIVITY,
+      Math.max(-90, Math.min(90, phi - dy * DRAG_SENSITIVITY)),
+      gamma,
+    ]);
+  }
+
+  function handlePointerUp() {
+    draggingRef.current = false;
+    lastPointerRef.current = null;
+    resumeAtRef.current = Date.now() + RESUME_AUTO_ROTATE_AFTER;
+  }
+
   return (
-    <div className="grid grid-cols-1 items-center gap-8 sm:grid-cols-[16rem_1fr]">
-      <div className="mx-auto w-full max-w-56 sm:max-w-none">
+    <div className="grid grid-cols-1 items-center gap-8 sm:grid-cols-[20rem_1fr]">
+      <div
+        className="mx-auto aspect-square w-full max-w-72 cursor-grab touch-none select-none active:cursor-grabbing"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+      >
         <ComposableMap
           projection="geoOrthographic"
-          projectionConfig={{ scale: 130, rotate: [-2, -8, 0] }}
-          style={{ width: "100%", height: "auto" }}
+          projectionConfig={{ scale: 160, rotate: rotation }}
+          width={320}
+          height={320}
+          style={{ width: "100%", height: "100%" }}
         >
           <Sphere
             id="globe-sphere"

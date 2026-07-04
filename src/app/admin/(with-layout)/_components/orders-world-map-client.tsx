@@ -7,7 +7,7 @@ const OrdersWorldMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-56 items-center justify-center text-body-sm text-dark-5 dark:text-dark-6">
+      <div className="flex h-72 items-center justify-center text-body-sm text-dark-5 dark:text-dark-6">
         Chargement du globe...
       </div>
     ),
