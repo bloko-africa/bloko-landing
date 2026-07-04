@@ -1,15 +1,19 @@
 import { StorefrontFooter } from "@/components/Storefront/footer";
 import { StorefrontHeader } from "@/components/Storefront/header";
 import { CartProvider } from "@/lib/cart/cart-context";
+import { getStoreSettings } from "@/lib/store-settings";
 import type { PropsWithChildren } from "react";
 
-export default function StorefrontLayout({ children }: PropsWithChildren) {
+export default async function StorefrontLayout({ children }: PropsWithChildren) {
+  const settings = await getStoreSettings();
+
   return (
     <CartProvider>
+      <style>{`:root{--color-primary: ${settings.accentColor};}`}</style>
       <div className="flex min-h-screen flex-col bg-white dark:bg-gray-dark">
-        <StorefrontHeader />
+        <StorefrontHeader storeName={settings.storeName} />
         <main className="flex-1">{children}</main>
-        <StorefrontFooter />
+        <StorefrontFooter storeName={settings.storeName} />
       </div>
     </CartProvider>
   );

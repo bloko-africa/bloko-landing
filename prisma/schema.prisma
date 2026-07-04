@@ -89,16 +89,17 @@ enum ProductStatus {
 }
 
 model Collection {
-  id          String    @id @default(cuid())
-  name        String
-  slug        String    @unique
-  season      String? // ex: "Printemps-Été 2027"
-  description String?
-  coverImage  String?   @map("cover_image")
-  isActive    Boolean   @default(true) @map("is_active")
-  products    Product[]
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  id             String          @id @default(cuid())
+  name           String
+  slug           String          @unique
+  season         String? // ex: "Printemps-Été 2027"
+  description    String?
+  coverImage     String?         @map("cover_image")
+  isActive       Boolean         @default(true) @map("is_active")
+  products       Product[]
+  featuredBy     StoreSettings[]
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
 
   @@map("collection")
 }
@@ -249,12 +250,17 @@ model Payment {
 // --- Parametres boutique (singleton, id fixe "default") ---
 
 model StoreSettings {
-  id           String   @id @default("default")
-  currency     String   @default("XOF")
-  heroTitle    String   @default("Le prêt-à-porter, pensé pour vous") @map("hero_title")
-  heroSubtitle String   @default("Des pièces sélectionnées, livrées depuis Cotonou et Abidjan.") @map("hero_subtitle")
-  heroCtaLabel String   @default("Découvrir la boutique") @map("hero_cta_label")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id                   String      @id @default("default")
+  storeName            String      @default("Mode Shop") @map("store_name")
+  currency             String      @default("XOF")
+  accentColor          String      @default("#a67c52") @map("accent_color")
+  heroEyebrow          String      @default("Nouvelle collection") @map("hero_eyebrow")
+  heroTitle            String      @default("Le prêt-à-porter, pensé pour vous") @map("hero_title")
+  heroSubtitle         String      @default("Des pièces sélectionnées, livrées depuis Cotonou et Abidjan.") @map("hero_subtitle")
+  heroCtaLabel         String      @default("Découvrir la boutique") @map("hero_cta_label")
+  featuredCollectionId String?     @map("featured_collection_id")
+  featuredCollection   Collection? @relation(fields: [featuredCollectionId], references: [id], onDelete: SetNull)
+  updatedAt            DateTime    @updatedAt @map("updated_at")
 
   @@map("store_settings")
 }

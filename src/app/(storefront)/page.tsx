@@ -50,7 +50,7 @@ export default async function StorefrontHome() {
     }),
   ]);
 
-  const featured = collections.find((c) => c.coverImage) ?? null;
+  const featured = settings.featuredCollection;
 
   return (
     <div>
@@ -59,7 +59,7 @@ export default async function StorefrontHome() {
         <div className="mx-auto grid max-w-(--breakpoint-2xl) grid-cols-1 gap-10 px-4 py-16 md:px-8 md:py-24 lg:grid-cols-2 lg:items-center lg:gap-16">
           <div>
             <p className="text-body-xs font-medium uppercase tracking-[0.2em] text-dark-5 dark:text-dark-6">
-              {featured?.season ?? "Nouvelle collection"}
+              {settings.heroEyebrow}
             </p>
             <div className="mt-3 h-px w-12 bg-primary" />
 

@@ -4,7 +4,11 @@ import { useCart } from "@/lib/cart/cart-context";
 import { useSession } from "@/lib/auth/auth-client";
 import Link from "next/link";
 
-export function StorefrontHeader() {
+type StorefrontHeaderProps = {
+  storeName: string;
+};
+
+export function StorefrontHeader({ storeName }: StorefrontHeaderProps) {
   const { totalItems } = useCart();
   const session = useSession();
 
@@ -24,7 +28,7 @@ export function StorefrontHeader() {
           href="/"
           className="text-heading-6 font-black uppercase tracking-tight text-dark dark:text-white md:text-center"
         >
-          Mode Shop
+          {storeName}
         </Link>
 
         <div className="flex items-center justify-end gap-5">

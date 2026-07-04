@@ -3,10 +3,20 @@ import { db } from "@/lib/db";
 import { type SupportedCurrency } from "@/lib/currencies";
 
 const DEFAULTS = {
+  storeName: "Mode Shop",
   currency: "XOF" as SupportedCurrency,
+  accentColor: "#a67c52",
+  heroEyebrow: "Nouvelle collection",
   heroTitle: "Le prêt-à-porter, pensé pour vous",
   heroSubtitle: "Des pièces sélectionnées, livrées depuis Cotonou et Abidjan.",
   heroCtaLabel: "Découvrir la boutique",
+  featuredCollectionId: null as string | null,
+  featuredCollection: null as {
+    id: string;
+    name: string;
+    slug: string;
+    coverImage: string | null;
+  } | null,
 };
 
 /**
@@ -17,6 +27,11 @@ const DEFAULTS = {
 export async function getStoreSettings() {
   const settings = await db.storeSettings.findUnique({
     where: { id: "default" },
+    include: {
+      featuredCollection: {
+        select: { id: true, name: true, slug: true, coverImage: true },
+      },
+    },
   });
 
   return settings ?? DEFAULTS;
