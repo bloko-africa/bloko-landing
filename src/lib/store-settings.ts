@@ -1,6 +1,24 @@
 import "server-only";
 import { db } from "@/lib/db";
 import { type SupportedCurrency } from "@/lib/currencies";
+import {
+  DEFAULT_TRUST_BADGES,
+  TRUST_BADGE_ICON_KEYS,
+  type TrustBadge,
+} from "@/lib/trust-badge-icons";
+import { z } from "zod";
+
+const trustBadgeSchema = z.object({
+  icon: z.enum(TRUST_BADGE_ICON_KEYS),
+  title: z.string().min(1),
+  subtitle: z.string(),
+});
+const trustBadgesSchema = z.array(trustBadgeSchema);
+
+function parseTrustBadges(value: unknown): TrustBadge[] {
+  const parsed = trustBadgesSchema.safeParse(value);
+  return parsed.success && parsed.data.length > 0 ? parsed.data : DEFAULT_TRUST_BADGES;
+}
 
 const DEFAULT_MENTIONS_LEGALES = `
 <h2>1. Édition du site</h2>
@@ -66,6 +84,7 @@ const DEFAULTS = {
   socialWhatsapp: "",
   legalMentions: DEFAULT_MENTIONS_LEGALES,
   cgvContent: DEFAULT_CGV,
+  trustBadges: DEFAULT_TRUST_BADGES,
 };
 
 /**
@@ -93,5 +112,6 @@ export async function getStoreSettings() {
     socialWhatsapp: settings.socialWhatsapp ?? "",
     legalMentions: settings.legalMentions ?? DEFAULT_MENTIONS_LEGALES,
     cgvContent: settings.cgvContent ?? DEFAULT_CGV,
+    trustBadges: parseTrustBadges(settings.trustBadges),
   };
 }

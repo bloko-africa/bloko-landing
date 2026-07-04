@@ -266,6 +266,7 @@ model StoreSettings {
   socialWhatsapp       String?     @map("social_whatsapp")
   legalMentions        String?     @map("legal_mentions")
   cgvContent           String?     @map("cgv_content")
+  trustBadges          Json?       @map("trust_badges")
   updatedAt            DateTime    @updatedAt @map("updated_at")
 
   @@map("store_settings")

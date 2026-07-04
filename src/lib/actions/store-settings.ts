@@ -4,8 +4,31 @@ import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth/session";
 import { SUPPORTED_CURRENCIES } from "@/lib/currencies";
 import { sanitizeRichText } from "@/lib/sanitize-html";
+import { TRUST_BADGE_ICON_KEYS } from "@/lib/trust-badge-icons";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+
+const TRUST_BADGE_COUNT = 4;
+
+const trustBadgesSchema = z
+  .array(
+    z.object({
+      icon: z.enum(TRUST_BADGE_ICON_KEYS),
+      title: z.string().min(1, "Titre requis"),
+      subtitle: z.string().min(1, "Sous-titre requis"),
+    }),
+  )
+  .length(TRUST_BADGE_COUNT);
+
+function parseTrustBadgesFromForm(formData: FormData) {
+  return trustBadgesSchema.parse(
+    Array.from({ length: TRUST_BADGE_COUNT }, (_, i) => ({
+      icon: formData.get(`trustBadgeIcon${i}`),
+      title: formData.get(`trustBadgeTitle${i}`),
+      subtitle: formData.get(`trustBadgeSubtitle${i}`),
+    })),
+  );
+}
 
 const optionalUrl = z
   .string()
@@ -56,6 +79,7 @@ export async function updateStoreSettings(formData: FormData) {
   });
 
   const { featuredCollectionId, legalMentions, cgvContent, ...rest } = data;
+  const trustBadges = parseTrustBadgesFromForm(formData);
 
   await db.storeSettings.upsert({
     where: { id: "default" },
@@ -65,12 +89,14 @@ export async function updateStoreSettings(formData: FormData) {
       featuredCollectionId: featuredCollectionId ?? null,
       legalMentions: legalMentions ? sanitizeRichText(legalMentions) : null,
       cgvContent: cgvContent ? sanitizeRichText(cgvContent) : null,
+      trustBadges,
     },
     update: {
       ...rest,
       featuredCollectionId: featuredCollectionId ?? null,
       legalMentions: legalMentions ? sanitizeRichText(legalMentions) : null,
       cgvContent: cgvContent ? sanitizeRichText(cgvContent) : null,
+      trustBadges,
     },
   });
 

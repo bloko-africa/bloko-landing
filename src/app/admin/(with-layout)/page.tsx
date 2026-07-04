@@ -45,12 +45,12 @@ export default async function AdminHome() {
     db.productVariant.findMany({
       where: { stock: { lte: 5 } },
       orderBy: { stock: "asc" },
-      take: 6,
+      take: 8,
       include: { product: { select: { name: true, id: true } } },
     }),
     db.order.findMany({
       orderBy: { createdAt: "desc" },
-      take: 6,
+      take: 8,
     }),
     db.order.groupBy({
       by: ["country"],
@@ -98,11 +98,14 @@ export default async function AdminHome() {
         />
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-5">
-        <ShowcaseSection
-          title="Commandes récentes"
-          className="p-0! xl:col-span-3"
-        >
+      <div className="mt-6">
+        <ShowcaseSection title="Commandes par pays" className="p-6.5!">
+          <OrdersWorldMap stats={countryStats} />
+        </ShowcaseSection>
+      </div>
+
+      <div className="mt-6 space-y-6">
+        <ShowcaseSection title="Commandes récentes" className="p-0!">
           <table className="w-full table-auto">
             <thead>
               <tr className="border-b border-stroke text-left dark:border-dark-3">
@@ -158,15 +161,12 @@ export default async function AdminHome() {
           </table>
         </ShowcaseSection>
 
-        <ShowcaseSection
-          title="Stock bas (≤ 5)"
-          className="p-0! xl:col-span-2"
-        >
-          <ul className="divide-y divide-stroke dark:divide-dark-3">
+        <ShowcaseSection title="Stock bas (≤ 5)" className="p-0!">
+          <ul className="divide-y divide-stroke sm:grid sm:grid-cols-2 sm:divide-x sm:divide-y-0 dark:divide-dark-3">
             {lowStockVariants.map((variant) => (
               <li
                 key={variant.id}
-                className="flex items-center justify-between px-5.5 py-3"
+                className="flex items-center justify-between gap-3 border-b border-stroke px-5.5 py-3 last:border-0 sm:border-b-0 dark:border-dark-3"
               >
                 <Link
                   href={`/admin/products/${variant.product.id}`}
@@ -198,12 +198,6 @@ export default async function AdminHome() {
               </li>
             )}
           </ul>
-        </ShowcaseSection>
-      </div>
-
-      <div className="mt-6">
-        <ShowcaseSection title="Commandes par pays" className="p-6.5!">
-          <OrdersWorldMap stats={countryStats} />
         </ShowcaseSection>
       </div>
     </>

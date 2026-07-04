@@ -43,6 +43,7 @@ export default async function SettingsPage() {
           socialWhatsapp: settings.socialWhatsapp,
           legalMentions: settings.legalMentions,
           cgvContent: settings.cgvContent,
+          trustBadges: settings.trustBadges,
         }}
       />
 
