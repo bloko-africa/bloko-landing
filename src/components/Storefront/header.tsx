@@ -10,15 +10,8 @@ export function StorefrontHeader() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-stroke bg-white/90 backdrop-blur dark:border-dark-3 dark:bg-gray-dark/90">
-      <div className="mx-auto flex h-18 max-w-(--breakpoint-2xl) items-center justify-between px-4 md:px-8">
-        <Link
-          href="/"
-          className="text-heading-6 font-medium tracking-tight text-dark dark:text-white"
-        >
-          Mode Shop
-        </Link>
-
-        <nav className="hidden items-center gap-8 text-body-sm font-medium text-dark-5 dark:text-dark-6 sm:flex">
+      <div className="mx-auto grid h-18 max-w-(--breakpoint-2xl) grid-cols-2 items-center px-4 md:grid-cols-3 md:px-8">
+        <nav className="hidden items-center gap-8 text-body-xs font-medium uppercase tracking-wide text-dark-5 dark:text-dark-6 md:flex">
           <Link href="/" className="hover:text-primary">
             Accueil
           </Link>
@@ -27,10 +20,17 @@ export function StorefrontHeader() {
           </Link>
         </nav>
 
-        <div className="flex items-center gap-5">
+        <Link
+          href="/"
+          className="text-heading-6 font-black uppercase tracking-tight text-dark dark:text-white md:text-center"
+        >
+          Mode Shop
+        </Link>
+
+        <div className="flex items-center justify-end gap-5">
           <Link
             href={session.data?.session ? "/compte" : "/compte/connexion"}
-            className="text-body-sm font-medium text-dark-5 hover:text-primary dark:text-dark-6"
+            className="hidden text-body-xs font-medium uppercase tracking-wide text-dark-5 hover:text-primary dark:text-dark-6 sm:block"
           >
             {session.data?.session ? "Mon compte" : "Connexion"}
           </Link>

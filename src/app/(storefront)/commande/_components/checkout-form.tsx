@@ -54,12 +54,12 @@ export function CheckoutForm({ currency }: { currency: string }) {
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-(--breakpoint-md) px-4 py-20 text-center">
-        <h1 className="text-heading-6 font-medium text-dark dark:text-white">
+        <h1 className="text-heading-6 font-bold uppercase tracking-tight text-dark dark:text-white">
           Ton panier est vide
         </h1>
         <Link
           href="/produits"
-          className="mt-6 inline-block rounded-full bg-primary px-8 py-3 font-medium text-white hover:bg-opacity-90"
+          className="mt-6 inline-block bg-dark px-8 py-3 font-medium uppercase tracking-wide text-white hover:bg-opacity-90 dark:bg-white dark:text-dark"
         >
           Voir la boutique
         </Link>
@@ -100,7 +100,7 @@ export function CheckoutForm({ currency }: { currency: string }) {
 
   return (
     <div className="mx-auto max-w-(--breakpoint-md) px-4 py-16">
-      <h1 className="text-heading-6 font-medium text-dark dark:text-white">
+      <h1 className="text-heading-6 font-bold uppercase tracking-tight text-dark dark:text-white">
         Finaliser la commande
       </h1>
 
@@ -197,7 +197,7 @@ export function CheckoutForm({ currency }: { currency: string }) {
         <button
           type="submit"
           disabled={loading || checkingEmail}
-          className="w-full rounded-full bg-primary py-3.5 font-medium text-white hover:bg-opacity-90 disabled:opacity-70"
+          className="w-full bg-dark py-3.5 font-medium uppercase tracking-wide text-white hover:bg-opacity-90 disabled:opacity-70 dark:bg-white dark:text-dark"
         >
           {loading ? "Redirection vers le paiement..." : "Payer maintenant"}
         </button>

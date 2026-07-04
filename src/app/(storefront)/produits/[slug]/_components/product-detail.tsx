@@ -131,7 +131,7 @@ export function ProductDetail({ product, currency }: ProductDetailProps) {
             {product.collectionName}
           </p>
         )}
-        <h1 className="mt-2 text-heading-5 font-medium text-dark dark:text-white">
+        <h1 className="mt-2 text-heading-5 font-bold uppercase tracking-tight text-dark dark:text-white">
           {product.name}
         </h1>
         <p className="mt-3 text-heading-6 font-medium text-dark dark:text-white">
@@ -204,14 +204,14 @@ export function ProductDetail({ product, currency }: ProductDetailProps) {
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <button
             onClick={handleAddToCart}
-            className="w-full rounded-full border border-primary py-3.5 font-medium text-primary hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full border border-dark py-3.5 font-medium uppercase tracking-wide text-dark hover:bg-dark hover:text-white disabled:cursor-not-allowed disabled:opacity-50 dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-dark"
             disabled={selectedVariant?.stock === 0}
           >
             Ajouter au panier
           </button>
           <button
             onClick={handleBuyNow}
-            className="w-full rounded-full bg-primary py-3.5 font-medium text-white hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full bg-dark py-3.5 font-medium uppercase tracking-wide text-white hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-dark"
             disabled={selectedVariant?.stock === 0}
           >
             Acheter maintenant

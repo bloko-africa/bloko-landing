@@ -80,7 +80,7 @@ export function ProductCard({
   return (
     <div className="group relative">
       <Link href={`/produits/${slug}`} className="block">
-        <div className="relative aspect-3/4 overflow-hidden rounded-xl bg-gray-2 dark:bg-dark-2">
+        <div className="relative aspect-3/4 overflow-hidden bg-gray-2 dark:bg-dark-2">
           {image && (
             <Image
               src={image}
@@ -95,13 +95,13 @@ export function ProductCard({
           <div className="absolute inset-x-2 bottom-2 hidden gap-2 opacity-0 transition group-hover:opacity-100 sm:flex">
             <button
               onClick={handleQuickAdd}
-              className="flex-1 rounded-full bg-white/95 py-2 text-body-xs font-medium text-dark shadow-1 hover:bg-white"
+              className="flex-1 bg-white/95 py-2 text-body-xs font-medium uppercase tracking-wide text-dark hover:bg-white"
             >
-              Ajouter au panier
+              Ajouter
             </button>
             <button
               onClick={handleQuickBuy}
-              className="flex-1 rounded-full bg-primary py-2 text-body-xs font-medium text-white hover:bg-opacity-90"
+              className="flex-1 bg-dark py-2 text-body-xs font-medium uppercase tracking-wide text-white hover:bg-opacity-90"
             >
               Acheter
             </button>
@@ -119,14 +119,14 @@ export function ProductCard({
             <button
               onClick={handleQuickBuy}
               aria-label="Acheter maintenant"
-              className="flex size-8 items-center justify-center rounded-full bg-primary shadow-1"
+              className="flex size-8 items-center justify-center rounded-full bg-dark shadow-1"
             >
               <BoltIcon />
             </button>
           </div>
         </div>
 
-        <p className="mt-3 text-body-sm font-medium text-dark dark:text-white">
+        <p className="mt-3 text-body-sm font-medium uppercase tracking-wide text-dark dark:text-white">
           {name}
         </p>
         <p className="text-body-sm text-dark-5 dark:text-dark-6">

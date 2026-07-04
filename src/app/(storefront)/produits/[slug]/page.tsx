@@ -89,7 +89,7 @@ export default async function ProductPage({
 
       {related.length > 0 && (
         <section className="mx-auto max-w-(--breakpoint-2xl) border-t border-stroke px-4 py-16 dark:border-dark-3 md:px-8">
-          <h2 className="text-heading-6 font-medium text-dark dark:text-white">
+          <h2 className="text-heading-6 font-bold uppercase tracking-tight text-dark dark:text-white">
             Vous aimerez aussi
           </h2>
 

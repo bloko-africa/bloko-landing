@@ -28,7 +28,7 @@ export default async function AccountPage() {
     <div className="mx-auto max-w-(--breakpoint-md) px-4 py-16">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-heading-6 font-medium text-dark dark:text-white">
+          <h1 className="text-heading-6 font-bold uppercase tracking-tight text-dark dark:text-white">
             Bonjour {user.name}
           </h1>
           <p className="text-body-sm text-dark-5 dark:text-dark-6">{user.email}</p>

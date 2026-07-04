@@ -61,7 +61,7 @@ export default async function CatalogPage({
 
   return (
     <div className="mx-auto max-w-(--breakpoint-2xl) px-4 py-12 md:px-8">
-      <h1 className="text-heading-5 font-medium text-dark dark:text-white">
+      <h1 className="text-heading-5 font-bold uppercase tracking-tight text-dark dark:text-white">
         Boutique
       </h1>
 

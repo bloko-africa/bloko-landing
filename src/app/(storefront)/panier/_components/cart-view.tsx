@@ -11,12 +11,12 @@ export function CartView({ currency }: { currency: string }) {
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-(--breakpoint-md) px-4 py-20 text-center">
-        <h1 className="text-heading-6 font-medium text-dark dark:text-white">
+        <h1 className="text-heading-6 font-bold uppercase tracking-tight text-dark dark:text-white">
           Ton panier est vide
         </h1>
         <Link
           href="/produits"
-          className="mt-6 inline-block rounded-full bg-primary px-8 py-3 font-medium text-white hover:bg-opacity-90"
+          className="mt-6 inline-block bg-dark px-8 py-3 font-medium uppercase tracking-wide text-white hover:bg-opacity-90 dark:bg-white dark:text-dark"
         >
           Voir la boutique
         </Link>
@@ -26,7 +26,7 @@ export function CartView({ currency }: { currency: string }) {
 
   return (
     <div className="mx-auto max-w-(--breakpoint-md) px-4 py-16">
-      <h1 className="text-heading-6 font-medium text-dark dark:text-white">
+      <h1 className="text-heading-6 font-bold uppercase tracking-tight text-dark dark:text-white">
         Mon panier
       </h1>
 
@@ -80,7 +80,7 @@ export function CartView({ currency }: { currency: string }) {
 
         <Link
           href="/commande"
-          className="rounded-full bg-primary px-8 py-3 font-medium text-white hover:bg-opacity-90"
+          className="bg-dark px-8 py-3 font-medium uppercase tracking-wide text-white hover:bg-opacity-90 dark:bg-white dark:text-dark"
         >
           Passer commande
         </Link>

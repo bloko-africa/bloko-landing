@@ -47,7 +47,7 @@ function InscriptionForm() {
 
   return (
     <div className="mx-auto max-w-105 px-4 py-20">
-      <h1 className="text-heading-6 font-medium text-dark dark:text-white">
+      <h1 className="text-heading-6 font-bold uppercase tracking-tight text-dark dark:text-white">
         Créer un compte
       </h1>
 

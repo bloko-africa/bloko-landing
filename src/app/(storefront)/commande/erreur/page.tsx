@@ -19,7 +19,7 @@ export default async function CheckoutErrorPage({
 
       <Link
         href="/compte"
-        className="mt-8 inline-block rounded-full bg-primary px-8 py-3 font-medium text-white hover:bg-opacity-90"
+        className="mt-8 inline-block bg-dark px-8 py-3 font-medium uppercase tracking-wide text-white hover:bg-opacity-90 dark:bg-white dark:text-dark"
       >
         Voir mes commandes
       </Link>
