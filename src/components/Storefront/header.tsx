@@ -22,6 +22,9 @@ export function StorefrontHeader({ storeName }: StorefrontHeaderProps) {
           <Link href="/produits" className="hover:text-primary">
             Boutique
           </Link>
+          <Link href="/collections" className="hover:text-primary">
+            Collections
+          </Link>
         </nav>
 
         <Link

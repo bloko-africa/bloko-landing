@@ -30,13 +30,16 @@ const TRUST_BADGES = [
 ];
 
 export default async function StorefrontHome() {
-  const [settings, collections, products] = await Promise.all([
+  const COLLECTIONS_PREVIEW = 6;
+
+  const [settings, collections, collectionsTotal, products] = await Promise.all([
     getStoreSettings(),
     db.collection.findMany({
       where: { isActive: true },
       orderBy: { createdAt: "desc" },
-      take: 3,
+      take: COLLECTIONS_PREVIEW,
     }),
+    db.collection.count({ where: { isActive: true } }),
     db.product.findMany({
       where: { status: "PUBLISHED" },
       orderBy: { createdAt: "desc" },
@@ -105,12 +108,12 @@ export default async function StorefrontHome() {
       {/* Collections */}
       {collections.length > 0 && (
         <section className="bg-dark dark:bg-black">
-          <div className="mx-auto grid max-w-(--breakpoint-2xl) grid-cols-1 divide-y divide-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          <div className="scrollbar-hide flex snap-x snap-mandatory gap-px overflow-x-auto sm:grid sm:max-w-(--breakpoint-2xl) sm:grid-cols-3 sm:divide-x sm:divide-white/10 sm:overflow-visible sm:mx-auto">
             {collections.map((collection) => (
               <Link
                 key={collection.id}
                 href={`/produits?collection=${collection.slug}`}
-                className="group flex items-center gap-5 px-6 py-10 hover:bg-white/5 md:px-10"
+                className="group flex w-[82%] shrink-0 snap-start items-center gap-5 border-b border-white/10 px-6 py-10 hover:bg-white/5 sm:w-auto sm:shrink sm:border-b-0 md:px-10"
               >
                 {collection.coverImage && (
                   <div className="relative size-20 shrink-0 overflow-hidden">
@@ -139,6 +142,17 @@ export default async function StorefrontHome() {
               </Link>
             ))}
           </div>
+
+          {collectionsTotal > collections.length && (
+            <div className="border-t border-white/10 py-6 text-center">
+              <Link
+                href="/collections"
+                className="text-body-sm font-medium uppercase tracking-wide text-white underline-offset-4 hover:underline"
+              >
+                Voir toutes les collections →
+              </Link>
+            </div>
+          )}
         </section>
       )}
 

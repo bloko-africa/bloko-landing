@@ -88,8 +88,10 @@ export async function checkout(input: CheckoutInput) {
       country: data.country,
     },
     metadata: { orderId: order.id, orderReference: order.reference },
-    successUrl: `${appUrl}/commande/succes?order=${order.reference}`,
-    errorUrl: `${appUrl}/commande/erreur?order=${order.reference}`,
+    // Paiement initie depuis le storefront -> on ramene le client sur le
+    // detail de sa commande (son compte), pas sur une page generique.
+    successUrl: `${appUrl}/compte/commandes/${order.id}?paiement=succes`,
+    errorUrl: `${appUrl}/compte/commandes/${order.id}?paiement=erreur`,
   });
 
   await db.payment.create({

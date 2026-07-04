@@ -73,6 +73,7 @@ export async function generatePaymentLink(orderId: string) {
   await requireRole(["editor", "admin"]);
 
   const order = await db.order.findUniqueOrThrow({ where: { id: orderId } });
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
   const payment = await createGeniusPayPayment({
     amount: Number(order.totalAmount),
@@ -85,6 +86,11 @@ export async function generatePaymentLink(orderId: string) {
       country: order.country,
     },
     metadata: { orderId: order.id, orderReference: order.reference },
+    // Lien genere par un membre du staff (envoye par WhatsApp/SMS...) -> on
+    // ramene le client sur la boutique publique, pas sur son compte (il n'a
+    // pas forcement de session ni de compte lie a cette commande).
+    successUrl: `${appUrl}/commande/succes?order=${order.reference}`,
+    errorUrl: `${appUrl}/commande/erreur?order=${order.reference}`,
   });
 
   await db.payment.create({
