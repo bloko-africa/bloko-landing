@@ -8,8 +8,54 @@ const db = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
 });
 
-function image(seed: string) {
-  return `https://picsum.photos/seed/${seed}/900/1150`;
+// Photos Unsplash choisies manuellement par produit (verifiees, gratuites) —
+// remplace les visuels aleatoires Picsum qui ne correspondaient a rien.
+const PHOTO_IDS: Record<string, string[]> = {
+  "eclat-d-ete": ["1562151270-c7d22ceb586a"],
+  "soiree-elegance": ["1568251188392-ae32f898cb3b"],
+  "robe-portefeuille-soie": [
+    "1625367534642-426f8d4f11fd",
+    "1668028554553-f83cac89ce0f",
+  ],
+  "robe-fluide-imprimee": [
+    "1609695813802-3c443be34359",
+    "1623288516140-47a0a17cec7c",
+  ],
+  "chemisier-lin": [
+    "1713881676551-b16f22ce4719",
+    "1774005906344-57048d3f5856",
+  ],
+  "pantalon-large-taille-haute": [
+    "1750857739910-81dda820b067",
+    "1762343291713-0d7f83e6c2e9",
+  ],
+  "robe-soiree-sequins": [
+    "1772615071600-f107b8c649af",
+    "1547697933-66bcb20f114a",
+  ],
+  "top-asymetrique": [
+    "1743015494938-6cd8672f9bdd",
+    "1678816922616-f3524ac4b6d3",
+  ],
+  "sac-main-structure": [
+    "1614179689702-355944cd0918",
+    "1605733513597-a8f8341084e6",
+  ],
+  "foulard-soie-imprime": [
+    "1777795530497-205664bbd965",
+    "1768744326593-50f2c9ad0d53",
+  ],
+  "blazer-oversize": [
+    "1730715145729-bf929994c328",
+    "1616715623022-65d18f0042ae",
+  ],
+};
+
+function image(seed: string, index = 0) {
+  const ids = PHOTO_IDS[seed];
+  const id = ids?.[index] ?? ids?.[0];
+  if (!id) throw new Error(`Pas de photo Unsplash configurée pour "${seed}"`);
+  return `https://images.unsplash.com/photo-${id}?w=900&h=1150&fit=crop&q=80`;
 }
 
 async function main() {
@@ -25,7 +71,7 @@ async function main() {
       slug: "eclat-d-ete",
       season: "Été 2026",
       description: "Des matières légères et des coupes fluides pour la saison chaude.",
-      coverImage: image("collection-ete"),
+      coverImage: image("eclat-d-ete"),
       isActive: true,
     },
   });
@@ -36,7 +82,7 @@ async function main() {
       slug: "soiree-elegance",
       season: "Collection permanente",
       description: "Des pièces qui font une entrée remarquée.",
-      coverImage: image("collection-soiree"),
+      coverImage: image("soiree-elegance"),
       isActive: true,
     },
   });
@@ -189,8 +235,8 @@ async function main() {
 
     await db.productImage.createMany({
       data: [
-        { productId: product.id, url: image(`${product.slug}-1`), position: 0 },
-        { productId: product.id, url: image(`${product.slug}-2`), position: 1 },
+        { productId: product.id, url: image(product.slug, 0), position: 0 },
+        { productId: product.id, url: image(product.slug, 1), position: 1 },
       ],
     });
 
