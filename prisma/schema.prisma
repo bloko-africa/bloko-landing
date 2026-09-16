@@ -25,6 +25,7 @@ model User {
   reviews           Review[]
   supportTickets    SupportTicket[]  @relation("SupportTicketBuyer")
   supportMessages   SupportMessage[] @relation("SupportMessageAuthor")
+  liveSessionsStarted LiveSession[]
 
   // Compte staff rattache a une boutique (role "vendeur"). NULL = staff
   // plateforme (viewer/editor/admin), voit toutes les boutiques.
@@ -171,6 +172,7 @@ model Boutique {
   payouts        PayoutRecord[]
   reviews        Review[]
   supportTickets SupportTicket[]
+  liveSessions   LiveSession[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -308,6 +310,7 @@ model Product {
   category     Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   images       ProductImage[]
   variants     ProductVariant[]
+  liveSessionProducts LiveSessionProduct[]
   createdAt    DateTime       @default(now()) @map("created_at")
   updatedAt    DateTime       @updatedAt @map("updated_at")
 
@@ -383,6 +386,11 @@ model Order {
   livraison     Livraison?
   review        Review?
   supportTicket SupportTicket?
+  // Rattachement au live pendant lequel la commande a été passée (voir
+  // checkout() dans checkout.ts) — pas une notion de produit exact acheté
+  // en live, juste "passée pendant que la boutique était en direct".
+  liveSessionId String?      @map("live_session_id")
+  liveSession   LiveSession? @relation(fields: [liveSessionId], references: [id], onDelete: SetNull)
   createdAt     DateTime    @default(now()) @map("created_at")
   updatedAt     DateTime    @updatedAt @map("updated_at")
 
@@ -390,12 +398,54 @@ model Order {
   @@index([status])
   @@index([userId])
   @@index([country])
+  @@index([liveSessionId])
   // Filtre le plus fréquent du code (portefeuille, dashboard, exports) :
   // "commandes PAID de cette boutique" — un index composite sert cette
   // requête directement plutôt que de laisser Postgres combiner deux index
   // simples.
   @@index([boutiqueId, status])
   @@map("order")
+}
+
+enum LiveSessionStatus {
+  EN_COURS
+  TERMINE
+}
+
+// Une "présence live" côté vendeuse : elle sélectionne ce qu'elle vend
+// aujourd'hui, lance la session, et toute commande passée sur sa boutique
+// pendant que la session est active y est rattachée (voir Order.liveSessionId)
+// — pas de notion de produit exact acheté pendant le live, juste "passée
+// pendant que j'étais en direct".
+model LiveSession {
+  id          String               @id @default(cuid())
+  boutiqueId  String               @map("boutique_id")
+  boutique    Boutique             @relation(fields: [boutiqueId], references: [id], onDelete: Cascade)
+  startedById String               @map("started_by_id")
+  startedBy   User                 @relation(fields: [startedById], references: [id], onDelete: Cascade)
+  status      LiveSessionStatus    @default(EN_COURS)
+  startedAt   DateTime             @default(now()) @map("started_at")
+  endedAt     DateTime?            @map("ended_at")
+  products    LiveSessionProduct[]
+  orders      Order[]
+  createdAt   DateTime             @default(now()) @map("created_at")
+
+  // Une seule session EN_COURS par boutique à la fois — vérifié côté
+  // action avant insert, pas en contrainte DB.
+  @@index([boutiqueId, status])
+  @@map("live_session")
+}
+
+model LiveSessionProduct {
+  id            String      @id @default(cuid())
+  liveSessionId String      @map("live_session_id")
+  liveSession   LiveSession @relation(fields: [liveSessionId], references: [id], onDelete: Cascade)
+  productId     String      @map("product_id")
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([liveSessionId, productId])
+  @@index([liveSessionId])
+  @@map("live_session_product")
 }
 
 // Un avis par commande (contrainte unique sur orderId), uniquement possible

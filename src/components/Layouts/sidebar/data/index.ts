@@ -44,6 +44,10 @@ export const NAV_DATA: {
             url: "/2558588dca9a/orders",
           },
           {
+            title: "Live",
+            url: "/2558588dca9a/live",
+          },
+          {
             title: "Livraisons",
             url: "/2558588dca9a/livraisons",
           },
@@ -52,7 +56,7 @@ export const NAV_DATA: {
             url: "/2558588dca9a/support",
           },
           {
-            title: "Contact & SAV (ma boutique)",
+            title: "Contact, SAV & livraison",
             url: "/2558588dca9a/contact-sav",
             roles: ["vendeur"],
           },

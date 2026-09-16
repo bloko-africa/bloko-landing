@@ -69,6 +69,13 @@ export async function checkout(input: CheckoutInput) {
   const session = await getCurrentSession();
   const userId: string | undefined = session?.user?.id;
 
+  // Rattache la commande au live en cours pour cette boutique, s'il y en a
+  // un — pas de changement du parcours acheteur, juste un lookup de plus.
+  const activeLive = await db.liveSession.findFirst({
+    where: { boutiqueId: boutique.id, status: "EN_COURS" },
+    select: { id: true },
+  });
+
   const order = await db.order.create({
     data: {
       boutiqueId: boutique.id,
@@ -82,6 +89,7 @@ export async function checkout(input: CheckoutInput) {
       currency: boutique.currency,
       deliveryFee,
       deliveryFeeMode,
+      liveSessionId: activeLive?.id,
       items: { create: itemsData },
     },
   });
