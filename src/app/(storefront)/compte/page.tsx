@@ -4,6 +4,10 @@ import { PushNotificationsToggle } from "@/components/Admin/push-notifications-t
 import { getCurrentSession } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { claimGuestOrders } from "@/lib/orders/claim-guest-orders";
+import {
+  SUPPORT_TICKET_STATUS_LABEL,
+  SUPPORT_TICKET_STATUS_STYLE,
+} from "@/lib/support-ticket-status";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -29,15 +33,25 @@ export default async function PlatformAccountPage() {
     await claimGuestOrders(user.id, user.email);
   }
 
-  const orders = await db.order.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: "desc" },
-    include: {
-      items: true,
-      livraison: { select: { status: true } },
-      boutique: { select: { handle: true, displayName: true } },
-    },
-  });
+  const [orders, tickets] = await Promise.all([
+    db.order.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+      include: {
+        items: true,
+        livraison: { select: { status: true } },
+        boutique: { select: { handle: true, displayName: true } },
+      },
+    }),
+    db.supportTicket.findMany({
+      where: { userId: user.id },
+      orderBy: { updatedAt: "desc" },
+      include: {
+        boutique: { select: { displayName: true } },
+        order: { select: { reference: true } },
+      },
+    }),
+  ]);
 
   return (
     <div className="mx-auto max-w-(--breakpoint-md) px-4 py-16">
@@ -93,6 +107,35 @@ export default async function PlatformAccountPage() {
             </Link>
           ))}
         </div>
+      )}
+
+      {tickets.length > 0 && (
+        <>
+          <h2 className="mt-10 text-body-lg font-medium text-dark dark:text-white">
+            Mes tickets
+          </h2>
+          <div className="mt-4 space-y-3">
+            {tickets.map((ticket) => (
+              <Link
+                key={ticket.id}
+                href={`/compte/tickets/${ticket.id}`}
+                className="flex items-center justify-between rounded-lg border border-stroke p-4 hover:border-primary dark:border-dark-3"
+              >
+                <div>
+                  <p className="font-medium text-dark dark:text-white">{ticket.subject}</p>
+                  <p className="text-body-sm text-dark-5 dark:text-dark-6">
+                    {ticket.boutique.displayName} — Commande {ticket.order.reference}
+                  </p>
+                </div>
+                <span
+                  className={`rounded-full px-3 py-1 text-body-xs font-medium ${SUPPORT_TICKET_STATUS_STYLE[ticket.status] ?? ""}`}
+                >
+                  {SUPPORT_TICKET_STATUS_LABEL[ticket.status] ?? ticket.status}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

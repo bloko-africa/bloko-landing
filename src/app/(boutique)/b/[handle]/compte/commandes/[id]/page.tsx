@@ -5,6 +5,11 @@ import { claimGuestOrders } from "@/lib/orders/claim-guest-orders";
 import { formatPrice } from "@/lib/format-price";
 import { DeliveryTimeline } from "@/components/Storefront/delivery-timeline";
 import { ReviewForm, StarDisplay } from "@/components/Storefront/review-form";
+import { TicketForm } from "@/components/Storefront/ticket-form";
+import {
+  SUPPORT_TICKET_STATUS_LABEL,
+  SUPPORT_TICKET_STATUS_STYLE,
+} from "@/lib/support-ticket-status";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -46,6 +51,7 @@ export default async function AccountOrderDetailPage({
       },
       livraison: { select: { status: true, trackingCode: true } },
       review: { select: { rating: true, comment: true } },
+      supportTicket: { select: { id: true, subject: true, status: true } },
     },
   });
 
@@ -163,6 +169,29 @@ export default async function AccountOrderDetailPage({
           )}
         </div>
       )}
+
+      <div className="mt-6">
+        {order.supportTicket ? (
+          <Link
+            href={`/compte/tickets/${order.supportTicket.id}`}
+            className="flex items-center justify-between rounded-xl border border-stroke p-6 hover:border-primary dark:border-dark-3"
+          >
+            <div>
+              <p className="text-body-sm font-medium text-dark dark:text-white">
+                {order.supportTicket.subject}
+              </p>
+              <p className="text-body-xs text-dark-5 dark:text-dark-6">Voir la conversation</p>
+            </div>
+            <span
+              className={`rounded-full px-3 py-1 text-body-xs font-medium ${SUPPORT_TICKET_STATUS_STYLE[order.supportTicket.status] ?? ""}`}
+            >
+              {SUPPORT_TICKET_STATUS_LABEL[order.supportTicket.status] ?? order.supportTicket.status}
+            </span>
+          </Link>
+        ) : (
+          <TicketForm orderId={order.id} />
+        )}
+      </div>
 
       <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
         <div>

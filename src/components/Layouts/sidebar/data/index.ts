@@ -48,6 +48,10 @@ export const NAV_DATA: {
             url: "/2558588dca9a/livraisons",
           },
           {
+            title: "SAV",
+            url: "/2558588dca9a/support",
+          },
+          {
             title: "Portefeuille",
             url: "/2558588dca9a/wallet",
           },

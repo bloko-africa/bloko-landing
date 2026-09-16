@@ -23,6 +23,8 @@ model User {
   pushSubscriptions PushSubscription[]
   payoutsRecorded   PayoutRecord[]
   reviews           Review[]
+  supportTickets    SupportTicket[]  @relation("SupportTicketBuyer")
+  supportMessages   SupportMessage[] @relation("SupportMessageAuthor")
 
   // Compte staff rattache a une boutique (role "vendeur"). NULL = staff
   // plateforme (viewer/editor/admin), voit toutes les boutiques.
@@ -153,9 +155,10 @@ model Boutique {
 
   products    Product[]
   collections Collection[] @relation("BoutiqueCollections")
-  orders      Order[]
-  payouts     PayoutRecord[]
-  reviews     Review[]
+  orders         Order[]
+  payouts        PayoutRecord[]
+  reviews        Review[]
+  supportTickets SupportTicket[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -367,6 +370,7 @@ model Order {
   payments      Payment[]
   livraison     Livraison?
   review        Review?
+  supportTicket SupportTicket?
   createdAt     DateTime    @default(now()) @map("created_at")
   updatedAt     DateTime    @updatedAt @map("updated_at")
 
@@ -401,6 +405,62 @@ model Review {
 
   @@index([boutiqueId])
   @@map("review")
+}
+
+enum SupportTicketStatus {
+  OUVERT
+  EN_COURS
+  RESOLU
+  FERME
+}
+
+// Ticket SAV rattache a une boutique comme une commande (Restrict, meme
+// raison que Order.boutique). Toujours cree par une acheteuse connectee
+// (pas de ticket anonyme — cf Review, et le fallback email
+// support@bloko.me existe deja pour une visiteuse non connectee) donc
+// userId est requis, Cascade comme Review.userId (meme compromis deja
+// fait par Review : l'historique SAV ne survit pas a la suppression du
+// compte — coherent puisque userId porte aussi le controle d'acces cote
+// acheteuse).
+// orderId est unique : un seul ticket par commande.
+model SupportTicket {
+  id         String              @id @default(cuid())
+  boutiqueId String              @map("boutique_id")
+  boutique   Boutique            @relation(fields: [boutiqueId], references: [id], onDelete: Restrict)
+  userId     String              @map("user_id")
+  user       User                @relation("SupportTicketBuyer", fields: [userId], references: [id], onDelete: Cascade)
+  orderId    String              @unique @map("order_id")
+  order      Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  subject    String
+  status     SupportTicketStatus @default(OUVERT)
+  messages   SupportMessage[]
+  createdAt  DateTime            @default(now()) @map("created_at")
+  updatedAt  DateTime            @updatedAt @map("updated_at")
+
+  @@index([boutiqueId, status])
+  @@index([userId])
+  @@map("support_ticket")
+}
+
+// Un message par intervention (acheteuse ou staff). isStaff est fige au
+// moment de l'envoi (pas recalcule depuis le role actuel de authorId)
+// pour que l'historique reste correct meme si le compte change de role
+// plus tard. authorId est nullable + SetNull — contrairement a
+// SupportTicket.userId — parce que c'est le ticket, pas le message, qui
+// porte le controle d'acces : un message doit pouvoir survivre a la
+// suppression de son auteur, meme compromis que Order.userId.
+model SupportMessage {
+  id        String        @id @default(cuid())
+  ticketId  String        @map("ticket_id")
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId  String?       @map("author_id")
+  author    User?         @relation("SupportMessageAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  isStaff   Boolean       @default(false) @map("is_staff")
+  body      String
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  @@index([ticketId])
+  @@map("support_message")
 }
 
 model OrderItem {
