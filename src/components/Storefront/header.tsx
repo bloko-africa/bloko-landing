@@ -28,6 +28,16 @@ export function StorefrontHeader({ storeName, handle }: StorefrontHeaderProps) {
     <header className="sticky top-0 z-30 border-b border-stroke bg-white/90 backdrop-blur dark:border-dark-3 dark:bg-gray-dark/90">
       <div className="mx-auto grid h-18 max-w-(--breakpoint-2xl) grid-cols-2 items-center px-4 md:grid-cols-3 md:px-8">
         <nav className="hidden items-center gap-8 text-body-xs font-medium uppercase tracking-wide text-dark-5 dark:text-dark-6 md:flex">
+          {/* Chaque boutique est une page isolée dans son propre univers
+              visuel (nom, couleurs) — sans ce lien, rien n'indique qu'on est
+              sur Bloko ni comment revenir découvrir d'autres boutiques. */}
+          <Link href="/" title="Retour à l'accueil Bloko" className="flex items-center gap-1.5 normal-case tracking-normal hover:text-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+            Bloko
+          </Link>
+          <span className="h-4 w-px bg-stroke dark:bg-dark-3" aria-hidden="true" />
           {navLinks.map((link) => (
             <Link key={link.href} href={link.href} className="hover:text-primary">
               {link.label}
@@ -96,6 +106,16 @@ export function StorefrontHeader({ storeName, handle }: StorefrontHeaderProps) {
 
       {menuOpen && (
         <nav className="flex flex-col border-t border-stroke bg-white px-4 py-2 dark:border-dark-3 dark:bg-gray-dark md:hidden">
+          <Link
+            href="/"
+            onClick={() => setMenuOpen(false)}
+            className="flex items-center gap-1.5 border-b border-stroke py-3.5 text-body-sm font-medium uppercase tracking-wide text-dark-5 hover:text-primary dark:border-dark-3 dark:text-dark-6"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+            Bloko
+          </Link>
           {navLinks.map((link) => (
             <Link
               key={link.href}

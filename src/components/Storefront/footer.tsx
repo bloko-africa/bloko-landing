@@ -82,9 +82,17 @@ export function StorefrontFooter({
           </Link>
         </div>
 
-        <p className="mt-6 text-body-xs text-dark-5 dark:text-dark-6">
-          © {new Date().getFullYear()} {storeName}. Tous droits réservés.
-        </p>
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-body-xs text-dark-5 dark:text-dark-6">
+            © {new Date().getFullYear()} {storeName}. Tous droits réservés.
+          </p>
+          <Link
+            href="/"
+            className="text-body-xs font-medium text-dark-5 hover:text-primary dark:text-dark-6"
+          >
+            Propulsé par Bloko →
+          </Link>
+        </div>
       </div>
     </footer>
   );
