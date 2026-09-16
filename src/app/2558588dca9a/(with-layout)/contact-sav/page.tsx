@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import type { Metadata } from "next";
 import { ContactSavForm } from "./_components/contact-sav-form";
 
-export const metadata: Metadata = { title: "Contact, SAV & livraison" };
+export const metadata: Metadata = { title: "Mes coordonnées" };
 export const dynamic = "force-dynamic";
 
 // Réservée à la vendeuse (requireBoutiqueAccess avec le seul rôle "vendeur"
@@ -29,7 +29,7 @@ export default async function ContactSavPage() {
 
   return (
     <div className="mx-auto w-full max-w-180">
-      <Breadcrumb pageName="Contact, SAV & livraison" />
+      <Breadcrumb pageName="Mes coordonnées" />
       <ContactSavForm initial={boutique} />
     </div>
   );

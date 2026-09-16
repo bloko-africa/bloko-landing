@@ -139,7 +139,7 @@ export function WalletPanel({
             </thead>
             <tbody>
               {payouts.map((p) => (
-                <tr key={p.id} className="border-b border-stroke last:border-0 dark:border-dark-3">
+                <tr key={p.id} className="border-b border-stroke last:border-0 hover:bg-gray-1 dark:border-dark-3 dark:hover:bg-dark-2">
                   <td className="px-4 py-2.5 text-body-sm text-dark-5 dark:text-dark-6">
                     {new Date(p.createdAt).toLocaleDateString("fr-FR")}
                   </td>

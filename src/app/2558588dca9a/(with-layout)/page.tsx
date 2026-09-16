@@ -1,5 +1,7 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import { EmptyState } from "@/components/Admin/empty-state";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
+import { requireBoutiqueAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { formatPrice } from "@/lib/format-price";
 import { getStoreSettings } from "@/lib/store-settings";
@@ -20,6 +22,22 @@ const ORDER_STATUS_STYLE: Record<string, string> = {
 };
 
 export default async function AdminHome() {
+  // Page d'atterrissage par défaut après connexion — était interrogée sans
+  // aucun filtre boutique jusqu'ici : une vendeuse y voyait le chiffre
+  // d'affaires, les commandes et le stock bas de TOUTE la plateforme, pas
+  // seulement de sa boutique. Même classe de bug que la cloche de
+  // notifications corrigée plus tôt cette session.
+  const { scopedBoutiqueId } = await requireBoutiqueAccess([
+    "viewer",
+    "editor",
+    "admin",
+    "vendeur",
+  ]);
+  const boutiqueFilter = scopedBoutiqueId ? { boutiqueId: scopedBoutiqueId } : {};
+  const productBoutiqueFilter = scopedBoutiqueId
+    ? { product: { boutiqueId: scopedBoutiqueId } }
+    : {};
+
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
@@ -33,29 +51,42 @@ export default async function AdminHome() {
     lowStockVariants,
     recentOrders,
     ordersByCountry,
+    activeLiveSession,
+    openTicketCount,
   ] = await Promise.all([
     getStoreSettings(),
     db.order.aggregate({
-      where: { status: "PAID", createdAt: { gte: startOfMonth } },
+      where: { ...boutiqueFilter, status: "PAID", createdAt: { gte: startOfMonth } },
       _sum: { totalAmount: true },
     }),
-    db.order.count({ where: { status: "PENDING" } }),
-    db.order.count(),
-    db.product.count({ where: { status: "PUBLISHED" } }),
+    db.order.count({ where: { ...boutiqueFilter, status: "PENDING" } }),
+    db.order.count({ where: boutiqueFilter }),
+    db.product.count({ where: { ...boutiqueFilter, status: "PUBLISHED" } }),
     db.productVariant.findMany({
-      where: { stock: { lte: 5 } },
+      where: { stock: { lte: 5 }, ...productBoutiqueFilter },
       orderBy: { stock: "asc" },
       take: 8,
       include: { product: { select: { name: true, id: true } } },
     }),
     db.order.findMany({
+      where: boutiqueFilter,
       orderBy: { createdAt: "desc" },
       take: 8,
     }),
     db.order.groupBy({
       by: ["country"],
+      where: boutiqueFilter,
       _count: { country: true },
       orderBy: { _count: { country: "desc" } },
+    }),
+    scopedBoutiqueId
+      ? db.liveSession.findFirst({
+          where: { boutiqueId: scopedBoutiqueId, status: "EN_COURS" },
+          select: { id: true },
+        })
+      : null,
+    db.supportTicket.count({
+      where: { ...boutiqueFilter, status: { in: ["OUVERT", "EN_COURS"] } },
     }),
   ]);
 
@@ -67,6 +98,31 @@ export default async function AdminHome() {
   return (
     <>
       <Breadcrumb pageName="Tableau de bord" />
+
+      {(activeLiveSession || openTicketCount > 0) && (
+        <div className="mb-6 flex flex-wrap gap-3">
+          {activeLiveSession && (
+            <Link
+              href={`/2558588dca9a/live/${activeLiveSession.id}`}
+              className="flex items-center gap-2 rounded-lg bg-red-light-6 px-4 py-3 text-body-sm font-medium text-red-dark hover:bg-opacity-80"
+            >
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-red-dark opacity-75" />
+                <span className="relative inline-flex size-2 rounded-full bg-red-dark" />
+              </span>
+              Live en cours — voir le suivi →
+            </Link>
+          )}
+          {openTicketCount > 0 && (
+            <Link
+              href="/2558588dca9a/support"
+              className="flex items-center gap-2 rounded-lg bg-yellow-light-4 px-4 py-3 text-body-sm font-medium text-yellow-dark-2 hover:bg-opacity-80"
+            >
+              {openTicketCount} ticket{openTicketCount > 1 ? "s" : ""} SAV en attente →
+            </Link>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
@@ -121,7 +177,7 @@ export default async function AdminHome() {
               {recentOrders.map((order) => (
                 <tr
                   key={order.id}
-                  className="border-b border-stroke last:border-0 dark:border-dark-3"
+                  className="border-b border-stroke last:border-0 hover:bg-gray-1 dark:border-dark-3 dark:hover:bg-dark-2"
                 >
                   <td className="px-5.5 py-3">
                     <Link
@@ -149,11 +205,11 @@ export default async function AdminHome() {
 
               {recentOrders.length === 0 && (
                 <tr>
-                  <td
-                    colSpan={4}
-                    className="px-5.5 py-8 text-center text-body-sm text-dark-5 dark:text-dark-6"
-                  >
-                    Aucune commande pour le moment.
+                  <td colSpan={4}>
+                    <EmptyState
+                      title="Aucune commande pour le moment"
+                      hint="Une commande apparaît ici dès qu'une cliente valide son panier."
+                    />
                   </td>
                 </tr>
               )}

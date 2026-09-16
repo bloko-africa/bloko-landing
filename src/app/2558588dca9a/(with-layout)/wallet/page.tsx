@@ -1,4 +1,5 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import { EmptyState } from "@/components/Admin/empty-state";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 import { requireBoutiqueAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -88,7 +89,7 @@ export default async function WalletPage() {
           </thead>
           <tbody>
             {summaries.map((b) => (
-              <tr key={b.id} className="border-b border-stroke last:border-0 dark:border-dark-3">
+              <tr key={b.id} className="border-b border-stroke last:border-0 hover:bg-gray-1 dark:border-dark-3 dark:hover:bg-dark-2">
                 <td className="px-5.5 py-4">
                   <Link
                     href={`/2558588dca9a/boutiques/${b.id}`}
@@ -111,8 +112,11 @@ export default async function WalletPage() {
 
             {summaries.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-5.5 py-8 text-center text-body-sm text-dark-5 dark:text-dark-6">
-                  Aucune boutique pour le moment.
+                <td colSpan={4}>
+                  <EmptyState
+                    title="Aucune boutique pour le moment"
+                    hint="Le solde de chaque vendeuse apparaît ici dès qu'une boutique existe et a des commandes payées."
+                  />
                 </td>
               </tr>
             )}

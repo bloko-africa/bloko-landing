@@ -77,7 +77,7 @@ export default async function LivePage() {
                   const revenue = s.orders.reduce((sum, o) => sum + Number(o.totalAmount), 0);
                   const currency = s.orders[0]?.currency ?? "XOF";
                   return (
-                    <tr key={s.id} className="border-b border-stroke last:border-0 dark:border-dark-3">
+                    <tr key={s.id} className="border-b border-stroke last:border-0 hover:bg-gray-1 dark:border-dark-3 dark:hover:bg-dark-2">
                       <td className="px-5.5 py-4 text-dark-5 dark:text-dark-6">
                         {s.startedAt.toLocaleDateString("fr-FR")}
                       </td>

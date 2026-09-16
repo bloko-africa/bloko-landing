@@ -24,7 +24,14 @@ export function LiveChecklistForm({ products }: { products: Product[] }) {
         error: (err) => (err instanceof Error ? err.message : "Échec"),
       });
       router.push(`/2558588dca9a/live/${result.liveSessionId}`);
-    } catch {
+    } catch (err) {
+      // Course avec un autre onglet/appareil qui a démarré le live entre
+      // temps : plutôt que de laisser un formulaire mort, on renvoie vers
+      // /live qui redirige déjà lui-même vers la session active.
+      if (err instanceof Error && err.message.includes("déjà en cours")) {
+        router.push("/2558588dca9a/live");
+        return;
+      }
       setLoading(false);
     }
   }

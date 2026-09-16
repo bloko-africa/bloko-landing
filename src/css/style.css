@@ -390,6 +390,47 @@
   }
 }
 
+/*
+  Transition de base pour tout élément interactif : la plupart des
+  hover:/active: du repo n'avaient aucune transition déclarée (changement
+  instantané, pas de sensation de réponse). Règle de secours plutôt que
+  d'ajouter `transition-colors` partout un par un — toute classe Tailwind
+  `transition-*` posée au niveau composant reste plus spécifique et prend
+  le dessus, ceci ne fait que combler les cas où rien n'était déclaré.
+  150ms/ease = le "hover subtil" du design system (voir motion-design skill).
+*/
+@layer base {
+  a,
+  button,
+  [role="button"],
+  input,
+  select,
+  textarea {
+    transition-property: color, background-color, border-color, opacity, box-shadow, transform;
+    transition-timing-function: ease;
+    transition-duration: 150ms;
+  }
+
+  /* Feedback de pression — 120ms, pas de rebond (voir motion-design skill,
+     dur-1/ease-out-quad). Un bouton désactivé ne doit rien communiquer au
+     clic puisqu'aucune action ne se produit. */
+  button:not(:disabled):active,
+  [role="button"]:not([aria-disabled="true"]):active {
+    transform: scale(0.98);
+    transition-duration: 120ms;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
 .custom-gradient-1 {
   background-image: linear-gradient(145deg, #eef 0%, #fff8fc 100%);
 }

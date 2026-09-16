@@ -86,7 +86,7 @@ export default async function LivraisonsPage() {
             {livraisons.map((livraison) => (
               <tr
                 key={livraison.id}
-                className="border-b border-stroke last:border-0 dark:border-dark-3"
+                className="border-b border-stroke last:border-0 hover:bg-gray-1 dark:border-dark-3 dark:hover:bg-dark-2"
               >
                 <td className="px-5.5 py-4 font-medium text-dark dark:text-white">
                   {livraison.order.reference}

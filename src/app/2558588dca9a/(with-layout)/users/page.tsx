@@ -1,4 +1,5 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import { EmptyState } from "@/components/Admin/empty-state";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { USER_ROLE_LABEL } from "@/lib/user-role";
@@ -111,7 +112,7 @@ export default async function UsersPage({
           </thead>
           <tbody>
             {staffUsers.map((user) => (
-              <tr key={user.id} className="border-b border-stroke last:border-0 dark:border-dark-3">
+              <tr key={user.id} className="border-b border-stroke last:border-0 hover:bg-gray-1 dark:border-dark-3 dark:hover:bg-dark-2">
                 <td className="px-5.5 py-4 font-medium text-dark dark:text-white">{user.name}</td>
                 <td className="px-5.5 py-4 text-dark-5 dark:text-dark-6">{user.email}</td>
                 <td className="px-5.5 py-4">
@@ -155,8 +156,26 @@ export default async function UsersPage({
 
             {staffUsers.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-5.5 py-8 text-center text-dark-5 dark:text-dark-6">
-                  Aucun compte trouvé.
+                <td colSpan={7}>
+                  {q ? (
+                    <EmptyState
+                      title="Aucun compte ne correspond"
+                      hint={`Aucun résultat pour "${q}" — vérifie l'orthographe de l'email.`}
+                    />
+                  ) : (
+                    <EmptyState
+                      title="Aucun compte staff pour le moment"
+                      hint="Le premier compte admin a été créé par script au démarrage — les suivants se créent ici."
+                      action={
+                        <Link
+                          href="/2558588dca9a/users/new"
+                          className="text-body-sm font-medium text-primary hover:underline"
+                        >
+                          Nouveau compte staff →
+                        </Link>
+                      }
+                    />
+                  )}
                 </td>
               </tr>
             )}

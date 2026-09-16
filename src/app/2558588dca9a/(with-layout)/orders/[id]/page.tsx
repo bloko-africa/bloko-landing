@@ -90,7 +90,7 @@ export default async function OrderDetailPage({
             {order.items.map((item) => (
               <tr
                 key={item.id}
-                className="border-b border-stroke last:border-0 dark:border-dark-3"
+                className="border-b border-stroke last:border-0 hover:bg-gray-1 dark:border-dark-3 dark:hover:bg-dark-2"
               >
                 <td className="px-3 py-2">{item.productVariant.product.name}</td>
                 <td className="px-3 py-2">

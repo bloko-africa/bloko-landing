@@ -23,8 +23,13 @@ export const NAV_DATA: {
         icon: Icons.HomeIcon,
         items: [],
       },
+      // Ex-groupe unique "Boutique" (10 items à plat) éclaté en 3 groupes
+      // qui suivent le modèle mental de la vendeuse — "je vends" / "je
+      // livre et je suis payée" / "je réponds à mes clientes" — plutôt
+      // qu'une liste technique. Même structure de données que "Plateforme"
+      // ci-dessous, juste plus de groupes.
       {
-        title: "Boutique",
+        title: "Vendre",
         icon: Icons.FourCircle,
         items: [
           {
@@ -40,33 +45,45 @@ export const NAV_DATA: {
             url: "/2558588dca9a/categories",
           },
           {
-            title: "Commandes",
-            url: "/2558588dca9a/orders",
-          },
-          {
             title: "Live",
             url: "/2558588dca9a/live",
+          },
+        ],
+      },
+      {
+        title: "Commandes",
+        icon: Icons.Table,
+        items: [
+          {
+            title: "Commandes",
+            url: "/2558588dca9a/orders",
           },
           {
             title: "Livraisons",
             url: "/2558588dca9a/livraisons",
           },
           {
+            title: "Portefeuille",
+            url: "/2558588dca9a/wallet",
+          },
+        ],
+      },
+      {
+        title: "Relation client",
+        icon: Icons.User,
+        items: [
+          {
             title: "SAV",
             url: "/2558588dca9a/support",
           },
           {
-            title: "Contact, SAV & livraison",
-            url: "/2558588dca9a/contact-sav",
-            roles: ["vendeur"],
-          },
-          {
-            title: "Portefeuille",
-            url: "/2558588dca9a/wallet",
-          },
-          {
             title: "Clients",
             url: "/2558588dca9a/clients",
+          },
+          {
+            title: "Mes coordonnées",
+            url: "/2558588dca9a/contact-sav",
+            roles: ["vendeur"],
           },
         ],
       },

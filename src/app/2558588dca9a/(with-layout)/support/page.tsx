@@ -1,4 +1,5 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import { EmptyState } from "@/components/Admin/empty-state";
 import { requireBoutiqueAccess } from "@/lib/auth/session";
 import { updateTicketStatus } from "@/lib/actions/support-tickets";
 import { db } from "@/lib/db";
@@ -72,7 +73,7 @@ export default async function SupportTicketsPage() {
             {tickets.map((ticket) => (
               <tr
                 key={ticket.id}
-                className="border-b border-stroke last:border-0 dark:border-dark-3"
+                className="border-b border-stroke last:border-0 hover:bg-gray-1 dark:border-dark-3 dark:hover:bg-dark-2"
               >
                 <td className="px-5.5 py-4 font-medium text-dark dark:text-white">
                   {ticket.subject}
@@ -125,11 +126,11 @@ export default async function SupportTicketsPage() {
 
             {tickets.length === 0 && (
               <tr>
-                <td
-                  colSpan={showBoutiqueColumn ? 7 : 6}
-                  className="px-5.5 py-8 text-center text-dark-5 dark:text-dark-6"
-                >
-                  Aucun ticket pour le moment.
+                <td colSpan={showBoutiqueColumn ? 7 : 6}>
+                  <EmptyState
+                    title="Aucun ticket pour le moment"
+                    hint="Un ticket apparaît ici dès qu'une cliente en ouvre un depuis le détail de sa commande."
+                  />
                 </td>
               </tr>
             )}

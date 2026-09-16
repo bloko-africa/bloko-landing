@@ -90,7 +90,7 @@ export function ProductVariants({
             {variants.map((variant) => (
               <tr
                 key={variant.id}
-                className="border-b border-stroke last:border-0 dark:border-dark-3"
+                className="border-b border-stroke last:border-0 hover:bg-gray-1 dark:border-dark-3 dark:hover:bg-dark-2"
               >
                 <td className="px-3 py-2">{variant.sku}</td>
                 <td className="px-3 py-2">{variant.size ?? "—"}</td>

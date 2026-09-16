@@ -43,7 +43,7 @@ export function ContactSavForm({ initial }: ContactSavFormProps) {
   }
 
   return (
-    <ShowcaseSection title="Contact, SAV & livraison" className="space-y-5.5 p-6.5!">
+    <ShowcaseSection title="Mes coordonnées" className="space-y-5.5 p-6.5!">
       <form onSubmit={handleSubmit} className="space-y-5.5">
         <TextAreaGroup
           label="Détails de livraison (affiché à la cliente)"
