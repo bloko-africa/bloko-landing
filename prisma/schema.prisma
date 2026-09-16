@@ -145,6 +145,12 @@ model Boutique {
   featuredCollectionId String?     @map("featured_collection_id")
   featuredCollection   Collection? @relation("BoutiqueFeaturedCollection", fields: [featuredCollectionId], references: [id], onDelete: SetNull)
 
+  // Numéro affiché aux acheteuses pour un contact direct (distinct de
+  // socialWhatsapp : peut être un numéro d'appel classique, pas forcément
+  // WhatsApp). Éditable par la vendeuse elle-même (voir requireBoutiqueAccess
+  // dans updateBoutiqueContact), contrairement au reste de la fiche boutique
+  // qui reste admin-only en v1.
+  savPhone        String? @map("sav_phone")
   socialFacebook  String? @map("social_facebook")
   socialInstagram String? @map("social_instagram")
   socialTiktok    String? @map("social_tiktok")

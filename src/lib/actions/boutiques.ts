@@ -2,7 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { requireRole } from "@/lib/auth/session";
+import { requireRole, requireBoutiqueAccess } from "@/lib/auth/session";
 import { slugify } from "@/lib/utils";
 import { uploadBoutiqueImage } from "@/lib/storage/upload-product-image";
 import { sanitizeRichText } from "@/lib/sanitize-html";
@@ -220,4 +220,45 @@ export async function updateBoutique(formData: FormData) {
 
   revalidatePath("/2558588dca9a/boutiques");
   revalidatePath(`/2558588dca9a/boutiques/${id}`);
+}
+
+const updateBoutiqueContactSchema = z.object({
+  id: z.string().min(1),
+  savPhone: z.string().optional(),
+  socialWhatsapp: z.string().optional(),
+  socialFacebook: z.string().optional(),
+  socialInstagram: z.string().optional(),
+  socialTiktok: z.string().optional(),
+});
+
+// Contrairement à updateBoutique (admin-only), ouvert à la vendeuse pour sa
+// propre boutique — seuls les champs de contact/SAV, pas le reste de la
+// fiche (statut, frais de livraison, CGV, branding) qui reste admin-only.
+export async function updateBoutiqueContact(formData: FormData) {
+  const id = formData.get("id")?.toString() ?? "";
+  await requireBoutiqueAccess(["admin", "vendeur"], id);
+
+  const data = updateBoutiqueContactSchema.parse({
+    id,
+    savPhone: formData.get("savPhone")?.toString() || undefined,
+    socialWhatsapp: formData.get("socialWhatsapp")?.toString() || undefined,
+    socialFacebook: formData.get("socialFacebook")?.toString() || undefined,
+    socialInstagram: formData.get("socialInstagram")?.toString() || undefined,
+    socialTiktok: formData.get("socialTiktok")?.toString() || undefined,
+  });
+
+  await db.boutique.update({
+    where: { id },
+    data: {
+      savPhone: data.savPhone ?? null,
+      socialWhatsapp: data.socialWhatsapp ?? null,
+      socialFacebook: data.socialFacebook ?? null,
+      socialInstagram: data.socialInstagram ?? null,
+      socialTiktok: data.socialTiktok ?? null,
+    },
+  });
+
+  revalidatePath("/2558588dca9a/contact-sav");
+  const boutique = await db.boutique.findUnique({ where: { id }, select: { handle: true } });
+  if (boutique) revalidatePath(`/b/${boutique.handle}`);
 }

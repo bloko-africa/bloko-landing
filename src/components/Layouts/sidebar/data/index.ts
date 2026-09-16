@@ -52,6 +52,11 @@ export const NAV_DATA: {
             url: "/2558588dca9a/support",
           },
           {
+            title: "Contact & SAV (ma boutique)",
+            url: "/2558588dca9a/contact-sav",
+            roles: ["vendeur"],
+          },
+          {
             title: "Portefeuille",
             url: "/2558588dca9a/wallet",
           },

@@ -26,6 +26,7 @@ export default async function BoutiqueLayout({
           handle={boutique.handle}
           bio={boutique.bio}
           ville={boutique.ville}
+          savPhone={boutique.savPhone}
           social={{
             facebook: boutique.socialFacebook ?? "",
             instagram: boutique.socialInstagram ?? "",

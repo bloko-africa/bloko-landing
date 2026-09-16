@@ -5,6 +5,7 @@ type StorefrontFooterProps = {
   handle: string;
   bio: string | null;
   ville: string;
+  savPhone: string | null;
   social: {
     facebook: string;
     instagram: string;
@@ -13,7 +14,14 @@ type StorefrontFooterProps = {
   };
 };
 
-export function StorefrontFooter({ storeName, handle, bio, ville, social }: StorefrontFooterProps) {
+export function StorefrontFooter({
+  storeName,
+  handle,
+  bio,
+  ville,
+  savPhone,
+  social,
+}: StorefrontFooterProps) {
   const base = `/b/${handle}`;
   const description = bio || `Boutique en direct depuis ${ville}.`;
   const socialLinks = [
@@ -34,6 +42,14 @@ export function StorefrontFooter({ storeName, handle, bio, ville, social }: Stor
             <p className="mt-2 max-w-md text-body-sm text-dark-5 dark:text-dark-6">
               {description}
             </p>
+            {savPhone && (
+              <a
+                href={`tel:${savPhone.replace(/\s+/g, "")}`}
+                className="mt-2 inline-block text-body-sm font-medium text-dark hover:text-primary dark:text-white"
+              >
+                SAV : {savPhone}
+              </a>
+            )}
           </div>
 
           {socialLinks.length > 0 && (
