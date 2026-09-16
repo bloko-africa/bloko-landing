@@ -2,6 +2,7 @@
 
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 import InputGroup from "@/components/FormElements/InputGroup";
+import { TextAreaGroup } from "@/components/FormElements/InputGroup/text-area";
 import { updateBoutiqueContact } from "@/lib/actions/boutiques";
 import { notifyPromise } from "@/lib/notify-promise";
 import { useRouter } from "next/navigation";
@@ -15,6 +16,7 @@ type ContactSavFormProps = {
     socialFacebook: string | null;
     socialInstagram: string | null;
     socialTiktok: string | null;
+    deliveryDetails: string | null;
   };
 };
 
@@ -41,8 +43,20 @@ export function ContactSavForm({ initial }: ContactSavFormProps) {
   }
 
   return (
-    <ShowcaseSection title="Contact & SAV" className="space-y-5.5 p-6.5!">
+    <ShowcaseSection title="Contact, SAV & livraison" className="space-y-5.5 p-6.5!">
       <form onSubmit={handleSubmit} className="space-y-5.5">
+        <TextAreaGroup
+          label="Détails de livraison (affiché à la cliente)"
+          name="deliveryDetails"
+          placeholder="Ex: Je livre moi-même sur Cotonou et Abomey-Calavi sous 24h, 1000f. Ailleurs, on s'arrange par WhatsApp."
+          defaultValue={initial.deliveryDetails ?? undefined}
+        />
+        <p className="-mt-3 text-body-xs text-dark-5 dark:text-dark-6">
+          Explique en quelques mots comment tu livres et où — pas besoin de
+          zone précise, la cliente paie la livraison directement avec toi si
+          ton tarif n&apos;est pas inclus au paiement en ligne.
+        </p>
+
         <InputGroup
           label="Numéro SAV (affiché aux clientes)"
           name="savPhone"

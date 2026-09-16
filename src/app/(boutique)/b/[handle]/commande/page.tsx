@@ -21,6 +21,7 @@ export default async function CheckoutPage({
       boutiqueHandle={boutique.handle}
       deliveryFee={Number(boutique.deliveryFee)}
       deliveryFeeMode={boutique.deliveryFeeMode}
+      deliveryDetails={boutique.deliveryDetails}
     />
   );
 }

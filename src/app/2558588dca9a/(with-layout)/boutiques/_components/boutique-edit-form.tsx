@@ -5,6 +5,7 @@ import { TextAreaGroup } from "@/components/FormElements/InputGroup/text-area";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 import { BoutiqueImageInput } from "@/components/Admin/boutique-image-input";
 import { RichTextEditor } from "@/components/Admin/rich-text-editor";
+import { CommuneSelect } from "@/components/commune-select";
 import {
   TRUST_BADGE_ICON_KEYS,
   TRUST_BADGE_ICON_LABELS,
@@ -64,6 +65,7 @@ type BoutiqueEditFormProps = {
 export function BoutiqueEditForm({ initial }: BoutiqueEditFormProps) {
   const [loading, setLoading] = useState(false);
   const [accentColor, setAccentColor] = useState(initial.accentColor);
+  const [ville, setVille] = useState(initial.ville);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -145,14 +147,7 @@ export function BoutiqueEditForm({ initial }: BoutiqueEditFormProps) {
             defaultValue={initial.pays}
             required
           />
-          <InputGroup
-            label="Ville"
-            name="ville"
-            type="text"
-            placeholder="Ex: Cotonou"
-            defaultValue={initial.ville}
-            required
-          />
+          <CommuneSelect label="Ville" name="ville" value={ville} onChange={setVille} />
           <InputGroup
             label="Quartier (optionnel)"
             name="quartier"

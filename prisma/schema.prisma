@@ -131,6 +131,12 @@ model Boutique {
   // n'a encore rien configure.
   deliveryFee     Decimal         @default(0) @map("delivery_fee") @db.Decimal(10, 2)
   deliveryFeeMode DeliveryFeeMode @default(A_LA_CHARGE_DU_CLIENT) @map("delivery_fee_mode")
+  // Texte libre écrit par la vendeuse elle-même (zones couvertes, délai,
+  // comment ça se passe) — pas de système de zones structuré/annuaire de
+  // communes : elle gère sa livraison à sa façon, le client la paie hors
+  // plateforme (déjà le cas par défaut via deliveryFeeMode). Affiché au
+  // checkout et sur la page boutique.
+  deliveryDetails String?         @map("delivery_details")
 
   accentColor  String  @default("#a67c52") @map("accent_color")
   heroEyebrow  String? @map("hero_eyebrow")

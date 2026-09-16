@@ -16,11 +16,13 @@ export function CheckoutForm({
   boutiqueHandle,
   deliveryFee,
   deliveryFeeMode,
+  deliveryDetails,
 }: {
   currency: string;
   boutiqueHandle: string;
   deliveryFee: number;
   deliveryFeeMode: string;
+  deliveryDetails: string | null;
 }) {
   const { items, totalPrice, clear } = useCart();
   const amountToCharge = totalPrice + (deliveryFeeMode === "INCLUS" ? deliveryFee : 0);
@@ -113,6 +115,11 @@ export function CheckoutForm({
             {deliveryFee > 0
               ? `+ ${formatPrice(deliveryFee, currency)} de livraison, à payer en espèces à la réception`
               : "Livraison à régler directement avec le livreur, hors paiement en ligne"}
+          </p>
+        )}
+        {deliveryDetails && (
+          <p className="rounded-lg bg-gray-1 p-3 text-body-xs text-dark-5 dark:bg-dark-2 dark:text-dark-6">
+            {deliveryDetails}
           </p>
         )}
       </div>

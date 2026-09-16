@@ -229,11 +229,14 @@ const updateBoutiqueContactSchema = z.object({
   socialFacebook: z.string().optional(),
   socialInstagram: z.string().optional(),
   socialTiktok: z.string().optional(),
+  deliveryDetails: z.string().max(1000).optional(),
 });
 
 // Contrairement à updateBoutique (admin-only), ouvert à la vendeuse pour sa
-// propre boutique — seuls les champs de contact/SAV, pas le reste de la
-// fiche (statut, frais de livraison, CGV, branding) qui reste admin-only.
+// propre boutique — seuls les champs de contact/SAV/livraison, pas le reste
+// de la fiche (statut, tarif de livraison, CGV, branding) qui reste
+// admin-only. deliveryDetails est un texte libre : pas de système de zones
+// structuré, la vendeuse décrit sa livraison à sa façon.
 export async function updateBoutiqueContact(formData: FormData) {
   const id = formData.get("id")?.toString() ?? "";
   await requireBoutiqueAccess(["admin", "vendeur"], id);
@@ -245,6 +248,7 @@ export async function updateBoutiqueContact(formData: FormData) {
     socialFacebook: formData.get("socialFacebook")?.toString() || undefined,
     socialInstagram: formData.get("socialInstagram")?.toString() || undefined,
     socialTiktok: formData.get("socialTiktok")?.toString() || undefined,
+    deliveryDetails: formData.get("deliveryDetails")?.toString() || undefined,
   });
 
   await db.boutique.update({
@@ -255,10 +259,14 @@ export async function updateBoutiqueContact(formData: FormData) {
       socialFacebook: data.socialFacebook ?? null,
       socialInstagram: data.socialInstagram ?? null,
       socialTiktok: data.socialTiktok ?? null,
+      deliveryDetails: data.deliveryDetails ?? null,
     },
   });
 
   revalidatePath("/2558588dca9a/contact-sav");
   const boutique = await db.boutique.findUnique({ where: { id }, select: { handle: true } });
-  if (boutique) revalidatePath(`/b/${boutique.handle}`);
+  if (boutique) {
+    revalidatePath(`/b/${boutique.handle}`);
+    revalidatePath(`/b/${boutique.handle}/commande`);
+  }
 }

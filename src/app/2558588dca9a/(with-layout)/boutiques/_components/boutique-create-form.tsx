@@ -3,6 +3,7 @@
 import InputGroup from "@/components/FormElements/InputGroup";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 import { BoutiqueImageInput } from "@/components/Admin/boutique-image-input";
+import { CommuneSelect } from "@/components/commune-select";
 import { createBoutique } from "@/lib/actions/boutiques";
 import { notifyPromise } from "@/lib/notify-promise";
 import { slugify } from "@/lib/utils";
@@ -27,6 +28,7 @@ export function BoutiqueCreateForm() {
   const [showPassword, setShowPassword] = useState(true);
   const [brandingOpen, setBrandingOpen] = useState(false);
   const brandingId = useId();
+  const [ville, setVille] = useState("");
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -84,13 +86,7 @@ export function BoutiqueCreateForm() {
             defaultValue="Bénin"
             required
           />
-          <InputGroup
-            label="Ville"
-            name="ville"
-            type="text"
-            placeholder="Ex: Cotonou"
-            required
-          />
+          <CommuneSelect label="Ville" name="ville" value={ville} onChange={setVille} />
         </div>
       </ShowcaseSection>
 
