@@ -1,11 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
+import { AccountNavLink } from "./account-nav-link";
 
-// Header minimal de l'accueil plateforme (direction A du design) — pas de
-// panier ni de "mon compte" : ceux-ci n'existent qu'une fois entré dans une
-// boutique via /b/[handle] (StorefrontHeader, composant séparé). Fond noir
-// (comme le hero et le footer) : le logo Bloko est blanc, il a besoin d'un
-// fond sombre pour être visible.
+// Header minimal de l'accueil plateforme (direction A du design). Le compte
+// acheteur est partagé entre boutiques (voir /compte), donc un lien
+// "Mon compte"/"Connexion" a sa place ici même hors contexte boutique —
+// contrairement au panier, qui reste propre à /b/[handle] (StorefrontHeader).
+// Fond noir (comme le hero et le footer) : le logo Bloko est blanc, il a
+// besoin d'un fond sombre pour être visible.
 export function PlatformHeader() {
   return (
     <header className="sticky top-0 z-30 bg-dark dark:bg-black">
@@ -34,6 +36,7 @@ export function PlatformHeader() {
           >
             Découvrir
           </Link>
+          <AccountNavLink className="text-body-xs font-medium uppercase tracking-wide text-dark-7 hover:text-white" />
         </nav>
       </div>
     </header>

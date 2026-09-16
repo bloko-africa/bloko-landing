@@ -1,16 +1,14 @@
 "use client";
 
 import { signOut } from "@/lib/auth/auth-client";
-import { useBoutiquePath } from "@/lib/boutique-path";
 import { useRouter } from "next/navigation";
 
-export function LogoutButton() {
+export function LogoutButton({ redirectTo }: { redirectTo: string }) {
   const router = useRouter();
-  const homePath = useBoutiquePath("");
 
   async function handleLogout() {
     await signOut();
-    router.push(homePath || "/");
+    router.push(redirectTo);
     router.refresh();
   }
 

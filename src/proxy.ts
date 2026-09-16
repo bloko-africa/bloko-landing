@@ -12,6 +12,13 @@ const ADMIN_AUTH_PATHS = ["/2558588dca9a/auth/sign-in"];
 const CUSTOMER_PATH_RE = /^\/b\/([^/]+)\/compte(\/|$)/;
 const CUSTOMER_AUTH_PATH_RE = /^\/b\/[^/]+\/compte\/(connexion|inscription)(\/|$)/;
 
+// Compte acheteur au niveau plateforme (pas rattaché à une boutique dans
+// l'URL) : /compte liste les commandes toutes boutiques confondues,
+// /connexion s'y connecte. Distinct de /b/<handle>/compte/connexion qui
+// reste le point d'entrée depuis une boutique précise.
+const PLATFORM_ACCOUNT_PATH_RE = /^\/compte(\/|$)/;
+const PLATFORM_AUTH_PATH_RE = /^\/connexion(\/|$)/;
+
 const SESSION_COOKIE_NAME =
   process.env.NODE_ENV === "development"
     ? "better-auth.session_token"
@@ -39,12 +46,17 @@ export async function proxy(request: NextRequest) {
   const isAdminAuthOnly = ADMIN_AUTH_PATHS.some((path) => pathname.startsWith(path));
   const customerMatch = pathname.match(CUSTOMER_PATH_RE);
   const isCustomerAuthOnly = CUSTOMER_AUTH_PATH_RE.test(pathname);
-  const isAuthOnly = isAdminAuthOnly || isCustomerAuthOnly;
+  const isPlatformAccount = PLATFORM_ACCOUNT_PATH_RE.test(pathname);
+  const isPlatformAuthOnly = PLATFORM_AUTH_PATH_RE.test(pathname);
+  const isAuthOnly = isAdminAuthOnly || isCustomerAuthOnly || isPlatformAuthOnly;
 
   const needsAdminAccess = isAdminPath(pathname);
-  // Session requise sur /b/<handle>/compte/** sauf les pages connexion/inscription
-  // elles-mêmes (elles gèrent leur propre état "pas encore connecté").
-  const needsAnySession = Boolean(customerMatch) && !isCustomerAuthOnly;
+  // Session requise sur /b/<handle>/compte/** et /compte, sauf les pages
+  // connexion/inscription elles-mêmes (elles gèrent leur propre état "pas
+  // encore connecté").
+  const needsAnySession =
+    (Boolean(customerMatch) && !isCustomerAuthOnly) ||
+    (isPlatformAccount && !isPlatformAuthOnly);
   const requiresAuth = needsAdminAccess || needsAnySession;
   const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
 
@@ -53,9 +65,10 @@ export async function proxy(request: NextRequest) {
     url.searchParams.set("callbackUrl", callbackUrl);
     if (needsAdminAccess) {
       url.pathname = "/2558588dca9a/auth/sign-in";
+    } else if (customerMatch) {
+      url.pathname = `/b/${customerMatch[1]}/compte/connexion`;
     } else {
-      // customerMatch garanti ici (needsAnySession implique needsAdminAccess=false)
-      url.pathname = `/b/${customerMatch![1]}/compte/connexion`;
+      url.pathname = "/connexion";
     }
     return NextResponse.redirect(url);
   }
@@ -94,7 +107,9 @@ export async function proxy(request: NextRequest) {
     if (isAuthOnly) {
       const destination = isAdminAuthOnly
         ? "/2558588dca9a"
-        : `/b/${customerMatch ? customerMatch[1] : pathname.split("/")[2]}/compte`;
+        : isPlatformAuthOnly
+          ? "/compte"
+          : `/b/${customerMatch ? customerMatch[1] : pathname.split("/")[2]}/compte`;
       return NextResponse.redirect(new URL(destination, request.url));
     }
   } catch (error) {

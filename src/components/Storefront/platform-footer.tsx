@@ -15,6 +15,9 @@ export function PlatformFooter() {
           <Link href="/cgu" className="hover:text-white">
             Conditions générales d&apos;utilisation
           </Link>
+          <Link href="/2558588dca9a/auth/sign-in" className="hover:text-white">
+            Espace vendeuse
+          </Link>
         </nav>
       </div>
     </footer>

@@ -5,7 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Sign in",
+  title: "Espace vendeuse",
+  // Lié publiquement depuis le footer (voir platform-footer.tsx) — pas
+  // besoin de robots.txt pour rester hors des résultats de recherche,
+  // juste hors de l'index.
+  robots: { index: false, follow: false },
 };
 
 export default function SignIn() {

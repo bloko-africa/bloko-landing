@@ -1,13 +1,11 @@
-import { getCurrentSession } from "@/lib/auth/session";
-import { getBoutiqueByHandle } from "@/lib/boutique";
-import { db } from "@/lib/db";
-import { claimGuestOrders } from "@/lib/orders/claim-guest-orders";
+import { LogoutButton } from "@/components/Auth/logout-button";
 import { DeliveryStatusBadge } from "@/components/Storefront/delivery-timeline";
 import { PushNotificationsToggle } from "@/components/Admin/push-notifications-toggle";
+import { getCurrentSession } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { claimGuestOrders } from "@/lib/orders/claim-guest-orders";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { LogoutButton } from "@/components/Auth/logout-button";
 
 export const metadata: Metadata = { title: "Mon compte" };
 export const dynamic = "force-dynamic";
@@ -20,15 +18,10 @@ const STATUS_LABEL: Record<string, string> = {
   REFUNDED: "Remboursée",
 };
 
-export default async function AccountPage({
-  params,
-}: {
-  params: Promise<{ handle: string }>;
-}) {
-  const { handle } = await params;
-  const boutique = await getBoutiqueByHandle(handle);
-  if (!boutique) notFound();
-
+// Vue plateforme du compte acheteur — mêmes données que /b/[handle]/compte
+// (le compte est partagé entre boutiques), mais accessible sans passer par
+// une boutique précise : point d'entrée depuis le header/footer Bloko.
+export default async function PlatformAccountPage() {
   const session = await getCurrentSession();
   const user = session!.user;
 
@@ -36,9 +29,6 @@ export default async function AccountPage({
     await claimGuestOrders(user.id, user.email);
   }
 
-  // Un compte acheteur est partagé entre toutes les boutiques Bloko : on
-  // liste ici l'historique complet, pas seulement les commandes passées sur
-  // cette boutique-ci (chaque ligne affiche la boutique concernée).
   const orders = await db.order.findMany({
     where: { userId: user.id },
     orderBy: { createdAt: "desc" },
@@ -58,19 +48,11 @@ export default async function AccountPage({
           </h1>
           <p className="text-body-sm text-dark-5 dark:text-dark-6">{user.email}</p>
         </div>
-        <LogoutButton redirectTo={`/b/${boutique.handle}`} />
+        <LogoutButton redirectTo="/" />
       </div>
 
-      <p className="mt-3 text-body-xs text-dark-5 dark:text-dark-6">
-        Ton compte est partagé entre toutes les boutiques Bloko —{" "}
-        <Link href="/compte" className="font-medium text-primary hover:underline">
-          voir toutes mes commandes
-        </Link>
-        .
-      </p>
-
       <div className="mt-8 rounded-lg border border-stroke p-4 dark:border-dark-3">
-        <PushNotificationsToggle description="Reçois une alerte sur cet appareil quand ta commande est en route ou livrée." />
+        <PushNotificationsToggle description="Reçois une alerte sur cet appareil quand une commande est en route ou livrée." />
       </div>
 
       <h2 className="mt-10 text-body-lg font-medium text-dark dark:text-white">
@@ -79,7 +61,10 @@ export default async function AccountPage({
 
       {orders.length === 0 ? (
         <p className="mt-4 text-body-sm text-dark-5 dark:text-dark-6">
-          Tu n'as pas encore passé de commande.
+          Tu n'as pas encore passé de commande.{" "}
+          <Link href="/decouvrir" className="font-medium text-primary hover:underline">
+            Découvrir les boutiques
+          </Link>
         </p>
       ) : (
         <div className="mt-4 space-y-3">
