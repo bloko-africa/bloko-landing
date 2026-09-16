@@ -42,18 +42,18 @@ export default async function DecouvrirPage({
   }
 
   return (
-    <div className="mx-auto max-w-(--breakpoint-2xl) px-4 py-10 md:px-8">
+    <div className="mx-auto max-w-(--breakpoint-2xl) px-4 py-6 md:px-8 md:py-10">
       <div className="mx-auto max-w-lg">
         <BlokoSearchBar />
       </div>
 
-      <div className="mt-8 flex flex-wrap justify-center gap-2">
+      <div className="scrollbar-hide -mx-4 mt-5 flex snap-x gap-2 overflow-x-auto px-4 sm:mx-0 sm:mt-8 sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0">
         <Link
           href={categoryHref(null)}
           className={
             !categorySlug
-              ? "rounded-full bg-primary px-4 py-1.5 text-body-sm font-medium text-white"
-              : "rounded-full border border-stroke px-4 py-1.5 text-body-sm font-medium text-dark-5 hover:border-primary hover:text-primary dark:border-dark-3 dark:text-dark-6"
+              ? "shrink-0 snap-start rounded-full bg-primary px-4 py-1.5 text-body-sm font-medium whitespace-nowrap text-white"
+              : "shrink-0 snap-start rounded-full border border-stroke px-4 py-1.5 text-body-sm font-medium whitespace-nowrap text-dark-5 hover:border-primary hover:text-primary dark:border-dark-3 dark:text-dark-6"
           }
         >
           Tout
@@ -64,8 +64,8 @@ export default async function DecouvrirPage({
             href={categoryHref(c.slug)}
             className={
               categorySlug === c.slug
-                ? "rounded-full bg-primary px-4 py-1.5 text-body-sm font-medium text-white"
-                : "rounded-full border border-stroke px-4 py-1.5 text-body-sm font-medium text-dark-5 hover:border-primary hover:text-primary dark:border-dark-3 dark:text-dark-6"
+                ? "shrink-0 snap-start rounded-full bg-primary px-4 py-1.5 text-body-sm font-medium whitespace-nowrap text-white"
+                : "shrink-0 snap-start rounded-full border border-stroke px-4 py-1.5 text-body-sm font-medium whitespace-nowrap text-dark-5 hover:border-primary hover:text-primary dark:border-dark-3 dark:text-dark-6"
             }
           >
             {c.name}
@@ -78,7 +78,7 @@ export default async function DecouvrirPage({
           Aucun produit ne correspond pour le moment.
         </p>
       ) : (
-        <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((p) => (
             <DiscoveryProductCard
               key={p.id}
