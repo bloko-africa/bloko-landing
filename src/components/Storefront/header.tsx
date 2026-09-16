@@ -35,30 +35,32 @@ export function StorefrontHeader({ storeName, handle }: StorefrontHeaderProps) {
           ))}
         </nav>
 
-        <button
-          type="button"
-          onClick={() => setMenuOpen((v) => !v)}
-          aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
-          aria-expanded={menuOpen}
-          className="flex size-10 items-center justify-center text-dark dark:text-white md:hidden"
-        >
-          {menuOpen ? (
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
-          ) : (
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-              <path d="M3 6h18M3 12h18M3 18h18" />
-            </svg>
-          )}
-        </button>
+        <div className="flex items-center gap-2 md:justify-center">
+          <button
+            type="button"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+            aria-expanded={menuOpen}
+            className="flex size-10 items-center justify-center text-dark dark:text-white md:hidden"
+          >
+            {menuOpen ? (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            ) : (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M3 6h18M3 12h18M3 18h18" />
+              </svg>
+            )}
+          </button>
 
-        <Link
-          href={base}
-          className="text-heading-6 font-black uppercase tracking-tight text-dark dark:text-white md:text-center"
-        >
-          {storeName}
-        </Link>
+          <Link
+            href={base}
+            className="text-heading-6 font-black uppercase tracking-tight text-dark dark:text-white"
+          >
+            {storeName}
+          </Link>
+        </div>
 
         <div className="flex items-center justify-end gap-5">
           <Link
