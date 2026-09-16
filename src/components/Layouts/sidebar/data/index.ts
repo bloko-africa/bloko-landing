@@ -76,6 +76,10 @@ export const NAV_DATA: {
             url: "/2558588dca9a/boutiques",
           },
           {
+            title: "Équipe",
+            url: "/2558588dca9a/users",
+          },
+          {
             title: "Agences de livraison",
             url: "/2558588dca9a/agences",
           },

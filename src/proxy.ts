@@ -31,6 +31,7 @@ const ROLE_PROTECTED: { prefix: string; requiredRoles: AppRole[] }[] = [
   { prefix: "/2558588dca9a/settings", requiredRoles: ["admin"] },
   { prefix: "/2558588dca9a/boutiques", requiredRoles: ["admin"] },
   { prefix: "/2558588dca9a/agences", requiredRoles: ["admin"] },
+  { prefix: "/2558588dca9a/users", requiredRoles: ["admin"] },
 ];
 
 function isAdminPath(pathname: string) {
