@@ -24,6 +24,8 @@ export default async function BoutiqueLayout({
         <StorefrontFooter
           storeName={boutique.displayName}
           handle={boutique.handle}
+          bio={boutique.bio}
+          ville={boutique.ville}
           social={{
             facebook: boutique.socialFacebook ?? "",
             instagram: boutique.socialInstagram ?? "",

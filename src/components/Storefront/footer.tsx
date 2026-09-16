@@ -3,6 +3,8 @@ import Link from "next/link";
 type StorefrontFooterProps = {
   storeName: string;
   handle: string;
+  bio: string | null;
+  ville: string;
   social: {
     facebook: string;
     instagram: string;
@@ -11,8 +13,9 @@ type StorefrontFooterProps = {
   };
 };
 
-export function StorefrontFooter({ storeName, handle, social }: StorefrontFooterProps) {
+export function StorefrontFooter({ storeName, handle, bio, ville, social }: StorefrontFooterProps) {
   const base = `/b/${handle}`;
+  const description = bio || `Boutique en direct depuis ${ville}.`;
   const socialLinks = [
     { name: "Facebook", href: social.facebook, icon: FacebookIcon },
     { name: "Instagram", href: social.instagram, icon: InstagramIcon },
@@ -29,7 +32,7 @@ export function StorefrontFooter({ storeName, handle, social }: StorefrontFooter
               {storeName}
             </p>
             <p className="mt-2 max-w-md text-body-sm text-dark-5 dark:text-dark-6">
-              Prêt-à-porter et accessoires, livrés depuis Cotonou et Abidjan.
+              {description}
             </p>
           </div>
 
