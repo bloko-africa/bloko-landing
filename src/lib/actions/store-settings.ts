@@ -100,7 +100,7 @@ export async function updateStoreSettings(formData: FormData) {
     },
   });
 
-  revalidatePath("/admin/settings");
+  revalidatePath("/2558588dca9a/settings");
   revalidatePath("/");
   revalidatePath("/mentions-legales");
   revalidatePath("/cgv");

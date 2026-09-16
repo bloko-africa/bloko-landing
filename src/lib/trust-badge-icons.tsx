@@ -114,3 +114,21 @@ export const DEFAULT_TRUST_BADGES: TrustBadge[] = [
     subtitle: "Mobile Money & carte",
   },
 ];
+
+/**
+ * Valide/normalise une valeur JSON lue en base (Boutique.trustBadges ou
+ * StoreSettings.trustBadges) vers TrustBadge[] — retombe sur les 4 badges
+ * par défaut si absent ou invalide plutôt que de planter le rendu.
+ */
+export function parseTrustBadges(value: unknown): TrustBadge[] {
+  if (!Array.isArray(value)) return DEFAULT_TRUST_BADGES;
+  const valid = value.filter(
+    (v): v is TrustBadge =>
+      typeof v === "object" &&
+      v !== null &&
+      TRUST_BADGE_ICON_KEYS.includes((v as TrustBadge).icon) &&
+      typeof (v as TrustBadge).title === "string" &&
+      typeof (v as TrustBadge).subtitle === "string",
+  );
+  return valid.length > 0 ? valid : DEFAULT_TRUST_BADGES;
+}

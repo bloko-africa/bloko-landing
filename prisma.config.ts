@@ -10,8 +10,9 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    // Connexion directe (port 5432) requise pour les migrations : le pooler
-    // transactionnel Supabase (port 6543) ne supporte pas les migrations Prisma.
+    // Connexion directe Prisma Postgres (db.prisma.io) requise pour les
+    // migrations : la connexion poolée (pooled.db.prisma.io, DATABASE_URL)
+    // ne supporte pas les migrations Prisma.
     url: process.env["DIRECT_URL"],
   },
 });

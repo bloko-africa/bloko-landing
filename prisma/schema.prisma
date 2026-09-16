@@ -21,6 +21,14 @@ model User {
   accounts      Account[]
   orders        Order[]
   pushSubscriptions PushSubscription[]
+  payoutsRecorded   PayoutRecord[]
+  reviews           Review[]
+
+  // Compte staff rattache a une boutique (role "vendeur"). NULL = staff
+  // plateforme (viewer/editor/admin), voit toutes les boutiques.
+  boutiqueId    String?   @map("boutique_id")
+  boutique      Boutique? @relation("BoutiqueStaff", fields: [boutiqueId], references: [id], onDelete: SetNull)
+  ownedBoutique Boutique? @relation("BoutiqueOwner")
 
   role       String?
   banned     Boolean?  @default(false)
@@ -28,6 +36,7 @@ model User {
   banExpires DateTime?
 
   @@unique([email])
+  @@index([boutiqueId])
   @@map("user")
 }
 
@@ -80,6 +89,154 @@ model Verification {
   @@map("verification")
 }
 
+// --- Boutiques (multi-tenant Pixel) ---
+
+enum BoutiqueStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum DeliveryFeeMode {
+  INCLUS                 // ajoute au montant paye en ligne
+  A_LA_CHARGE_DU_CLIENT   // paye separement, en especes, a la reception
+}
+
+// Une boutique = une vendeuse TikTok. Le branding (ex-StoreSettings) est
+// duplique ici plutot que dans une table a part : meme acteur, meme cadence
+// d'edition que le reste de la fiche boutique.
+model Boutique {
+  id          String         @id @default(cuid())
+  handle      String         @unique
+  displayName String         @map("display_name")
+  status      BoutiqueStatus @default(PENDING)
+
+  ownerId String @unique @map("owner_id")
+  owner   User   @relation("BoutiqueOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  staff   User[] @relation("BoutiqueStaff")
+
+  // Localisation : sert a suggerer les agences de livraison pertinentes
+  // (Agence.zones) au moment d'assigner une livraison.
+  pays     String  @default("Bénin")
+  ville    String
+  quartier String?
+  adresse  String?
+
+  // Certaines vendeuses ont leur propre service de livraison et facturent
+  // un tarif ; d'autres laissent la livraison a la charge du client (payee
+  // en especes a la reception, hors paiement en ligne). Valeur par defaut
+  // (0, a la charge du client) au moment ou une boutique est creee et
+  // n'a encore rien configure.
+  deliveryFee     Decimal         @default(0) @map("delivery_fee") @db.Decimal(10, 2)
+  deliveryFeeMode DeliveryFeeMode @default(A_LA_CHARGE_DU_CLIENT) @map("delivery_fee_mode")
+
+  accentColor  String  @default("#a67c52") @map("accent_color")
+  heroEyebrow  String? @map("hero_eyebrow")
+  heroTitle    String? @map("hero_title")
+  heroSubtitle String? @map("hero_subtitle")
+  heroCtaLabel String? @map("hero_cta_label")
+  bio          String?
+  logoUrl      String? @map("logo_url")
+  coverImage   String? @map("cover_image")
+  currency     String  @default("XOF")
+
+  featuredCollectionId String?     @map("featured_collection_id")
+  featuredCollection   Collection? @relation("BoutiqueFeaturedCollection", fields: [featuredCollectionId], references: [id], onDelete: SetNull)
+
+  socialFacebook  String? @map("social_facebook")
+  socialInstagram String? @map("social_instagram")
+  socialTiktok    String? @map("social_tiktok")
+  socialWhatsapp  String? @map("social_whatsapp")
+  legalMentions   String? @map("legal_mentions")
+  cgvContent      String? @map("cgv_content")
+  trustBadges     Json?   @map("trust_badges")
+
+  products    Product[]
+  collections Collection[] @relation("BoutiqueCollections")
+  orders      Order[]
+  payouts     PayoutRecord[]
+  reviews     Review[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([ville])
+  @@map("boutique")
+}
+
+// --- Livraison / agences partenaires ---
+
+enum LivraisonStatus {
+  A_ASSIGNER
+  PRISE_EN_CHARGE
+  EN_ROUTE
+  LIVREE
+  ECHEC
+  RETOUR
+}
+
+model Agence {
+  id         String      @id @default(cuid())
+  name       String
+  phone      String?
+  zones      String[]
+  isActive   Boolean     @default(true) @map("is_active")
+  livraisons Livraison[]
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+
+  @@map("agence")
+}
+
+// Cycle de vie separe de OrderStatus : le paiement est arbitre par le
+// webhook GeniusPay, la livraison est saisie manuellement par le
+// staff/la vendeuse (aucune agence n'a d'integration aujourd'hui).
+model Livraison {
+  id           String          @id @default(cuid())
+  orderId      String          @unique @map("order_id")
+  order        Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  agenceId     String?         @map("agence_id")
+  agence       Agence?         @relation(fields: [agenceId], references: [id], onDelete: SetNull)
+  status       LivraisonStatus @default(A_ASSIGNER)
+  trackingCode String?         @map("tracking_code")
+  notes        String?
+  proofUrl     String?         @map("proof_url")
+  assignedAt   DateTime?       @map("assigned_at")
+  deliveredAt  DateTime?       @map("delivered_at")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([agenceId])
+  @@map("livraison")
+}
+
+// Grand livre interne (pas un vrai sequestre) : l'argent continue de
+// transiter par GeniusPay vers le compte plateforme, ces lignes ne font que
+// tracer ce qui a ete reellement reverse a chaque vendeuse en dehors de
+// l'app. Le solde du (getWalletSummary) se calcule a partir des
+// OrderItem des commandes PAID moins la somme de ces PayoutRecord — jamais
+// stocke directement, pour eviter toute desynchronisation. Cree uniquement
+// par un admin (jamais la vendeuse elle-meme) : regle d'integrite pour
+// qu'un solde ne puisse pas etre falsifie de l'interieur.
+model PayoutRecord {
+  id           String   @id @default(cuid())
+  boutiqueId   String   @map("boutique_id")
+  boutique     Boutique @relation(fields: [boutiqueId], references: [id], onDelete: Restrict)
+  amount       Decimal  @db.Decimal(10, 2)
+  currency     String   @default("XOF")
+  method       String
+  reference    String?
+  note         String?
+  recordedById String   @map("recorded_by_id")
+  recordedBy   User     @relation(fields: [recordedById], references: [id], onDelete: Restrict)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([boutiqueId])
+  @@map("payout_record")
+}
+
 // --- Catalogue mode ---
 
 enum ProductStatus {
@@ -96,11 +253,15 @@ model Collection {
   description    String?
   coverImage     String?         @map("cover_image")
   isActive       Boolean         @default(true) @map("is_active")
+  boutiqueId     String          @map("boutique_id")
+  boutique       Boutique        @relation("BoutiqueCollections", fields: [boutiqueId], references: [id], onDelete: Restrict)
   products       Product[]
   featuredBy     StoreSettings[]
+  featuredByBoutique Boutique[]  @relation("BoutiqueFeaturedCollection")
   createdAt      DateTime        @default(now()) @map("created_at")
   updatedAt      DateTime        @updatedAt @map("updated_at")
 
+  @@index([boutiqueId])
   @@map("collection")
 }
 
@@ -124,6 +285,8 @@ model Product {
   description  String?
   basePrice    Decimal        @map("base_price") @db.Decimal(10, 2)
   status       ProductStatus  @default(DRAFT)
+  boutiqueId   String         @map("boutique_id")
+  boutique     Boutique       @relation(fields: [boutiqueId], references: [id], onDelete: Restrict)
   collectionId String?        @map("collection_id")
   collection   Collection?    @relation(fields: [collectionId], references: [id], onDelete: SetNull)
   categoryId   String?        @map("category_id")
@@ -133,6 +296,7 @@ model Product {
   createdAt    DateTime       @default(now()) @map("created_at")
   updatedAt    DateTime       @updatedAt @map("updated_at")
 
+  @@index([boutiqueId])
   @@index([collectionId])
   @@index([categoryId])
   @@index([status])
@@ -183,6 +347,8 @@ enum OrderStatus {
 model Order {
   id            String      @id @default(cuid())
   reference     String      @unique
+  boutiqueId    String      @map("boutique_id")
+  boutique      Boutique    @relation(fields: [boutiqueId], references: [id], onDelete: Restrict)
   userId        String?     @map("user_id")
   user          User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   customerName  String      @map("customer_name")
@@ -192,15 +358,49 @@ model Order {
   status        OrderStatus @default(PENDING)
   totalAmount   Decimal     @map("total_amount") @db.Decimal(10, 2)
   currency      String      @default("XOF")
+  // Copie des reglages boutique au moment de la commande (pas une
+  // reference live) : si la vendeuse change son tarif plus tard, les
+  // commandes deja passees gardent ce qui a ete annonce a l'acheteur.
+  deliveryFee     Decimal         @default(0) @map("delivery_fee") @db.Decimal(10, 2)
+  deliveryFeeMode DeliveryFeeMode @default(A_LA_CHARGE_DU_CLIENT) @map("delivery_fee_mode")
   items         OrderItem[]
   payments      Payment[]
+  livraison     Livraison?
+  review        Review?
   createdAt     DateTime    @default(now()) @map("created_at")
   updatedAt     DateTime    @updatedAt @map("updated_at")
 
+  @@index([boutiqueId])
   @@index([status])
   @@index([userId])
   @@index([country])
+  // Filtre le plus fréquent du code (portefeuille, dashboard, exports) :
+  // "commandes PAID de cette boutique" — un index composite sert cette
+  // requête directement plutôt que de laisser Postgres combiner deux index
+  // simples.
+  @@index([boutiqueId, status])
   @@map("order")
+}
+
+// Un avis par commande (contrainte unique sur orderId), uniquement possible
+// une fois la Livraison au statut LIVREE — vérifié côté action, pas en
+// contrainte DB (le statut peut encore changer après coup, ex: RETOUR).
+// Nécessite un compte acheteur (Order.userId non nul) : pas d'avis anonyme
+// pour une commande invitée.
+model Review {
+  id         String   @id @default(cuid())
+  orderId    String   @unique @map("order_id")
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  boutiqueId String   @map("boutique_id")
+  boutique   Boutique @relation(fields: [boutiqueId], references: [id], onDelete: Cascade)
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([boutiqueId])
+  @@map("review")
 }
 
 model OrderItem {
@@ -247,7 +447,10 @@ model Payment {
   @@map("payment")
 }
 
-// --- Parametres boutique (singleton, id fixe "default") ---
+// --- Parametres plateforme (singleton, id fixe "default") ---
+// Ex-parametres "boutique unique", repositionnes comme reglages de l'accueil
+// Pixel (marque plateforme) depuis le passage au multi-boutiques. Les
+// champs de branding par boutique vivent desormais sur Boutique (ci-dessus).
 
 model StoreSettings {
   id                   String      @id @default("default")

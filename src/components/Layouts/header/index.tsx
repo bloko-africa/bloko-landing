@@ -23,14 +23,11 @@ export function Header() {
       </button>
 
       {isMobile && (
-        <Link href={"/admin"} className="2xsm:ml-4 ml-2 max-[430px]:hidden">
-          <Image
-            src={"/images/logo/logo-icon.svg"}
-            width={32}
-            height={32}
-            alt=""
-            role="presentation"
-          />
+        <Link
+          href={"/2558588dca9a"}
+          className="2xsm:ml-4 ml-2 flex size-8 shrink-0 items-center justify-center rounded-lg bg-dark max-[430px]:hidden dark:bg-black"
+        >
+          <Image src="/brand/bloko-icon.png" width={16} height={18} alt="" role="presentation" />
         </Link>
       )}
 

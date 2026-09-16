@@ -1,6 +1,7 @@
 "use client";
 
 import { useCart } from "@/lib/cart/cart-context";
+import { useBoutiqueHandle } from "@/lib/boutique-path";
 import { formatPrice } from "@/lib/format-price";
 import Image from "next/image";
 import Link from "next/link";
@@ -34,6 +35,8 @@ export function ProductCard({
 }: ProductCardProps) {
   const { addItem } = useCart();
   const router = useRouter();
+  const handle = useBoutiqueHandle();
+  const base = `/b/${handle}`;
 
   const singleVariant = variants.length === 1 ? variants[0] : null;
   const canQuickAct = Boolean(singleVariant && singleVariant.stock > 0);
@@ -42,10 +45,11 @@ export function ProductCard({
   function handleQuickAdd(e: React.MouseEvent) {
     e.preventDefault();
     if (!canQuickAct || !singleVariant) {
-      router.push(`/produits/${slug}`);
+      router.push(`${base}/produits/${slug}`);
       return;
     }
     addItem({
+      boutiqueHandle: handle,
       variantId: singleVariant.id,
       productSlug: slug,
       productName: name,
@@ -61,10 +65,11 @@ export function ProductCard({
   function handleQuickBuy(e: React.MouseEvent) {
     e.preventDefault();
     if (!canQuickAct || !singleVariant) {
-      router.push(`/produits/${slug}`);
+      router.push(`${base}/produits/${slug}`);
       return;
     }
     addItem({
+      boutiqueHandle: handle,
       variantId: singleVariant.id,
       productSlug: slug,
       productName: name,
@@ -74,12 +79,12 @@ export function ProductCard({
       image,
       stock: singleVariant.stock,
     });
-    router.push("/commande");
+    router.push(`${base}/commande`);
   }
 
   return (
     <div className="group relative">
-      <Link href={`/produits/${slug}`} className="block">
+      <Link href={`${base}/produits/${slug}`} className="block">
         <div className="relative aspect-3/4 overflow-hidden bg-gray-2 dark:bg-dark-2">
           {image && (
             <Image

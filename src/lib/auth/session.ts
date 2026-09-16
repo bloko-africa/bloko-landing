@@ -22,3 +22,40 @@ export async function requireRole(allowed: AppRole[]) {
 
   return session;
 }
+
+/**
+ * Variante de requireRole() pour tout ce qui touche une ressource rattachée
+ * à une boutique (produits, collections, commandes, livraisons...).
+ *
+ * - Staff plateforme (viewer/editor/admin) : scopedBoutiqueId vaut
+ *   `undefined` — non filtré, voit/agit sur toutes les boutiques.
+ * - Vendeuse (role "vendeur") : scopedBoutiqueId vaut sa propre boutique.
+ *   Utilisée seule (sans targetBoutiqueId) sur une liste, elle sert de
+ *   valeur de filtre Prisma (`where: { boutiqueId: scopedBoutiqueId }`).
+ *   Avec targetBoutiqueId (page détail / mutation sur une ressource déjà
+ *   chargée), elle lève une erreur si la ressource appartient à une autre
+ *   boutique — protège un accès direct par URL.
+ */
+export async function requireBoutiqueAccess(
+  allowed: AppRole[],
+  targetBoutiqueId?: string,
+) {
+  const session = await requireRole(allowed);
+  const role = (session.user as { role?: string }).role as AppRole;
+  const userBoutiqueId =
+    (session.user as { boutiqueId?: string | null }).boutiqueId ?? null;
+
+  if (role !== "vendeur") {
+    return { session, scopedBoutiqueId: undefined as string | undefined };
+  }
+
+  if (!userBoutiqueId) {
+    throw new Error("Ce compte vendeur n'est rattaché à aucune boutique.");
+  }
+
+  if (targetBoutiqueId && targetBoutiqueId !== userBoutiqueId) {
+    throw new Error("Action non autorisée pour cette boutique.");
+  }
+
+  return { session, scopedBoutiqueId: userBoutiqueId as string | undefined };
+}

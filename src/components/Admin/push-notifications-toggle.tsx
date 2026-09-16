@@ -16,7 +16,11 @@ function urlBase64ToUint8Array(base64String: string) {
   return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
 }
 
-export function PushNotificationsToggle() {
+export function PushNotificationsToggle({
+  description = "Reçois une alerte sur cet appareil à chaque nouvelle commande.",
+}: {
+  description?: string;
+} = {}) {
   const [supported, setSupported] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -99,9 +103,7 @@ export function PushNotificationsToggle() {
         <p className="text-body-sm font-medium text-dark dark:text-white">
           Notifications push
         </p>
-        <p className="text-body-xs text-dark-5 dark:text-dark-6">
-          Reçois une alerte sur cet appareil à chaque nouvelle commande.
-        </p>
+        <p className="text-body-xs text-dark-5 dark:text-dark-6">{description}</p>
       </div>
 
       <button

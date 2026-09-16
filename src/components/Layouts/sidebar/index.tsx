@@ -1,10 +1,12 @@
 "use client";
 
 import { Logo } from "@/components/logo";
+import { useSession } from "@/lib/auth/auth-client";
+import type { AppRole } from "@/lib/auth/modules/authorization/permissions";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { NAV_DATA } from "./data";
 import { ArrowLeftIcon, ChevronUp } from "./icons";
 import { MenuItem } from "./menu-item";
@@ -14,6 +16,27 @@ export function Sidebar() {
   const pathname = usePathname();
   const { setIsOpen, isOpen, isMobile, toggleSidebar } = useSidebarContext();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const session = useSession();
+  const role = (session.data?.user as { role?: string } | undefined)
+    ?.role as AppRole | undefined;
+
+  // Un item sans `roles` est visible par tout le staff connecté ; un item
+  // avec `roles` (ex: "Plateforme" -> admin only) ne s'affiche que pour ce
+  // rôle précis — la vraie barrière reste côté serveur (proxy.ts,
+  // requireBoutiqueAccess), ceci n'est qu'un filtre d'affichage.
+  const visibleSections = useMemo(() => {
+    return NAV_DATA.map((section) => ({
+      ...section,
+      items: section.items
+        .filter((item) => !item.roles || (role && item.roles.includes(role)))
+        .map((item) => ({
+          ...item,
+          items: item.items.filter(
+            (subItem) => !subItem.roles || (role && subItem.roles.includes(role)),
+          ),
+        })),
+    })).filter((section) => section.items.length > 0);
+  }, [role]);
 
   const toggleExpanded = (title: string) => {
     setExpandedItems((prev) => (prev.includes(title) ? [] : [title]));
@@ -26,7 +49,7 @@ export function Sidebar() {
 
   useEffect(() => {
     // Keep collapsible open, when it's subpage is active
-    NAV_DATA.some((section) => {
+    visibleSections.some((section) => {
       return section.items.some((item) => {
         return item.items.some((subItem) => {
           if (subItem.url === pathname) {
@@ -40,7 +63,7 @@ export function Sidebar() {
         });
       });
     });
-  }, [pathname]);
+  }, [pathname, visibleSections]);
 
   return (
     <>
@@ -66,7 +89,7 @@ export function Sidebar() {
         <div className="flex h-full flex-col py-10 pl-[25px] pr-[7px]">
           <div className="relative pr-4.5">
             <Link
-              href={"/admin"}
+              href={"/2558588dca9a"}
               onClick={() => isMobile && toggleSidebar()}
               className="px-0 py-2.5 min-[850px]:py-0"
             >
@@ -87,7 +110,7 @@ export function Sidebar() {
 
           {/* Navigation */}
           <div className="custom-scrollbar mt-6 flex-1 overflow-y-auto pr-3 min-[850px]:mt-10">
-            {NAV_DATA.map((section) => (
+            {visibleSections.map((section) => (
               <div key={section.label} className="mb-6">
                 <h2 className="mb-5 text-sm font-medium text-dark-4 dark:text-dark-6">
                   {section.label}

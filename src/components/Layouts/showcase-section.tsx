@@ -2,14 +2,24 @@ import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
 type PropsType = {
+  id?: string;
   title: string;
   children: ReactNode;
   className?: string;
 };
 
-export function ShowcaseSection({ title, children, className }: PropsType) {
+export function ShowcaseSection({ id, title, children, className }: PropsType) {
   return (
-    <div className="rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
+    <div
+      id={id}
+      className={cn(
+        "rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card",
+        // scroll-mt : décale la cible d'ancrage sous le header sticky admin
+        // + la nav de sections sticky (boutique-edit-form) quand on saute
+        // dessus via #ancre — sans effet quand id est absent.
+        id && "scroll-mt-32",
+      )}
+    >
       <h2 className="border-b border-stroke px-4 py-4 font-medium text-dark dark:border-dark-3 dark:text-white sm:px-6 xl:px-7.5">
         {title}
       </h2>

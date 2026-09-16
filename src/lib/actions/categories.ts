@@ -32,7 +32,7 @@ export async function createCategory(formData: FormData) {
     },
   });
 
-  revalidatePath("/admin/categories");
+  revalidatePath("/2558588dca9a/categories");
 }
 
 export async function updateCategory(formData: FormData) {
@@ -52,11 +52,11 @@ export async function updateCategory(formData: FormData) {
     },
   });
 
-  revalidatePath("/admin/categories");
+  revalidatePath("/2558588dca9a/categories");
 }
 
 export async function deleteCategory(id: string) {
   await requireRole(["admin"]);
   await db.category.delete({ where: { id } });
-  revalidatePath("/admin/categories");
+  revalidatePath("/2558588dca9a/categories");
 }

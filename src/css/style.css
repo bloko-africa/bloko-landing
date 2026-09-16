@@ -4,8 +4,8 @@
 
 @theme {
   --font-sans:
-    'Satoshi', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
-    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    var(--font-poppins), ui-sans-serif, system-ui, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
   --breakpoint-2xsm: 375px;
   --breakpoint-xsm: 425px;
@@ -14,7 +14,9 @@
   --color-current: currentColor;
   --color-transparent: transparent;
   --color-white: #ffffff;
-  --color-primary: #a67c52;
+  /* Branding plateforme par défaut : noir/blanc. Chaque boutique surcharge
+     --color-primary avec sa propre accentColor (voir b/[handle]/layout.tsx). */
+  --color-primary: #141414;
   --color-stroke: #e8e5e0;
   --color-stroke-dark: #2a2825;
 

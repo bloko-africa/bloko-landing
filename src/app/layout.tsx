@@ -1,26 +1,33 @@
-import "@/css/satoshi.css";
 import "@/css/style.css";
 
 import type { Metadata } from "next";
+import { Poppins } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import type { PropsWithChildren } from "react";
 import { Toaster } from "sonner";
 import { Providers } from "./providers";
 
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-poppins",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: {
-    template: "%s | Mode Shop",
-    default: "Mode Shop",
+    template: "%s | Bloko",
+    default: "Bloko",
   },
-  description: "Boutique de prêt-à-porter et accessoires.",
+  description: "Le marché des boutiques TikTok.",
 };
 
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="fr" suppressHydrationWarning className={poppins.variable}>
       <body>
         <Providers>
-          <NextTopLoader color="#5750F1" showSpinner={false} />
+          <NextTopLoader color="#141414" showSpinner={false} />
 
           {children}
 

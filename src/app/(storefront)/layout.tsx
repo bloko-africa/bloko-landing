@@ -1,30 +1,18 @@
 import { CookieConsent } from "@/components/Storefront/cookie-consent";
-import { StorefrontFooter } from "@/components/Storefront/footer";
-import { StorefrontHeader } from "@/components/Storefront/header";
-import { CartProvider } from "@/lib/cart/cart-context";
-import { getStoreSettings } from "@/lib/store-settings";
+import { PlatformHeader } from "@/components/Storefront/platform-header";
+import { PlatformFooter } from "@/components/Storefront/platform-footer";
 import type { PropsWithChildren } from "react";
 
-export default async function StorefrontLayout({ children }: PropsWithChildren) {
-  const settings = await getStoreSettings();
-
+// Accueil plateforme Bloko (recherche + découverte cross-boutiques) : pas de
+// CartProvider ici, aucun panier n'existe tant qu'on n'est pas entré dans
+// une boutique via /b/[handle] (voir ce layout séparé).
+export default function PlatformLayout({ children }: PropsWithChildren) {
   return (
-    <CartProvider>
-      <style>{`:root{--color-primary: ${settings.accentColor};}`}</style>
-      <div className="flex min-h-screen flex-col bg-white dark:bg-gray-dark">
-        <StorefrontHeader storeName={settings.storeName} />
-        <main className="flex-1">{children}</main>
-        <StorefrontFooter
-          storeName={settings.storeName}
-          social={{
-            facebook: settings.socialFacebook,
-            instagram: settings.socialInstagram,
-            tiktok: settings.socialTiktok,
-            whatsapp: settings.socialWhatsapp,
-          }}
-        />
-      </div>
+    <div className="flex min-h-screen flex-col bg-gray-1 dark:bg-gray-dark">
+      <PlatformHeader />
+      <main className="flex-1">{children}</main>
+      <PlatformFooter />
       <CookieConsent />
-    </CartProvider>
+    </div>
   );
 }

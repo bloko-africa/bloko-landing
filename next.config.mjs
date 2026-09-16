@@ -25,7 +25,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "jrtnejduiqlxmbhnzzay.supabase.co",
+        hostname: "*.ufs.sh",
         port: ""
       },
       {

@@ -26,8 +26,7 @@ const DEFAULT_MENTIONS_LEGALES = `
 <p>Numéro de téléphone : <strong>[Numéro de téléphone]</strong><br>Adresse e-mail : <strong>[Adresse e-mail de contact]</strong></p>
 <p>Directeur de la publication : <strong>[Nom et prénom(s)]</strong></p>
 <h2>2. Hébergement</h2>
-<p>Le site est hébergé par : <strong>[Nom de l'hébergeur]</strong>, dont le siège social est situé au <strong>[Adresse de l'hébergeur]</strong>.</p>
-<p>La base de données et les fichiers du site sont hébergés par Supabase Inc., et l'application est déployée via Vercel Inc.</p>
+<p>Cette boutique est hébergée sur la plateforme Bloko. L'application est déployée par Vercel Inc., la base de données par Prisma Data Platform, et les fichiers/images par UploadThing. Voir les <a href="/mentions-legales">mentions légales de Bloko</a> pour le détail des prestataires techniques.</p>
 <h2>3. Propriété intellectuelle</h2>
 <p>L'ensemble des éléments présents sur ce site (textes, images, photographies, logos, mise en page, charte graphique) est protégé par le droit d'auteur et demeure la propriété exclusive de <strong>[Nom de l'entreprise]</strong>, sauf mention contraire. Toute reproduction, représentation ou exploitation, totale ou partielle, sans autorisation écrite préalable est interdite et constitue une contrefaçon.</p>
 <h2>4. Données personnelles</h2>

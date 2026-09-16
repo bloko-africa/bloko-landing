@@ -1,12 +1,25 @@
 import * as Icons from "../icons";
+import type { AppRole } from "@/lib/auth/modules/authorization/permissions";
 
-export const NAV_DATA = [
+// `roles` restreint un item (et son sous-menu) à certains rôles — absent =
+// visible par tout le staff (viewer/editor/admin/vendeur). Filtré dans
+// Sidebar via le rôle de la session courante.
+export const NAV_DATA: {
+  label: string;
+  items: {
+    title: string;
+    url?: string;
+    icon: (props: { className?: string }) => React.ReactElement;
+    roles?: AppRole[];
+    items: { title: string; url: string; roles?: AppRole[] }[];
+  }[];
+}[] = [
   {
     label: "MAIN MENU",
     items: [
       {
         title: "Tableau de bord",
-        url: "/admin",
+        url: "/2558588dca9a",
         icon: Icons.HomeIcon,
         items: [],
       },
@@ -16,26 +29,54 @@ export const NAV_DATA = [
         items: [
           {
             title: "Produits",
-            url: "/admin/products",
+            url: "/2558588dca9a/products",
           },
           {
             title: "Collections",
-            url: "/admin/collections",
+            url: "/2558588dca9a/collections",
           },
           {
             title: "Catégories",
-            url: "/admin/categories",
+            url: "/2558588dca9a/categories",
           },
           {
             title: "Commandes",
-            url: "/admin/orders",
+            url: "/2558588dca9a/orders",
+          },
+          {
+            title: "Livraisons",
+            url: "/2558588dca9a/livraisons",
+          },
+          {
+            title: "Portefeuille",
+            url: "/2558588dca9a/wallet",
+          },
+          {
+            title: "Clients",
+            url: "/2558588dca9a/clients",
+          },
+        ],
+      },
+      {
+        title: "Plateforme",
+        icon: Icons.Authentication,
+        roles: ["admin"],
+        items: [
+          {
+            title: "Boutiques",
+            url: "/2558588dca9a/boutiques",
+          },
+          {
+            title: "Agences de livraison",
+            url: "/2558588dca9a/agences",
           },
         ],
       },
       {
         title: "Paramètres",
-        url: "/admin/settings",
+        url: "/2558588dca9a/settings",
         icon: Icons.Alphabet,
+        roles: ["admin"],
         items: [],
       },
     ],

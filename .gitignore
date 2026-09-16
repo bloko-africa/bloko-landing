@@ -46,3 +46,7 @@ skills-lock.json
 
 # Local Netlify folder
 .netlify
+
+# crash artifacts
+core
+.disk_check.log

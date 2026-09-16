@@ -1,13 +1,14 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { requireRole } from "@/lib/auth/session";
+import { requireRole, requireBoutiqueAccess } from "@/lib/auth/session";
 import { slugify } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 const collectionSchema = z.object({
   id: z.string().optional(),
+  boutiqueId: z.string().optional(),
   name: z.string().min(1, "Le nom est requis"),
   season: z.string().optional(),
   description: z.string().optional(),
@@ -18,6 +19,7 @@ const collectionSchema = z.object({
 function parseForm(formData: FormData) {
   return collectionSchema.parse({
     id: formData.get("id")?.toString() || undefined,
+    boutiqueId: formData.get("boutiqueId")?.toString() || undefined,
     name: formData.get("name")?.toString() ?? "",
     season: formData.get("season")?.toString() || undefined,
     description: formData.get("description")?.toString() || undefined,
@@ -27,11 +29,19 @@ function parseForm(formData: FormData) {
 }
 
 export async function createCollection(formData: FormData) {
-  await requireRole(["editor", "admin"]);
+  const { scopedBoutiqueId } = await requireBoutiqueAccess([
+    "editor",
+    "admin",
+    "vendeur",
+  ]);
   const data = parseForm(formData);
+
+  const boutiqueId = scopedBoutiqueId ?? data.boutiqueId;
+  if (!boutiqueId) throw new Error("Boutique requise.");
 
   await db.collection.create({
     data: {
+      boutiqueId,
       name: data.name,
       slug: slugify(data.name),
       season: data.season,
@@ -41,17 +51,23 @@ export async function createCollection(formData: FormData) {
     },
   });
 
-  revalidatePath("/admin/collections");
+  revalidatePath("/2558588dca9a/collections");
 }
 
 export async function updateCollection(formData: FormData) {
-  await requireRole(["editor", "admin"]);
   const data = parseForm(formData);
   if (!data.id) throw new Error("id manquant");
+
+  const current = await db.collection.findUniqueOrThrow({
+    where: { id: data.id },
+    select: { boutiqueId: true },
+  });
+  await requireBoutiqueAccess(["editor", "admin", "vendeur"], current.boutiqueId);
 
   await db.collection.update({
     where: { id: data.id },
     data: {
+      // boutiqueId immuable, comme pour Product.
       name: data.name,
       season: data.season,
       description: data.description,
@@ -60,11 +76,11 @@ export async function updateCollection(formData: FormData) {
     },
   });
 
-  revalidatePath("/admin/collections");
+  revalidatePath("/2558588dca9a/collections");
 }
 
 export async function deleteCollection(id: string) {
   await requireRole(["admin"]);
   await db.collection.delete({ where: { id } });
-  revalidatePath("/admin/collections");
+  revalidatePath("/2558588dca9a/collections");
 }

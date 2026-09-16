@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "cookie-consent";
 
-export function CookieConsent() {
+export function CookieConsent({ mentionsHref = "/mentions-legales" }: { mentionsHref?: string }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export function CookieConsent() {
           Ce site utilise des cookies strictement nécessaires à son
           fonctionnement (panier, connexion). En savoir plus dans nos{" "}
           <Link
-            href="/mentions-legales"
+            href={mentionsHref}
             className="text-dark underline underline-offset-2 dark:text-white"
           >
             mentions légales

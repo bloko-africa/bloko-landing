@@ -21,6 +21,14 @@ export const roles = {
     content: ["read", "create", "update"],
   }),
 
+  // Compte vendeuse (Bloko) : mêmes droits de contenu qu'editor, mais
+  // toujours restreint à sa propre boutique par requireBoutiqueAccess() —
+  // pas de delete, comme editor (delete reste admin-only partout).
+  vendeur: ac.newRole({
+    user: ["read", "update:own"],
+    content: ["read", "create", "update"],
+  }),
+
   admin: ac.newRole({
     user: ["read", "update:own", "update:any", "delete"],
     content: ["read", "create", "update", "delete"],

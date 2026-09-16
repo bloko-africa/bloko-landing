@@ -2,56 +2,61 @@ import { auth } from "@/lib/auth";
 import type { AppRole } from "@/lib/auth/modules/authorization/permissions";
 import { NextRequest, NextResponse } from "next/server";
 
-const STAFF_ROLES: AppRole[] = ["viewer", "editor", "admin"];
+const STAFF_ROLES: AppRole[] = ["viewer", "editor", "admin", "vendeur"];
 
-const ADMIN_AUTH_PATHS = ["/admin/auth/sign-in"];
-const CUSTOMER_AUTH_PATHS = ["/compte/connexion", "/compte/inscription"];
-const AUTH_ONLY_PATHS = [...ADMIN_AUTH_PATHS, ...CUSTOMER_AUTH_PATHS];
+const ADMIN_AUTH_PATHS = ["/2558588dca9a/auth/sign-in"];
 
-// Routes needing a logged-in session (any role) but not staff privileges.
-// /commande n'est plus protege : le checkout gere lui-meme l'auth (compte
-// cree a la volee ou commande invitee si l'email existe deja).
-const CUSTOMER_PROTECTED_PREFIXES = ["/compte"];
+// Compte acheteur, scopé par boutique : /b/<handle>/compte/**. Capture le
+// handle pour rediriger vers la bonne connexion/inscription plutôt qu'une
+// route plateforme générique qui n'existe pas.
+const CUSTOMER_PATH_RE = /^\/b\/([^/]+)\/compte(\/|$)/;
+const CUSTOMER_AUTH_PATH_RE = /^\/b\/[^/]+\/compte\/(connexion|inscription)(\/|$)/;
 
 const SESSION_COOKIE_NAME =
   process.env.NODE_ENV === "development"
     ? "better-auth.session_token"
     : "__Secure-better-auth.session_token";
 
-const ROLE_PROTECTED: { prefix: string; requiredRole: AppRole }[] = [
-  { prefix: "/admin/settings", requiredRole: "admin" },
+// /2558588dca9a/livraisons, /2558588dca9a/products, /2558588dca9a/orders, /2558588dca9a/collections
+// restent ouverts a tout le staff (y compris vendeur) : le filtrage par
+// boutique se fait au niveau requete via requireBoutiqueAccess(), pas ici.
+const ROLE_PROTECTED: { prefix: string; requiredRoles: AppRole[] }[] = [
+  { prefix: "/2558588dca9a/settings", requiredRoles: ["admin"] },
+  { prefix: "/2558588dca9a/boutiques", requiredRoles: ["admin"] },
+  { prefix: "/2558588dca9a/agences", requiredRoles: ["admin"] },
 ];
 
 function isAdminPath(pathname: string) {
   return (
-    pathname.startsWith("/admin") &&
+    pathname.startsWith("/2558588dca9a") &&
     !ADMIN_AUTH_PATHS.some((path) => pathname.startsWith(path))
-  );
-}
-
-function isCustomerProtectedPath(pathname: string) {
-  return (
-    CUSTOMER_PROTECTED_PREFIXES.some((path) => pathname.startsWith(path)) &&
-    !CUSTOMER_AUTH_PATHS.some((path) => pathname.startsWith(path))
   );
 }
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const callbackUrl = `${pathname}${request.nextUrl.search}`;
-  const isAuthOnly = AUTH_ONLY_PATHS.some((path) => pathname.startsWith(path));
-  const isAdminAuthOnly = ADMIN_AUTH_PATHS.some((path) =>
-    pathname.startsWith(path),
-  );
+  const isAdminAuthOnly = ADMIN_AUTH_PATHS.some((path) => pathname.startsWith(path));
+  const customerMatch = pathname.match(CUSTOMER_PATH_RE);
+  const isCustomerAuthOnly = CUSTOMER_AUTH_PATH_RE.test(pathname);
+  const isAuthOnly = isAdminAuthOnly || isCustomerAuthOnly;
+
   const needsAdminAccess = isAdminPath(pathname);
-  const needsAnySession = isCustomerProtectedPath(pathname);
+  // Session requise sur /b/<handle>/compte/** sauf les pages connexion/inscription
+  // elles-mêmes (elles gèrent leur propre état "pas encore connecté").
+  const needsAnySession = Boolean(customerMatch) && !isCustomerAuthOnly;
   const requiresAuth = needsAdminAccess || needsAnySession;
   const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
 
   function redirectToLogin() {
     const url = request.nextUrl.clone();
     url.searchParams.set("callbackUrl", callbackUrl);
-    url.pathname = needsAdminAccess ? "/admin/auth/sign-in" : "/compte/connexion";
+    if (needsAdminAccess) {
+      url.pathname = "/2558588dca9a/auth/sign-in";
+    } else {
+      // customerMatch garanti ici (needsAnySession implique needsAdminAccess=false)
+      url.pathname = `/b/${customerMatch![1]}/compte/connexion`;
+    }
     return NextResponse.redirect(url);
   }
 
@@ -79,12 +84,17 @@ export async function proxy(request: NextRequest) {
     const roleProtectedRoute = ROLE_PROTECTED.find((route) =>
       pathname.startsWith(route.prefix),
     );
-    if (roleProtectedRoute && sessionRole !== roleProtectedRoute.requiredRole) {
-      return NextResponse.redirect(new URL("/admin", request.url));
+    if (
+      roleProtectedRoute &&
+      !roleProtectedRoute.requiredRoles.includes(sessionRole as AppRole)
+    ) {
+      return NextResponse.redirect(new URL("/2558588dca9a", request.url));
     }
 
     if (isAuthOnly) {
-      const destination = isAdminAuthOnly ? "/admin" : "/compte";
+      const destination = isAdminAuthOnly
+        ? "/2558588dca9a"
+        : `/b/${customerMatch ? customerMatch[1] : pathname.split("/")[2]}/compte`;
       return NextResponse.redirect(new URL(destination, request.url));
     }
   } catch (error) {

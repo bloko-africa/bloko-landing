@@ -2,6 +2,7 @@ import Link from "next/link";
 
 type StorefrontFooterProps = {
   storeName: string;
+  handle: string;
   social: {
     facebook: string;
     instagram: string;
@@ -10,7 +11,8 @@ type StorefrontFooterProps = {
   };
 };
 
-export function StorefrontFooter({ storeName, social }: StorefrontFooterProps) {
+export function StorefrontFooter({ storeName, handle, social }: StorefrontFooterProps) {
+  const base = `/b/${handle}`;
   const socialLinks = [
     { name: "Facebook", href: social.facebook, icon: FacebookIcon },
     { name: "Instagram", href: social.instagram, icon: InstagramIcon },
@@ -51,12 +53,12 @@ export function StorefrontFooter({ storeName, social }: StorefrontFooterProps) {
 
         <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-stroke pt-6 text-body-sm dark:border-dark-3">
           <Link
-            href="/mentions-legales"
+            href={`${base}/mentions-legales`}
             className="text-dark-5 hover:text-primary dark:text-dark-6"
           >
             Mentions légales
           </Link>
-          <Link href="/cgv" className="text-dark-5 hover:text-primary dark:text-dark-6">
+          <Link href={`${base}/cgv`} className="text-dark-5 hover:text-primary dark:text-dark-6">
             Conditions générales de vente
           </Link>
         </div>

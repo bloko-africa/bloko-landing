@@ -11,6 +11,7 @@ import {
 } from "react";
 
 export type CartItem = {
+  boutiqueHandle: string;
   variantId: string;
   productSlug: string;
   productName: string;
@@ -58,19 +59,26 @@ export function CartProvider({ children }: PropsWithChildren) {
   const addItem = useCallback(
     (item: Omit<CartItem, "quantity">, quantity = 1) => {
       setItems((prev) => {
-        const existing = prev.find((i) => i.variantId === item.variantId);
+        // Une commande = une boutique (voir buildOrderItems côté serveur,
+        // qui fait foi) : ajouter un article d'une autre boutique vide
+        // d'abord le panier, plutôt que de laisser un mélange invisible
+        // jusqu'au checkout.
+        const mismatch = prev.length > 0 && prev[0].boutiqueHandle !== item.boutiqueHandle;
+        const base = mismatch ? [] : prev;
+
+        const existing = base.find((i) => i.variantId === item.variantId);
         if (existing) {
           const nextQuantity = Math.min(
             existing.quantity + quantity,
             item.stock,
           );
-          return prev.map((i) =>
+          return base.map((i) =>
             i.variantId === item.variantId
               ? { ...i, quantity: nextQuantity }
               : i,
           );
         }
-        return [...prev, { ...item, quantity: Math.min(quantity, item.stock) }];
+        return [...base, { ...item, quantity: Math.min(quantity, item.stock) }];
       });
     },
     [],

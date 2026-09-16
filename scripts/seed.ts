@@ -59,14 +59,36 @@ function image(seed: string, index = 0) {
 }
 
 async function main() {
+  // Depuis le passage multi-boutique, Product/Collection sont rattachés à
+  // une Boutique — ce seed reconstitue le catalogue "mode-shop" d'origine
+  // (même boutique par défaut que prisma/seed-default-boutique.ts).
+  const owner = await db.user.findFirst({ where: { role: "admin" }, orderBy: { createdAt: "asc" } });
+  if (!owner) {
+    throw new Error(
+      "Aucun compte admin trouvé — crée un compte admin avant de lancer ce seed (il devient owner de la boutique de démo).",
+    );
+  }
+  const boutique = await db.boutique.upsert({
+    where: { handle: "mode-shop" },
+    update: {},
+    create: {
+      handle: "mode-shop",
+      displayName: "Mode Shop",
+      status: "ACTIVE",
+      ownerId: owner.id,
+      ville: "Cotonou",
+    },
+  });
+
   console.log("Nettoyage du catalogue existant...");
-  await db.product.deleteMany();
-  await db.collection.deleteMany();
+  await db.product.deleteMany({ where: { boutiqueId: boutique.id } });
+  await db.collection.deleteMany({ where: { boutiqueId: boutique.id } });
   await db.category.deleteMany();
 
   console.log("Création des collections...");
   const ete = await db.collection.create({
     data: {
+      boutiqueId: boutique.id,
       name: "Éclat d'Été",
       slug: "eclat-d-ete",
       season: "Été 2026",
@@ -78,6 +100,7 @@ async function main() {
 
   const soiree = await db.collection.create({
     data: {
+      boutiqueId: boutique.id,
       name: "Soirée Élégance",
       slug: "soiree-elegance",
       season: "Collection permanente",
@@ -220,7 +243,9 @@ async function main() {
 
   for (const p of products) {
     const { variants, ...productData } = p;
-    const product = await db.product.create({ data: productData });
+    const product = await db.product.create({
+      data: { ...productData, boutiqueId: boutique.id },
+    });
 
     await db.productVariant.createMany({
       data: variants.map((v, i) => ({

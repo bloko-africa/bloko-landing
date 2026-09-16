@@ -20,7 +20,7 @@ const DEMO_ORDERS = [
 
 async function main() {
   const variants = await db.productVariant.findMany({
-    include: { product: { select: { basePrice: true } } },
+    include: { product: { select: { basePrice: true, boutiqueId: true } } },
     take: 20,
   });
 
@@ -39,6 +39,7 @@ async function main() {
     const order = await db.order.create({
       data: {
         reference: `ORD-DEMO-${index + 1}`,
+        boutiqueId: variant.product.boutiqueId,
         customerName: demo.name,
         customerPhone: demo.phone,
         country: demo.country,

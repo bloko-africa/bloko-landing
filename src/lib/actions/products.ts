@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { requireRole } from "@/lib/auth/session";
+import { requireRole, requireBoutiqueAccess } from "@/lib/auth/session";
 import { sanitizeRichText } from "@/lib/sanitize-html";
 import { slugify } from "@/lib/utils";
 import {
@@ -13,6 +13,7 @@ import { z } from "zod";
 
 const productSchema = z.object({
   id: z.string().optional(),
+  boutiqueId: z.string().optional(),
   name: z.string().min(1, "Le nom est requis"),
   description: z.string().optional(),
   basePrice: z.coerce.number().positive("Le prix doit être positif"),
@@ -24,6 +25,7 @@ const productSchema = z.object({
 function parseForm(formData: FormData) {
   const data = productSchema.parse({
     id: formData.get("id")?.toString() || undefined,
+    boutiqueId: formData.get("boutiqueId")?.toString() || undefined,
     name: formData.get("name")?.toString() ?? "",
     description: formData.get("description")?.toString() || undefined,
     basePrice: formData.get("basePrice"),
@@ -38,12 +40,28 @@ function parseForm(formData: FormData) {
   };
 }
 
+async function getProductBoutiqueId(productId: string): Promise<string> {
+  const product = await db.product.findUniqueOrThrow({
+    where: { id: productId },
+    select: { boutiqueId: true },
+  });
+  return product.boutiqueId;
+}
+
 export async function createProduct(formData: FormData) {
-  await requireRole(["editor", "admin"]);
+  const { scopedBoutiqueId } = await requireBoutiqueAccess([
+    "editor",
+    "admin",
+    "vendeur",
+  ]);
   const data = parseForm(formData);
+
+  const boutiqueId = scopedBoutiqueId ?? data.boutiqueId;
+  if (!boutiqueId) throw new Error("Boutique requise.");
 
   const product = await db.product.create({
     data: {
+      boutiqueId,
       name: data.name,
       slug: `${slugify(data.name)}-${Date.now().toString(36)}`,
       description: data.description,
@@ -54,18 +72,22 @@ export async function createProduct(formData: FormData) {
     },
   });
 
-  revalidatePath("/admin/products");
+  revalidatePath("/2558588dca9a/products");
   return product.id;
 }
 
 export async function updateProduct(formData: FormData) {
-  await requireRole(["editor", "admin"]);
   const data = parseForm(formData);
   if (!data.id) throw new Error("id manquant");
+
+  const currentBoutiqueId = await getProductBoutiqueId(data.id);
+  await requireBoutiqueAccess(["editor", "admin", "vendeur"], currentBoutiqueId);
 
   await db.product.update({
     where: { id: data.id },
     data: {
+      // boutiqueId n'est pas modifiable ici — un produit ne change pas de
+      // boutique en v1, ça évite de devoir migrer ses commandes/variantes.
       name: data.name,
       description: data.description,
       basePrice: data.basePrice,
@@ -75,8 +97,8 @@ export async function updateProduct(formData: FormData) {
     },
   });
 
-  revalidatePath("/admin/products");
-  revalidatePath(`/admin/products/${data.id}`);
+  revalidatePath("/2558588dca9a/products");
+  revalidatePath(`/2558588dca9a/products/${data.id}`);
 }
 
 export async function deleteProduct(id: string) {
@@ -86,10 +108,10 @@ export async function deleteProduct(id: string) {
   await db.product.delete({ where: { id } });
 
   await Promise.allSettled(
-    images.map((image) => removeStoredImage(imagePathFromUrl(image.url))),
+    images.map((image) => removeStoredImage(imageKeyFromUrl(image.url))),
   );
 
-  revalidatePath("/admin/products");
+  revalidatePath("/2558588dca9a/products");
 }
 
 const variantSchema = z.object({
@@ -103,7 +125,6 @@ const variantSchema = z.object({
 });
 
 export async function addProductVariant(formData: FormData) {
-  await requireRole(["editor", "admin"]);
   const data = variantSchema.parse({
     productId: formData.get("productId"),
     sku: formData.get("sku"),
@@ -114,36 +135,48 @@ export async function addProductVariant(formData: FormData) {
     priceOverride: formData.get("priceOverride") || undefined,
   });
 
+  const boutiqueId = await getProductBoutiqueId(data.productId);
+  await requireBoutiqueAccess(["editor", "admin", "vendeur"], boutiqueId);
+
   await db.productVariant.create({ data });
-  revalidatePath(`/admin/products/${data.productId}`);
+  revalidatePath(`/2558588dca9a/products/${data.productId}`);
 }
 
 export async function updateVariantStock(variantId: string, stock: number) {
-  await requireRole(["editor", "admin"]);
   if (stock < 0) throw new Error("Stock invalide");
+
+  const existing = await db.productVariant.findUniqueOrThrow({
+    where: { id: variantId },
+    select: { product: { select: { boutiqueId: true } } },
+  });
+  await requireBoutiqueAccess(
+    ["editor", "admin", "vendeur"],
+    existing.product.boutiqueId,
+  );
 
   const variant = await db.productVariant.update({
     where: { id: variantId },
     data: { stock },
   });
 
-  revalidatePath(`/admin/products/${variant.productId}`);
+  revalidatePath(`/2558588dca9a/products/${variant.productId}`);
 }
 
 export async function deleteProductVariant(variantId: string) {
   await requireRole(["admin"]);
   const variant = await db.productVariant.delete({ where: { id: variantId } });
-  revalidatePath(`/admin/products/${variant.productId}`);
+  revalidatePath(`/2558588dca9a/products/${variant.productId}`);
 }
 
-function imagePathFromUrl(url: string): string {
-  const marker = "/product-images/";
-  const index = url.indexOf(marker);
-  return index === -1 ? url : url.slice(index + marker.length);
+// UploadThing sert chaque fichier sous .../f/<key> — le dernier segment de
+// l'URL est directement la clé attendue par deleteProductImage.
+function imageKeyFromUrl(url: string): string {
+  return url.slice(url.lastIndexOf("/") + 1);
 }
 
 export async function addProductImage(productId: string, file: File) {
-  await requireRole(["editor", "admin"]);
+  const boutiqueId = await getProductBoutiqueId(productId);
+  await requireBoutiqueAccess(["editor", "admin", "vendeur"], boutiqueId);
 
   if (!file.type.startsWith("image/")) {
     throw new Error("Le fichier doit être une image.");
@@ -163,13 +196,20 @@ export async function addProductImage(productId: string, file: File) {
     data: { productId, url, position: (lastImage?.position ?? -1) + 1 },
   });
 
-  revalidatePath(`/admin/products/${productId}`);
+  revalidatePath(`/2558588dca9a/products/${productId}`);
 }
 
 export async function deleteProductImageAction(imageId: string) {
-  await requireRole(["editor", "admin"]);
+  const existing = await db.productImage.findUniqueOrThrow({
+    where: { id: imageId },
+    select: { product: { select: { boutiqueId: true } } },
+  });
+  await requireBoutiqueAccess(
+    ["editor", "admin", "vendeur"],
+    existing.product.boutiqueId,
+  );
 
   const image = await db.productImage.delete({ where: { id: imageId } });
-  await removeStoredImage(imagePathFromUrl(image.url));
-  revalidatePath(`/admin/products/${image.productId}`);
+  await removeStoredImage(imageKeyFromUrl(image.url));
+  revalidatePath(`/2558588dca9a/products/${image.productId}`);
 }
