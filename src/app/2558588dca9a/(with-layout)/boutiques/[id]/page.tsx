@@ -80,6 +80,8 @@ export default async function BoutiqueDetailPage({
       <ShowcaseSection title="Portefeuille" className="p-6.5!">
         <WalletPanel
           boutiqueId={boutique.id}
+          grossSales={wallet.grossSales}
+          commission={wallet.commission}
           totalEarned={wallet.totalEarned}
           totalPaidOut={wallet.totalPaidOut}
           balance={wallet.balance}

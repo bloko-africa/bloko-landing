@@ -5,6 +5,7 @@ import InputGroup from "@/components/FormElements/InputGroup";
 import { recordPayout } from "@/lib/actions/wallet";
 import { notifyPromise } from "@/lib/notify-promise";
 import { formatPrice } from "@/lib/format-price";
+import { PLATFORM_COMMISSION_RATE } from "@/lib/pricing";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
@@ -33,6 +34,8 @@ type Payout = {
 
 export function WalletPanel({
   boutiqueId,
+  grossSales,
+  commission,
   totalEarned,
   totalPaidOut,
   balance,
@@ -41,6 +44,8 @@ export function WalletPanel({
   canRecordPayout = true,
 }: {
   boutiqueId: string;
+  grossSales: number;
+  commission: number;
   totalEarned: number;
   totalPaidOut: number;
   balance: number;
@@ -74,7 +79,7 @@ export function WalletPanel({
     <div className="space-y-5.5">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
-          <p className="text-body-xs text-dark-5 dark:text-dark-6">Gagné (commandes payées)</p>
+          <p className="text-body-xs text-dark-5 dark:text-dark-6">Gagné net (commandes payées)</p>
           <p className="mt-1 text-body-lg font-semibold text-dark dark:text-white">
             {formatPrice(totalEarned, currency)}
           </p>
@@ -93,11 +98,14 @@ export function WalletPanel({
         </div>
       </div>
       <p className="text-body-xs text-dark-5 dark:text-dark-6">
-        Grand livre interne, pas un vrai séquestre : l&apos;argent transite par
-        GeniusPay vers le compte plateforme, ce solde sert juste à suivre ce
-        qui reste à reverser à la vendeuse en dehors de l&apos;app. Les frais de
-        livraison inclus dans un paiement ne comptent pas dans ce qu&apos;elle a
-        gagné.
+        Ventes brutes {formatPrice(grossSales, currency)} − commission Bloko{" "}
+        {PLATFORM_COMMISSION_RATE * 100}% ({formatPrice(commission, currency)}) ={" "}
+        {formatPrice(totalEarned, currency)} net. Grand livre interne, pas un
+        vrai séquestre : l&apos;argent transite
+        par GeniusPay vers le compte plateforme, ce solde sert juste à suivre
+        ce qui reste à reverser à la vendeuse en dehors de l&apos;app. Les frais
+        de livraison inclus dans un paiement ne comptent ni dans le brut ni
+        dans le gagné.
       </p>
 
       {canRecordPayout && (

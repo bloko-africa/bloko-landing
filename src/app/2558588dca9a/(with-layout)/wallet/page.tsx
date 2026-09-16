@@ -38,6 +38,8 @@ export default async function WalletPage() {
         <ShowcaseSection title="Ton solde" className="p-6.5!">
           <WalletPanel
             boutiqueId={scopedBoutiqueId}
+            grossSales={wallet.grossSales}
+            commission={wallet.commission}
             totalEarned={wallet.totalEarned}
             totalPaidOut={wallet.totalPaidOut}
             balance={wallet.balance}
@@ -67,6 +69,8 @@ export default async function WalletPage() {
   const summaries = boutiques.map((b) => ({
     ...b,
     wallet: walletsByBoutique.get(b.id) ?? {
+      grossSales: 0,
+      commission: 0,
       totalEarned: 0,
       totalPaidOut: 0,
       balance: 0,

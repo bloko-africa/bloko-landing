@@ -1,19 +1,28 @@
 import "server-only";
 import { db } from "@/lib/db";
+import { PLATFORM_COMMISSION_RATE } from "@/lib/pricing";
 
 export type WalletSummary = {
+  grossSales: number;
+  commission: number;
   totalEarned: number;
   totalPaidOut: number;
   balance: number;
   currency: string;
 };
 
+function splitGrossSales(grossSales: number) {
+  const commission = Math.round(grossSales * PLATFORM_COMMISSION_RATE);
+  return { commission, totalEarned: grossSales - commission };
+}
+
 /**
  * Solde jamais stocké tel quel — toujours recalculé à partir des commandes
- * PAID et des PayoutRecord existants. Règle d'intégrité : "gagné" = somme
+ * PAID et des PayoutRecord existants. Règle d'intégrité : "brut" = somme
  * des articles (OrderItem), PAS Order.totalAmount, qui peut inclure des
  * frais de livraison (mode INCLUS) qui ne reviennent pas à la vendeuse —
- * cet argent-là n'entre jamais dans son solde.
+ * cet argent-là n'entre jamais dans son solde. La commission plateforme
+ * (voir pricing.ts) se prélève sur ce brut, jamais sur la livraison.
  */
 export async function getWalletSummary(boutiqueId: string): Promise<WalletSummary> {
   const [boutique, paidOrders, payoutAgg] = await Promise.all([
@@ -31,14 +40,17 @@ export async function getWalletSummary(boutiqueId: string): Promise<WalletSummar
     }),
   ]);
 
-  const totalEarned = paidOrders.reduce(
+  const grossSales = paidOrders.reduce(
     (sum, order) =>
       sum + order.items.reduce((s, item) => s + Number(item.unitPrice) * item.quantity, 0),
     0,
   );
+  const { commission, totalEarned } = splitGrossSales(grossSales);
   const totalPaidOut = Number(payoutAgg._sum.amount ?? 0);
 
   return {
+    grossSales,
+    commission,
     totalEarned,
     totalPaidOut,
     balance: totalEarned - totalPaidOut,
@@ -76,13 +88,13 @@ export async function getWalletSummaries(
     }),
   ]);
 
-  const earnedByBoutique = new Map<string, number>();
+  const grossByBoutique = new Map<string, number>();
   for (const order of paidOrders) {
     const orderTotal = order.items.reduce(
       (s, item) => s + Number(item.unitPrice) * item.quantity,
       0,
     );
-    earnedByBoutique.set(order.boutiqueId, (earnedByBoutique.get(order.boutiqueId) ?? 0) + orderTotal);
+    grossByBoutique.set(order.boutiqueId, (grossByBoutique.get(order.boutiqueId) ?? 0) + orderTotal);
   }
 
   const paidOutByBoutique = new Map(
@@ -91,9 +103,12 @@ export async function getWalletSummaries(
 
   const result = new Map<string, WalletSummary>();
   for (const boutique of boutiques) {
-    const totalEarned = earnedByBoutique.get(boutique.id) ?? 0;
+    const grossSales = grossByBoutique.get(boutique.id) ?? 0;
+    const { commission, totalEarned } = splitGrossSales(grossSales);
     const totalPaidOut = paidOutByBoutique.get(boutique.id) ?? 0;
     result.set(boutique.id, {
+      grossSales,
+      commission,
       totalEarned,
       totalPaidOut,
       balance: totalEarned - totalPaidOut,
