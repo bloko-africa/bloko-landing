@@ -1,3 +1,4 @@
+import { StorefrontBottomNav } from "@/components/Storefront/bottom-nav";
 import { CookieConsent } from "@/components/Storefront/cookie-consent";
 import { StorefrontFooter } from "@/components/Storefront/footer";
 import { StorefrontHeader } from "@/components/Storefront/header";
@@ -20,7 +21,8 @@ export default async function BoutiqueLayout({
       <style>{`:root{--color-primary: ${boutique.accentColor};}`}</style>
       <div className="flex min-h-screen flex-col bg-white dark:bg-gray-dark">
         <StorefrontHeader storeName={boutique.displayName} handle={boutique.handle} />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 pb-16 md:pb-0">{children}</main>
+        <StorefrontBottomNav handle={boutique.handle} />
         <StorefrontFooter
           storeName={boutique.displayName}
           handle={boutique.handle}

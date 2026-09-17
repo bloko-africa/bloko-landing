@@ -1,10 +1,11 @@
 import "@/css/style.css";
 
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import type { PropsWithChildren } from "react";
 import { Toaster } from "sonner";
+import { InstallPrompt } from "@/components/install-prompt";
 import { Providers } from "./providers";
 
 const poppins = Poppins({
@@ -20,6 +21,15 @@ export const metadata: Metadata = {
     default: "Bloko",
   },
   description: "Le marché des boutiques TikTok.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Bloko",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#141414",
 };
 
 export default function RootLayout({ children }: PropsWithChildren) {
@@ -30,6 +40,8 @@ export default function RootLayout({ children }: PropsWithChildren) {
           <NextTopLoader color="#141414" showSpinner={false} />
 
           {children}
+
+          <InstallPrompt />
 
           <Toaster
             position="bottom-right"
