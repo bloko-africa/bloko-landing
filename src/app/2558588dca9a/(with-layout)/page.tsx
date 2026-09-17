@@ -55,6 +55,8 @@ export default async function AdminHome() {
     ordersByCountry,
     activeLiveSession,
     openTicketCount,
+    onboardingBoutique,
+    hasEverLived,
   ] = await Promise.all([
     getStoreSettings(),
     db.order.aggregate({
@@ -100,12 +102,45 @@ export default async function AdminHome() {
     db.supportTicket.count({
       where: { ...boutiqueFilter, status: { in: ["OUVERT", "EN_COURS"] } },
     }),
+    // Checklist premier login — une vendeuse qui atterrit sur un tableau à
+    // zéro sans aucune indication de "quoi faire d'abord" (trouvé par
+    // l'audit UX). Disparaît d'elle-même dès que les 3 étapes sont faites.
+    scopedBoutiqueId
+      ? db.boutique.findUnique({
+          where: { id: scopedBoutiqueId },
+          select: { savPhone: true, deliveryDetails: true },
+        })
+      : null,
+    scopedBoutiqueId
+      ? db.liveSession.count({ where: { boutiqueId: scopedBoutiqueId } })
+      : null,
   ]);
 
   const countryStats = ordersByCountry.map((row) => ({
     code: row.country,
     count: row._count.country,
   }));
+
+  const onboardingSteps = scopedBoutiqueId
+    ? [
+        {
+          label: "Ajoute ton premier produit",
+          done: publishedProductsCount > 0,
+          href: "/2558588dca9a/products/new",
+        },
+        {
+          label: "Renseigne ta livraison et ton SAV",
+          done: Boolean(onboardingBoutique?.savPhone || onboardingBoutique?.deliveryDetails),
+          href: "/2558588dca9a/contact-sav",
+        },
+        {
+          label: "Lance ton premier live",
+          done: Boolean(hasEverLived && hasEverLived > 0),
+          href: "/2558588dca9a/live",
+        },
+      ]
+    : [];
+  const showOnboarding = onboardingSteps.length > 0 && onboardingSteps.some((s) => !s.done);
 
   const platformRevenue = platformItemsThisMonth
     ? (() => {
@@ -124,6 +159,46 @@ export default async function AdminHome() {
   return (
     <>
       <Breadcrumb pageName="Tableau de bord" />
+
+      {showOnboarding && (
+        <div className="mb-6">
+          <ShowcaseSection title="Pour bien démarrer" className="p-6.5!">
+            <ul className="space-y-3">
+              {onboardingSteps.map((step) => (
+                <li key={step.label}>
+                  <Link
+                    href={step.href}
+                    className="flex items-center gap-3 rounded-lg border border-stroke p-3 hover:border-primary dark:border-dark-3"
+                  >
+                    <span
+                      className={`flex size-6 shrink-0 items-center justify-center rounded-full ${
+                        step.done
+                          ? "bg-green-light-6 text-green-dark"
+                          : "border border-stroke text-transparent dark:border-dark-3"
+                      }`}
+                    >
+                      {step.done && (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                          <path d="M5 12l5 5L20 7" />
+                        </svg>
+                      )}
+                    </span>
+                    <span
+                      className={
+                        step.done
+                          ? "text-body-sm text-dark-5 line-through dark:text-dark-6"
+                          : "text-body-sm font-medium text-dark dark:text-white"
+                      }
+                    >
+                      {step.label}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </ShowcaseSection>
+        </div>
+      )}
 
       {(activeLiveSession || openTicketCount > 0) && (
         <div className="mb-6 flex flex-wrap gap-3">
