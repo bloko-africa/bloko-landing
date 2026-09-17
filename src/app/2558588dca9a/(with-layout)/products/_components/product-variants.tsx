@@ -8,6 +8,7 @@ import {
   updateVariantStock,
 } from "@/lib/actions/products";
 import { notifyPromise } from "@/lib/notify-promise";
+import { getVariantLabels } from "@/lib/variant-labels";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { toast } from "sonner";
@@ -24,12 +25,15 @@ type Variant = {
 export function ProductVariants({
   productId,
   variants,
+  categorySlug,
 }: {
   productId: string;
   variants: Variant[];
+  categorySlug: string | null;
 }) {
   const router = useRouter();
   const [adding, setAdding] = useState(false);
+  const labels = getVariantLabels(categorySlug);
 
   async function handleAdd(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -74,14 +78,14 @@ export function ProductVariants({
   }
 
   return (
-    <ShowcaseSection title="Variantes (taille / couleur)" className="p-6.5!">
+    <ShowcaseSection title={`Variantes (${labels.field1.toLowerCase()} / ${labels.field2.toLowerCase()})`} className="p-6.5!">
       <div className="mb-5.5 overflow-x-auto">
         <table className="w-full table-auto">
           <thead>
             <tr className="border-b border-stroke text-left dark:border-dark-3">
               <th className="px-3 py-2 text-body-sm font-medium">SKU</th>
-              <th className="px-3 py-2 text-body-sm font-medium">Taille</th>
-              <th className="px-3 py-2 text-body-sm font-medium">Couleur</th>
+              <th className="px-3 py-2 text-body-sm font-medium">{labels.field1}</th>
+              <th className="px-3 py-2 text-body-sm font-medium">{labels.field2}</th>
               <th className="px-3 py-2 text-body-sm font-medium">Stock</th>
               <th className="px-3 py-2 text-body-sm font-medium"></th>
             </tr>
@@ -121,7 +125,8 @@ export function ProductVariants({
                   colSpan={5}
                   className="px-3 py-6 text-center text-dark-5 dark:text-dark-6"
                 >
-                  Aucune variante. Ajoutez au moins une taille/couleur ci-dessous.
+                  Aucune variante. Ajoutez-en une ci-dessous ({labels.field1.toLowerCase()}/
+                  {labels.field2.toLowerCase()}).
                 </td>
               </tr>
             )}
@@ -137,11 +142,11 @@ export function ProductVariants({
           label="SKU"
           name="sku"
           type="text"
-          placeholder="ROB-001-M-NOIR"
+          placeholder="REF-001"
           required
         />
-        <InputGroup label="Taille" name="size" type="text" placeholder="M" />
-        <InputGroup label="Couleur" name="color" type="text" placeholder="Noir" />
+        <InputGroup label={labels.field1} name="size" type="text" placeholder={labels.placeholder1} />
+        <InputGroup label={labels.field2} name="color" type="text" placeholder={labels.placeholder2} />
         <InputGroup
           label="Stock initial"
           name="stock"

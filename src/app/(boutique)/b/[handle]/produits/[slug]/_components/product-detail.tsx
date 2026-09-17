@@ -4,6 +4,7 @@ import { useCart } from "@/lib/cart/cart-context";
 import { useBoutiqueHandle, useBoutiquePath } from "@/lib/boutique-path";
 import { formatPrice } from "@/lib/format-price";
 import { cn } from "@/lib/utils";
+import { getVariantLabels } from "@/lib/variant-labels";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -26,6 +27,7 @@ type ProductDetailProps = {
     description: string | null;
     basePrice: number;
     collectionName: string | null;
+    categorySlug: string | null;
     images: { id: string; url: string }[];
     variants: Variant[];
   };
@@ -39,6 +41,7 @@ export function ProductDetail({ product, currency }: ProductDetailProps) {
   const [activeImage, setActiveImage] = useState(0);
   const [size, setSize] = useState<string | null>(null);
   const [color, setColor] = useState<string | null>(null);
+  const labels = getVariantLabels(product.categorySlug);
 
   const sizes = useMemo(
     () => [...new Set(product.variants.map((v) => v.size).filter(Boolean))],
@@ -152,7 +155,7 @@ export function ProductDetail({ product, currency }: ProductDetailProps) {
         {sizes.length > 0 && (
           <div className="mt-8">
             <span className="text-body-sm font-medium text-dark dark:text-white">
-              Taille
+              {labels.field1}
             </span>
             <div className="mt-3 flex flex-wrap gap-2">
               {sizes.map((s) => (
@@ -176,7 +179,7 @@ export function ProductDetail({ product, currency }: ProductDetailProps) {
         {colors.length > 0 && (
           <div className="mt-6">
             <span className="text-body-sm font-medium text-dark dark:text-white">
-              Couleur
+              {labels.field2}
             </span>
             <div className="mt-3 flex flex-wrap gap-2">
               {colors.map((c) => (

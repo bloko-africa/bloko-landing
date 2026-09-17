@@ -246,7 +246,7 @@ export function BoutiqueEditForm({ initial }: BoutiqueEditFormProps) {
           label="Titre d'accueil (optionnel)"
           name="heroTitle"
           type="text"
-          placeholder="Ex: Le prêt-à-porter, pensé pour toi"
+          placeholder="Ex: Ce que tu vends, pensé pour tes clientes"
           defaultValue={initial.heroTitle ?? undefined}
         />
         <InputGroup

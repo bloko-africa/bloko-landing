@@ -64,7 +64,7 @@ export function BoutiqueCreateForm() {
           label="Handle TikTok"
           name="handle"
           type="text"
-          placeholder="Ex: aisha.mode (sans @)"
+          placeholder="Ex: aisha.boutique (sans @)"
           value={handle}
           required
           handleChange={(e) => {

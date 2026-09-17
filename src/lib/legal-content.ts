@@ -56,7 +56,7 @@ export const DEFAULT_BOUTIQUE_CGV = `
 <h2>4. Livraison</h2>
 <p>Les commandes sont livrées par une agence de livraison partenaire, dans un délai indicatif de <strong>[Délai, ex : 2 à 5 jours ouvrés]</strong>. Zones livrées : <strong>[zones, ex : Cotonou et environs]</strong>.</p>
 <h2>5. Retours et garanties</h2>
-<p>La Vendeuse accepte les retours dans un délai de <strong>[Délai, ex : 7 jours]</strong> après réception, pour un article non porté et avec ses étiquettes. Tout article défectueux ou non conforme peut faire l'objet d'un échange ou remboursement sur présentation d'une preuve d'achat.</p>
+<p>La Vendeuse accepte les retours dans un délai de <strong>[Délai, ex : 7 jours]</strong> après réception, pour un article dans son état d'origine (non utilisé, avec son emballage). Tout article défectueux ou non conforme peut faire l'objet d'un échange ou remboursement sur présentation d'une preuve d'achat. Pour les produits périssables (alimentaire, cosmétiques ouverts), le retour n'est possible qu'en cas de non-conformité ou de défaut constaté à la livraison.</p>
 <h2>6. Contact</h2>
 <p>Pour toute question sur une commande : <strong>[E-mail]</strong> — <strong>[Téléphone / WhatsApp]</strong>.</p>
 `.trim();

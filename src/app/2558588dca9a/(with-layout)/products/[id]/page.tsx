@@ -25,6 +25,7 @@ export default async function EditProductPage({
     include: {
       variants: { orderBy: { createdAt: "asc" } },
       images: { orderBy: { position: "asc" } },
+      category: { select: { slug: true } },
     },
   });
 
@@ -68,6 +69,7 @@ export default async function EditProductPage({
 
       <ProductVariants
         productId={product.id}
+        categorySlug={product.category?.slug ?? null}
         variants={product.variants.map((v) => ({
           id: v.id,
           sku: v.sku,

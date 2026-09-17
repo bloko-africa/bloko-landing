@@ -55,6 +55,7 @@ export default async function ProductPage({
       images: { orderBy: { position: "asc" } },
       variants: { orderBy: { createdAt: "asc" } },
       collection: { select: { name: true, slug: true } },
+      category: { select: { slug: true } },
     },
   });
 
@@ -96,6 +97,7 @@ export default async function ProductPage({
           description: product.description,
           basePrice: getBuyerPrice(Number(product.basePrice), boutique.passCommissionToClient),
           collectionName: product.collection?.name ?? null,
+          categorySlug: product.category?.slug ?? null,
           images: product.images.map((i) => ({ id: i.id, url: i.url })),
           variants: product.variants.map((v) => ({
             id: v.id,
