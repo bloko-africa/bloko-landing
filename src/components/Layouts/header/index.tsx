@@ -9,7 +9,13 @@ import { Notification } from "./notification";
 import { ThemeToggleSwitch } from "./theme-toggle";
 import { UserInfo } from "./user-info";
 
-export function Header() {
+export function Header({
+  subtitle,
+  storeUrl,
+}: {
+  subtitle: string;
+  storeUrl: string | null;
+}) {
   const { toggleSidebar, isMobile } = useSidebarContext();
 
   return (
@@ -35,20 +41,22 @@ export function Header() {
         <h1 className="text-heading-5 text-dark mb-0.5 font-bold dark:text-white">
           Dashboard
         </h1>
-        <p className="font-medium">Mode Shop</p>
+        <p className="font-medium">{subtitle}</p>
       </div>
 
       <div className="2xsm:gap-4 flex flex-1 items-center justify-end gap-2">
         <CommandPalette />
 
-        <Link
-          href="/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hidden shrink-0 items-center gap-2 rounded-full border border-stroke px-4 py-2.5 text-body-sm font-medium text-dark-5 hover:border-primary hover:text-primary dark:border-dark-3 dark:text-dark-6 sm:flex"
-        >
-          Voir la boutique
-        </Link>
+        {storeUrl && (
+          <Link
+            href={storeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden shrink-0 items-center gap-2 rounded-full border border-stroke px-4 py-2.5 text-body-sm font-medium text-dark-5 hover:border-primary hover:text-primary dark:border-dark-3 dark:text-dark-6 sm:flex"
+          >
+            Voir ma boutique
+          </Link>
+        )}
 
         <ThemeToggleSwitch />
 

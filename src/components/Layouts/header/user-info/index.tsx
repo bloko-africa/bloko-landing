@@ -7,6 +7,7 @@ import {
   DropdownTrigger,
 } from "@/components/ui/dropdown";
 import { signOut, useSession } from "@/lib/auth/auth-client";
+import { USER_ROLE_LABEL } from "@/lib/user-role";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -52,10 +53,12 @@ export function UserInfo() {
     );
   }
 
+  const role = session?.data?.user as { role?: string } | undefined;
   const user = {
     name: session?.data?.user?.name as string,
     email: session?.data?.user?.email as string,
     img: session?.data?.user?.image as string,
+    roleLabel: role?.role ? (USER_ROLE_LABEL[role.role] ?? role.role) : null,
   };
 
   return (
@@ -112,8 +115,13 @@ export function UserInfo() {
           )}
 
           <figcaption className="space-y-1 text-base font-medium">
-            <div className="mb-2 leading-none text-dark dark:text-white">
+            <div className="flex items-center gap-2 leading-none text-dark dark:text-white">
               {user.name}
+              {user.roleLabel && (
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-body-xs font-medium text-primary">
+                  {user.roleLabel}
+                </span>
+              )}
             </div>
 
             <div className="w-full max-w-47.5 truncate leading-none text-gray-6">
