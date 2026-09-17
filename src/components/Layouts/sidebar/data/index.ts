@@ -47,6 +47,7 @@ export const NAV_DATA: {
           {
             title: "Live",
             url: "/2558588dca9a/live",
+            roles: ["vendeur"],
           },
         ],
       },

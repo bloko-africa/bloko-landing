@@ -10,13 +10,14 @@ const startLiveSessionSchema = z.object({
 });
 
 export async function startLiveSession(formData: FormData) {
-  const { session, scopedBoutiqueId } = await requireBoutiqueAccess([
-    "admin",
-    "editor",
-    "vendeur",
-  ]);
+  // Même raisonnement que live/page.tsx : démarrer un live n'a de sens que
+  // pour une vendeuse précise, jamais pour le staff plateforme.
+  const { session, scopedBoutiqueId } = await requireBoutiqueAccess(["vendeur"]);
   if (!scopedBoutiqueId) {
-    throw new Error("Cette action nécessite un compte rattaché à une boutique.");
+    // Ne peut pas arriver en pratique (requireBoutiqueAccess ne renvoie
+    // undefined que pour un rôle non-vendeur, exclu ci-dessus) — juste pour
+    // que TypeScript resserre le type avant le create() plus bas.
+    throw new Error("Ce compte vendeuse n'est rattaché à aucune boutique.");
   }
 
   const data = startLiveSessionSchema.parse({

@@ -11,10 +11,12 @@ export const metadata: Metadata = { title: "Live" };
 export const dynamic = "force-dynamic";
 
 export default async function LivePage() {
-  const { scopedBoutiqueId } = await requireBoutiqueAccess(["admin", "editor", "vendeur"]);
-  if (!scopedBoutiqueId) {
-    throw new Error("Cette page nécessite un compte rattaché à une boutique.");
-  }
+  // Démarrer un live n'a de sens que pour une vendeuse précise — pas de cas
+  // d'usage légitime pour le staff plateforme (qui gère plusieurs boutiques,
+  // pas "sa" boutique). admin/editor étaient acceptés ici mais provoquaient
+  // un crash immédiat juste après (scopedBoutiqueId toujours undefined pour
+  // eux) : symptôme du mélange entre statut superadmin et statut vendeuse.
+  const { scopedBoutiqueId } = await requireBoutiqueAccess(["vendeur"]);
 
   const activeSession = await db.liveSession.findFirst({
     where: { boutiqueId: scopedBoutiqueId, status: "EN_COURS" },
