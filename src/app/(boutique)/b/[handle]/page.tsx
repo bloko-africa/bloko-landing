@@ -3,6 +3,7 @@ import { StarDisplay } from "@/components/Storefront/review-form";
 import { db } from "@/lib/db";
 import { getBoutiqueByHandle } from "@/lib/boutique";
 import { getBoutiqueRating } from "@/lib/reviews";
+import { getBuyerPrice } from "@/lib/pricing";
 import { TRUST_BADGE_ICON_COMPONENTS, parseTrustBadges } from "@/lib/trust-badge-icons";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -233,14 +234,17 @@ export default async function BoutiqueHome({
                 slug={product.slug}
                 name={product.name}
                 image={product.images[0]?.url ?? null}
-                basePrice={Number(product.basePrice)}
+                basePrice={getBuyerPrice(Number(product.basePrice), boutique.passCommissionToClient)}
                 currency={boutique.currency}
                 variants={product.variants.map((v) => ({
                   id: v.id,
                   size: v.size,
                   color: v.color,
                   stock: v.stock,
-                  unitPrice: Number(v.priceOverride ?? product.basePrice),
+                  unitPrice: getBuyerPrice(
+                    Number(v.priceOverride ?? product.basePrice),
+                    boutique.passCommissionToClient,
+                  ),
                 }))}
               />
             ))}

@@ -1,6 +1,7 @@
 import { ProductCard } from "@/components/Storefront/product-card";
 import { db } from "@/lib/db";
 import { getBoutiqueByHandle } from "@/lib/boutique";
+import { getBuyerPrice } from "@/lib/pricing";
 import { stripHtml } from "@/lib/strip-html";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -93,7 +94,7 @@ export default async function ProductPage({
           slug: product.slug,
           name: product.name,
           description: product.description,
-          basePrice: Number(product.basePrice),
+          basePrice: getBuyerPrice(Number(product.basePrice), boutique.passCommissionToClient),
           collectionName: product.collection?.name ?? null,
           images: product.images.map((i) => ({ id: i.id, url: i.url })),
           variants: product.variants.map((v) => ({
@@ -101,7 +102,10 @@ export default async function ProductPage({
             size: v.size,
             color: v.color,
             stock: v.stock,
-            unitPrice: Number(v.priceOverride ?? product.basePrice),
+            unitPrice: getBuyerPrice(
+              Number(v.priceOverride ?? product.basePrice),
+              boutique.passCommissionToClient,
+            ),
           })),
         }}
       />
@@ -119,14 +123,17 @@ export default async function ProductPage({
                 slug={p.slug}
                 name={p.name}
                 image={p.images[0]?.url ?? null}
-                basePrice={Number(p.basePrice)}
+                basePrice={getBuyerPrice(Number(p.basePrice), boutique.passCommissionToClient)}
                 currency={boutique.currency}
                 variants={p.variants.map((v) => ({
                   id: v.id,
                   size: v.size,
                   color: v.color,
                   stock: v.stock,
-                  unitPrice: Number(v.priceOverride ?? p.basePrice),
+                  unitPrice: getBuyerPrice(
+                    Number(v.priceOverride ?? p.basePrice),
+                    boutique.passCommissionToClient,
+                  ),
                 }))}
               />
             ))}

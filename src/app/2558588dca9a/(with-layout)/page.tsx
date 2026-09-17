@@ -4,6 +4,7 @@ import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 import { requireBoutiqueAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { formatPrice } from "@/lib/format-price";
+import { ESTIMATED_GENIUSPAY_COST_RATE, PLATFORM_COMMISSION_RATE } from "@/lib/pricing";
 import { getStoreSettings } from "@/lib/store-settings";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -45,6 +46,7 @@ export default async function AdminHome() {
   const [
     settings,
     revenueThisMonth,
+    platformItemsThisMonth,
     pendingCount,
     totalOrdersCount,
     publishedProductsCount,
@@ -59,6 +61,16 @@ export default async function AdminHome() {
       where: { ...boutiqueFilter, status: "PAID", createdAt: { gte: startOfMonth } },
       _sum: { totalAmount: true },
     }),
+    // Vue "revenu Bloko" (brut/commission/bénéfice) réservée au staff
+    // plateforme non scopé — une vendeuse voit déjà son propre net dans son
+    // Wallet, ce n'est pas la même donnée (celle-ci parle des revenus de
+    // Bloko elle-même, pas des siens).
+    scopedBoutiqueId
+      ? null
+      : db.orderItem.findMany({
+          where: { order: { status: "PAID", createdAt: { gte: startOfMonth } } },
+          select: { unitPrice: true, quantity: true },
+        }),
     db.order.count({ where: { ...boutiqueFilter, status: "PENDING" } }),
     db.order.count({ where: boutiqueFilter }),
     db.product.count({ where: { ...boutiqueFilter, status: "PUBLISHED" } }),
@@ -94,6 +106,20 @@ export default async function AdminHome() {
     code: row.country,
     count: row._count.country,
   }));
+
+  const platformRevenue = platformItemsThisMonth
+    ? (() => {
+        const grossSales = platformItemsThisMonth.reduce(
+          (sum, item) => sum + Number(item.unitPrice) * item.quantity,
+          0,
+        );
+        const commission = Math.round(grossSales * PLATFORM_COMMISSION_RATE);
+        const estimatedProfit = Math.round(
+          commission - grossSales * ESTIMATED_GENIUSPAY_COST_RATE,
+        );
+        return { grossSales, commission, estimatedProfit };
+      })()
+    : null;
 
   return (
     <>
@@ -153,6 +179,47 @@ export default async function AdminHome() {
           icon={<TagIcon />}
         />
       </div>
+
+      {platformRevenue && (
+        <div className="mt-6">
+          <ShowcaseSection title="Revenu Bloko (mois en cours)" className="p-6.5!">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
+                <p className="text-body-xs text-dark-5 dark:text-dark-6">
+                  Revenu brut (ventes vendeuses)
+                </p>
+                <p className="mt-1 text-body-lg font-semibold text-dark dark:text-white">
+                  {formatPrice(platformRevenue.grossSales, settings.currency)}
+                </p>
+              </div>
+              <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
+                <p className="text-body-xs text-dark-5 dark:text-dark-6">
+                  Revenu net Bloko (commission {PLATFORM_COMMISSION_RATE * 100}%)
+                </p>
+                <p className="mt-1 text-body-lg font-semibold text-primary">
+                  {formatPrice(platformRevenue.commission, settings.currency)}
+                </p>
+              </div>
+              <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
+                <p className="text-body-xs text-dark-5 dark:text-dark-6">
+                  Bénéfice estimé (après frais GeniusPay)
+                </p>
+                <p className="mt-1 text-body-lg font-semibold text-dark dark:text-white">
+                  {formatPrice(platformRevenue.estimatedProfit, settings.currency)}
+                </p>
+              </div>
+            </div>
+            <p className="mt-4 text-body-xs text-dark-5 dark:text-dark-6">
+              Le brut est le total des articles vendus (hors livraison) sur
+              toute la plateforme. Le bénéfice est une estimation basée sur un
+              coût GeniusPay moyen de {ESTIMATED_GENIUSPAY_COST_RATE * 100}%
+              (rail Mobile Money dominant) — GeniusPay ne communique pas le
+              frais exact par transaction, le vrai chiffre peut varier selon
+              le moyen de paiement utilisé.
+            </p>
+          </ShowcaseSection>
+        </div>
+      )}
 
       <div className="mt-6">
         <ShowcaseSection title="Commandes par pays" className="p-6.5!">

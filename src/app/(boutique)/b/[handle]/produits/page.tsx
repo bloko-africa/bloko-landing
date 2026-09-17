@@ -1,6 +1,7 @@
 import { ProductCard } from "@/components/Storefront/product-card";
 import { db } from "@/lib/db";
 import { getBoutiqueByHandle } from "@/lib/boutique";
+import { getBuyerPrice } from "@/lib/pricing";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -112,14 +113,17 @@ export default async function CatalogPage({
                 slug={product.slug}
                 name={product.name}
                 image={product.images[0]?.url ?? null}
-                basePrice={Number(product.basePrice)}
+                basePrice={getBuyerPrice(Number(product.basePrice), boutique.passCommissionToClient)}
                 currency={boutique.currency}
                 variants={product.variants.map((v) => ({
                   id: v.id,
                   size: v.size,
                   color: v.color,
                   stock: v.stock,
-                  unitPrice: Number(v.priceOverride ?? product.basePrice),
+                  unitPrice: getBuyerPrice(
+                    Number(v.priceOverride ?? product.basePrice),
+                    boutique.passCommissionToClient,
+                  ),
                 }))}
               />
             ))}

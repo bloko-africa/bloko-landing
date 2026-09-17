@@ -24,6 +24,7 @@ export default async function ContactSavPage() {
       socialInstagram: true,
       socialTiktok: true,
       deliveryDetails: true,
+      passCommissionToClient: true,
     },
   });
 

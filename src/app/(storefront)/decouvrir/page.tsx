@@ -1,6 +1,7 @@
 import { DiscoveryProductCard } from "@/components/Storefront/discovery-product-card";
 import { BlokoSearchBar } from "@/components/Storefront/bloko-search-bar";
 import { db } from "@/lib/db";
+import { getBuyerPrice } from "@/lib/pricing";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -28,7 +29,7 @@ export default async function DecouvrirPage({
       include: {
         images: { take: 1, orderBy: { position: "asc" } },
         variants: { select: { priceOverride: true } },
-        boutique: { select: { handle: true, currency: true } },
+        boutique: { select: { handle: true, currency: true, passCommissionToClient: true } },
       },
     }),
   ]);
@@ -85,7 +86,10 @@ export default async function DecouvrirPage({
               href={`/b/${p.boutique.handle}/produits/${p.slug}`}
               image={p.images[0]?.url ?? null}
               name={p.name}
-              price={Number(p.variants[0]?.priceOverride ?? p.basePrice)}
+              price={getBuyerPrice(
+                Number(p.variants[0]?.priceOverride ?? p.basePrice),
+                p.boutique.passCommissionToClient,
+              )}
               currency={p.boutique.currency}
               boutiqueHandle={p.boutique.handle}
             />

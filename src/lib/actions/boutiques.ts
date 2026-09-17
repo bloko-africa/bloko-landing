@@ -230,13 +230,16 @@ const updateBoutiqueContactSchema = z.object({
   socialInstagram: z.string().optional(),
   socialTiktok: z.string().optional(),
   deliveryDetails: z.string().max(1000).optional(),
+  passCommissionToClient: z.boolean(),
 });
 
 // Contrairement à updateBoutique (admin-only), ouvert à la vendeuse pour sa
-// propre boutique — seuls les champs de contact/SAV/livraison, pas le reste
-// de la fiche (statut, tarif de livraison, CGV, branding) qui reste
-// admin-only. deliveryDetails est un texte libre : pas de système de zones
-// structuré, la vendeuse décrit sa livraison à sa façon.
+// propre boutique — seuls les champs de contact/SAV/livraison/facturation,
+// pas le reste de la fiche (statut, tarif de livraison, CGV, branding) qui
+// reste admin-only. deliveryDetails est un texte libre : pas de système de
+// zones structuré, la vendeuse décrit sa livraison à sa façon.
+// passCommissionToClient : voir src/lib/pricing.ts::getBuyerPrice — bascule
+// qui prix le client paie (marge de la vendeuse préservée dans les 2 cas).
 export async function updateBoutiqueContact(formData: FormData) {
   const id = formData.get("id")?.toString() ?? "";
   await requireBoutiqueAccess(["admin", "vendeur"], id);
@@ -249,6 +252,7 @@ export async function updateBoutiqueContact(formData: FormData) {
     socialInstagram: formData.get("socialInstagram")?.toString() || undefined,
     socialTiktok: formData.get("socialTiktok")?.toString() || undefined,
     deliveryDetails: formData.get("deliveryDetails")?.toString() || undefined,
+    passCommissionToClient: formData.get("passCommissionToClient") === "on",
   });
 
   await db.boutique.update({
@@ -260,6 +264,7 @@ export async function updateBoutiqueContact(formData: FormData) {
       socialInstagram: data.socialInstagram ?? null,
       socialTiktok: data.socialTiktok ?? null,
       deliveryDetails: data.deliveryDetails ?? null,
+      passCommissionToClient: data.passCommissionToClient,
     },
   });
 

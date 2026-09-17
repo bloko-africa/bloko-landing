@@ -74,27 +74,30 @@ export const PLATFORM_CGU = `
 <h2>4. Suspension et résiliation d'une boutique</h2>
 <p>Bloko se réserve le droit de suspendre ou de clôturer, à tout moment et sans préavis en cas de manquement grave (produit illicite, fraude, non-respect des présentes CGU), l'accès d'une Vendeuse à la Plateforme. Une boutique suspendue disparaît de l'espace public mais ses données (commandes passées, historique) sont conservées.</p>
 
-<h2>5. Paiement</h2>
+<h2>5. Commission de la Plateforme</h2>
+<p>L'utilisation de la Plateforme par la Vendeuse est soumise à une commission unique de <strong>8% du montant des articles vendus</strong> (hors frais de livraison), prélevée automatiquement sur chaque commande payée. Cette commission couvre notamment les frais de traitement des paiements facturés par le prestataire tiers (GeniusPay) ainsi que les coûts d'exploitation et de maintenance de la Plateforme. Le solde net revenant à la Vendeuse (montant de la vente diminué de la commission) est consultable à tout moment dans son portefeuille (« Wallet »). La Vendeuse peut, depuis les réglages de sa boutique, choisir de répercuter cette commission sur le prix payé par l'Acheteur plutôt que de l'absorber sur son propre prix — ce choix, ainsi que le taux de commission en vigueur, peuvent être consultés sur la page <a href="/pourquoi-bloko">Pourquoi Bloko</a>. Bloko peut faire évoluer ce taux, sous réserve d'en informer les Vendeuses par les moyens de communication habituels de la Plateforme.</p>
+
+<h2>6. Paiement</h2>
 <p>Les paiements effectués sur la Plateforme sont traités par GeniusPay, prestataire de services de paiement tiers, indépendant de Bloko. Bloko ne collecte ni ne conserve aucune donnée de carte bancaire ou de Mobile Money. La confirmation d'une commande est subordonnée à la confirmation du paiement par GeniusPay. En cas d'incident de paiement, l'Acheteur et la Vendeuse peuvent être invités à se rapprocher du support Bloko pour faciliter la résolution, sans que cela n'engage la responsabilité de Bloko en tant que partie au contrat de vente.</p>
 
-<h2>6. Livraison</h2>
+<h2>7. Livraison</h2>
 <p>La livraison des commandes est assurée par des agences de livraison partenaires, prestataires indépendants sélectionnés pour chaque commande. Bloko met à disposition un outil de suivi de statut de livraison renseigné par la Vendeuse ou l'agence, mais <strong>n'exécute elle-même aucune livraison</strong>. En cas de retard, perte ou dommage imputable à l'agence de livraison, la responsabilité de Bloko ne saurait être engagée au-delà de son rôle d'outil de suivi ; l'Acheteur conserve ses droits vis-à-vis de la Vendeuse au titre de son obligation de livraison conforme.</p>
 
-<h2>7. Limitation de responsabilité de la Plateforme</h2>
+<h2>8. Limitation de responsabilité de la Plateforme</h2>
 <p>Bloko s'efforce d'assurer la disponibilité et le bon fonctionnement de la Plateforme, sans obligation de résultat. Bloko ne saurait être tenue responsable des dommages résultant : d'une interruption temporaire du service, d'un contenu publié par une Vendeuse, d'un défaut de conformité d'un produit, ou d'une défaillance d'un prestataire tiers (paiement, livraison, hébergement). Cette limitation ne s'applique pas en cas de faute lourde ou intentionnelle de Bloko.</p>
 
-<h2>8. Données personnelles</h2>
+<h2>9. Données personnelles</h2>
 <p>Les données collectées (identité, contact, adresse de livraison, historique de commandes) sont utilisées pour le fonctionnement de la Plateforme : création de compte, traitement des commandes, suivi de livraison, communication liée au service. Conformément à la loi béninoise n°2017-20 du 20 avril 2018 portant Code du numérique et sous le contrôle de l'Autorité de Protection des Données Personnelles (APDP), toute personne dispose d'un droit d'accès, de rectification et de suppression de ses données, exerçable en écrivant à <strong>eazysell.bj@gmail.com</strong>. Une Vendeuse a accès aux données des Acheteurs strictement nécessaires au traitement de ses propres commandes.</p>
 
-<h2>9. Propriété intellectuelle</h2>
+<h2>10. Propriété intellectuelle</h2>
 <p>La marque « Bloko », son logo et le logiciel de la Plateforme sont la propriété exclusive de <strong>EazySell BJ</strong>. Chaque Vendeuse conserve la propriété des contenus (textes, photos) qu'elle publie sur sa boutique et garantit disposer des droits nécessaires à leur publication.</p>
 
-<h2>10. Modification des CGU</h2>
+<h2>11. Modification des CGU</h2>
 <p>Bloko peut modifier les présentes CGU à tout moment ; la version en vigueur est celle publiée sur cette page à la date de connexion.</p>
 
-<h2>11. Droit applicable et litiges</h2>
+<h2>12. Droit applicable et litiges</h2>
 <p>Les présentes CGU sont soumises au droit béninois et aux actes uniformes OHADA. En cas de litige, une résolution amiable sera recherchée en priorité en contactant <strong>eazysell.bj@gmail.com</strong>. À défaut, les tribunaux compétents du Bénin seront seuls compétents.</p>
 
-<h2>12. Contact</h2>
+<h2>13. Contact</h2>
 <p>Pour toute question relative à la Plateforme : <strong>eazysell.bj@gmail.com</strong> — <strong>+229 01 67 26 63 60</strong>.</p>
 `.trim();

@@ -8,6 +8,8 @@ type PropsType = {
   label: string;
   name?: string;
   minimal?: boolean;
+  defaultChecked?: boolean;
+  form?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   radius?: "default" | "md";
 };
@@ -18,6 +20,8 @@ export function Checkbox({
   name,
   withBg,
   minimal,
+  defaultChecked,
+  form,
   onChange,
   radius,
 }: PropsType) {
@@ -36,8 +40,10 @@ export function Checkbox({
           <input
             type="checkbox"
             onChange={onChange}
+            defaultChecked={defaultChecked}
             name={name}
             id={id}
+            form={form}
             className="peer sr-only"
           />
 

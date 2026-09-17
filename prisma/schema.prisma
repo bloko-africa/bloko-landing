@@ -139,6 +139,14 @@ model Boutique {
   // checkout et sur la page boutique.
   deliveryDetails String?         @map("delivery_details")
 
+  // Par défaut (false), la commission Bloko (voir src/lib/pricing.ts) est
+  // absorbée sur le prix de la vendeuse — le client paie le prix affiché,
+  // la vendeuse touche 92%. Si activé, le prix affiché au client est
+  // majoré pour que la vendeuse touche exactement son prix listé même
+  // après commission (voir getBuyerPrice) — éditable par la vendeuse
+  // elle-même, même surface self-service que savPhone/deliveryDetails.
+  passCommissionToClient Boolean @default(false) @map("pass_commission_to_client")
+
   accentColor  String  @default("#a67c52") @map("accent_color")
   heroEyebrow  String? @map("hero_eyebrow")
   heroTitle    String? @map("hero_title")

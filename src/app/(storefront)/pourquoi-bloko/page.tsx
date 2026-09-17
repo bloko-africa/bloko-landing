@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { PLATFORM_COMMISSION_RATE } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "Pourquoi Bloko",
@@ -187,6 +188,40 @@ export default function PourquoiBlokoPage() {
           {vendorBenefits.map((b) => (
             <BenefitCard key={b.title} {...b} />
           ))}
+        </div>
+      </section>
+
+      {/* Tarifs */}
+      <section className="border-y border-stroke bg-gray-1 dark:border-dark-3 dark:bg-dark-2">
+        <div className="mx-auto max-w-(--breakpoint-sm) px-4 py-16 text-center md:py-20">
+          <p className="text-body-xs font-medium uppercase tracking-[0.2em] text-dark-5 dark:text-dark-6">
+            Tarifs
+          </p>
+          <h2 className="mt-3 text-heading-5 font-bold uppercase tracking-tight text-dark dark:text-white">
+            Un seul plan, aucune surprise
+          </h2>
+          <div className="mx-auto mt-10 max-w-xs rounded-2xl border border-stroke bg-white p-8 dark:border-dark-3 dark:bg-gray-dark">
+            <p className="text-[clamp(2.5rem,8vw,3.5rem)] font-black leading-none text-dark dark:text-white">
+              {PLATFORM_COMMISSION_RATE * 100}%
+            </p>
+            <p className="mt-2 text-body-sm text-dark-5 dark:text-dark-6">
+              par vente payée — c&apos;est tout
+            </p>
+            <ul className="mt-6 space-y-2.5 text-left text-body-sm text-dark-5 dark:text-dark-6">
+              <li>✓ Pas d&apos;abonnement, pas de frais fixes</li>
+              <li>✓ Rien à payer tant que tu ne vends pas</li>
+              <li>✓ Couvre les frais de paiement Mobile Money et carte</li>
+              <li>✓ Tu peux choisir de le répercuter sur ton prix client</li>
+            </ul>
+          </div>
+          <p className="mx-auto mt-6 max-w-md text-body-xs text-dark-5 dark:text-dark-6">
+            La commission ne s&apos;applique jamais aux frais de livraison. Détail
+            complet dans nos{" "}
+            <Link href="/cgu" className="font-medium text-primary hover:underline">
+              CGU
+            </Link>
+            .
+          </p>
         </div>
       </section>
 

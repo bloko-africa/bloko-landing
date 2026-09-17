@@ -1,5 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
+import { getBuyerPrice } from "@/lib/pricing";
 
 export type OrderItemInput = { productVariantId: string; quantity: number };
 
@@ -96,10 +97,15 @@ export async function buildOrderItems(items: OrderItemInput[]) {
   }
   const [boutiqueId] = boutiqueIds;
 
+  const boutique = await db.boutique.findUniqueOrThrow({
+    where: { id: boutiqueId },
+    select: { passCommissionToClient: true },
+  });
+
   type ItemData = {
     productVariantId: string;
     quantity: number;
-    unitPrice: (typeof variants)[number]["product"]["basePrice"];
+    unitPrice: number;
   };
 
   // Transaction interactive : si un item échoue (stock insuffisant), les
@@ -126,8 +132,9 @@ export async function buildOrderItems(items: OrderItemInput[]) {
         );
       }
 
-      const unitPrice = variant.priceOverride ?? variant.product.basePrice;
-      runningTotal += Number(unitPrice) * item.quantity;
+      const listedPrice = Number(variant.priceOverride ?? variant.product.basePrice);
+      const unitPrice = getBuyerPrice(listedPrice, boutique.passCommissionToClient);
+      runningTotal += unitPrice * item.quantity;
 
       data.push({
         productVariantId: item.productVariantId,
