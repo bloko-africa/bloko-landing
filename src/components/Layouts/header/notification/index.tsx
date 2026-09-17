@@ -5,6 +5,8 @@ import {
   DropdownContent,
   DropdownTrigger,
 } from "@/components/ui/dropdown";
+import { useSession } from "@/lib/auth/auth-client";
+import { getDashboardBase } from "@/lib/dashboard-space";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   getRecentOrderNotifications,
@@ -23,6 +25,10 @@ export function Notification() {
   const [recentCount, setRecentCount] = useState(0);
   const [seen, setSeen] = useState(false);
   const isMobile = useIsMobile();
+  const session = useSession();
+  const dashboardBase = getDashboardBase(
+    (session.data?.user as { role?: string } | undefined)?.role,
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -116,7 +122,7 @@ export function Notification() {
         </ul>
 
         <Link
-          href="/2558588dca9a/orders"
+          href={`${dashboardBase}/orders`}
           onClick={() => setIsOpen(false)}
           className="block rounded-lg border border-primary p-2 text-center text-sm font-medium tracking-wide text-primary transition-colors outline-none hover:bg-blue-light-5 focus:bg-blue-light-5 focus:text-primary focus-visible:border-primary dark:border-dark-3 dark:text-dark-6 dark:hover:border-dark-5 dark:hover:bg-dark-3 dark:hover:text-dark-7 dark:focus-visible:border-dark-5 dark:focus-visible:bg-dark-3 dark:focus-visible:text-dark-7"
         >

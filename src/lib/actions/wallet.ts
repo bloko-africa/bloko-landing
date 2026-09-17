@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth/session";
 import { getWalletSummary } from "@/lib/wallet";
+import { revalidateDashboardPath } from "@/lib/dashboard-space-server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -55,5 +56,5 @@ export async function recordPayout(formData: FormData) {
 
   revalidatePath("/2558588dca9a/boutiques");
   revalidatePath(`/2558588dca9a/boutiques/${data.boutiqueId}`);
-  revalidatePath("/2558588dca9a/wallet");
+  revalidateDashboardPath("/wallet");
 }

@@ -8,7 +8,7 @@ import {
   deleteProductImage as removeStoredImage,
   uploadProductImage,
 } from "@/lib/storage/upload-product-image";
-import { revalidatePath } from "next/cache";
+import { revalidateDashboardPath } from "@/lib/dashboard-space-server";
 import { z } from "zod";
 
 const productSchema = z.object({
@@ -72,7 +72,7 @@ export async function createProduct(formData: FormData) {
     },
   });
 
-  revalidatePath("/2558588dca9a/products");
+  revalidateDashboardPath("/products");
   return product.id;
 }
 
@@ -97,8 +97,8 @@ export async function updateProduct(formData: FormData) {
     },
   });
 
-  revalidatePath("/2558588dca9a/products");
-  revalidatePath(`/2558588dca9a/products/${data.id}`);
+  revalidateDashboardPath("/products");
+  revalidateDashboardPath(`/products/${data.id}`);
 }
 
 export async function deleteProduct(id: string) {
@@ -111,7 +111,7 @@ export async function deleteProduct(id: string) {
     images.map((image) => removeStoredImage(imageKeyFromUrl(image.url))),
   );
 
-  revalidatePath("/2558588dca9a/products");
+  revalidateDashboardPath("/products");
 }
 
 const variantSchema = z.object({
@@ -139,7 +139,7 @@ export async function addProductVariant(formData: FormData) {
   await requireBoutiqueAccess(["editor", "admin", "vendeur"], boutiqueId);
 
   await db.productVariant.create({ data });
-  revalidatePath(`/2558588dca9a/products/${data.productId}`);
+  revalidateDashboardPath(`/products/${data.productId}`);
 }
 
 export async function updateVariantStock(variantId: string, stock: number) {
@@ -159,13 +159,13 @@ export async function updateVariantStock(variantId: string, stock: number) {
     data: { stock },
   });
 
-  revalidatePath(`/2558588dca9a/products/${variant.productId}`);
+  revalidateDashboardPath(`/products/${variant.productId}`);
 }
 
 export async function deleteProductVariant(variantId: string) {
   await requireRole(["admin"]);
   const variant = await db.productVariant.delete({ where: { id: variantId } });
-  revalidatePath(`/2558588dca9a/products/${variant.productId}`);
+  revalidateDashboardPath(`/products/${variant.productId}`);
 }
 
 // UploadThing sert chaque fichier sous .../f/<key> — le dernier segment de
@@ -196,7 +196,7 @@ export async function addProductImage(productId: string, file: File) {
     data: { productId, url, position: (lastImage?.position ?? -1) + 1 },
   });
 
-  revalidatePath(`/2558588dca9a/products/${productId}`);
+  revalidateDashboardPath(`/products/${productId}`);
 }
 
 export async function deleteProductImageAction(imageId: string) {
@@ -211,5 +211,5 @@ export async function deleteProductImageAction(imageId: string) {
 
   const image = await db.productImage.delete({ where: { id: imageId } });
   await removeStoredImage(imageKeyFromUrl(image.url));
-  revalidatePath(`/2558588dca9a/products/${image.productId}`);
+  revalidateDashboardPath(`/products/${image.productId}`);
 }

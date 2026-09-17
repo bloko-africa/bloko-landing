@@ -268,7 +268,9 @@ export async function updateBoutiqueContact(formData: FormData) {
     },
   });
 
-  revalidatePath("/2558588dca9a/contact-sav");
+  // contact-sav vit exclusivement sous /ma-boutique depuis la séparation
+  // des espaces — plus d'équivalent staff à invalider séparément.
+  revalidatePath("/ma-boutique/contact-sav");
   const boutique = await db.boutique.findUnique({ where: { id }, select: { handle: true } });
   if (boutique) {
     revalidatePath(`/b/${boutique.handle}`);

@@ -3,7 +3,7 @@
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth/session";
 import { slugify } from "@/lib/utils";
-import { revalidatePath } from "next/cache";
+import { revalidateDashboardPath } from "@/lib/dashboard-space-server";
 import { z } from "zod";
 
 const categorySchema = z.object({
@@ -32,7 +32,7 @@ export async function createCategory(formData: FormData) {
     },
   });
 
-  revalidatePath("/2558588dca9a/categories");
+  revalidateDashboardPath("/categories");
 }
 
 export async function updateCategory(formData: FormData) {
@@ -52,11 +52,11 @@ export async function updateCategory(formData: FormData) {
     },
   });
 
-  revalidatePath("/2558588dca9a/categories");
+  revalidateDashboardPath("/categories");
 }
 
 export async function deleteCategory(id: string) {
   await requireRole(["admin"]);
   await db.category.delete({ where: { id } });
-  revalidatePath("/2558588dca9a/categories");
+  revalidateDashboardPath("/categories");
 }

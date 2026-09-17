@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { createOrder } from "@/lib/actions/orders";
 import { formatPrice } from "@/lib/format-price";
 import { notifyPromise } from "@/lib/notify-promise";
+import { useDashboardBase } from "@/lib/use-dashboard-base";
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import { toast } from "sonner";
@@ -76,6 +77,7 @@ export function OrderForm({
   currency: string;
 }) {
   const router = useRouter();
+  const dashboardBase = useDashboardBase();
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
@@ -127,7 +129,7 @@ export function OrderForm({
           error: (err) => (err instanceof Error ? err.message : "Échec"),
         },
       );
-      router.push(`/2558588dca9a/orders/${id}`);
+      router.push(`${dashboardBase}/orders/${id}`);
     } finally {
       setLoading(false);
     }

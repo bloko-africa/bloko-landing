@@ -3,6 +3,7 @@
 import { Logo } from "@/components/logo";
 import { useSession } from "@/lib/auth/auth-client";
 import type { AppRole } from "@/lib/auth/modules/authorization/permissions";
+import { ADMIN_BASE, getDashboardBase } from "@/lib/dashboard-space";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -23,7 +24,14 @@ export function Sidebar() {
   // Un item sans `roles` est visible par tout le staff connecté ; un item
   // avec `roles` (ex: "Plateforme" -> admin only) ne s'affiche que pour ce
   // rôle précis — la vraie barrière reste côté serveur (proxy.ts,
-  // requireBoutiqueAccess), ceci n'est qu'un filtre d'affichage.
+  // requireBoutiqueAccess), ceci n'est qu'un filtre d'affichage. NAV_DATA
+  // encode ses URLs sous le préfixe admin ; pour une vendeuse (espace
+  // /ma-boutique séparé), on les réécrit au rendu plutôt que de dupliquer
+  // toute la structure de navigation pour un seul préfixe différent.
+  const dashboardBase = getDashboardBase(role);
+  const rewriteUrl = (url: string) =>
+    dashboardBase === ADMIN_BASE ? url : url.replace(ADMIN_BASE, dashboardBase);
+
   const visibleSections = useMemo(() => {
     return NAV_DATA.map((section) => ({
       ...section,
@@ -31,12 +39,13 @@ export function Sidebar() {
         .filter((item) => !item.roles || (role && item.roles.includes(role)))
         .map((item) => ({
           ...item,
-          items: item.items.filter(
-            (subItem) => !subItem.roles || (role && subItem.roles.includes(role)),
-          ),
+          ...(item.url ? { url: rewriteUrl(item.url) } : {}),
+          items: item.items
+            .filter((subItem) => !subItem.roles || (role && subItem.roles.includes(role)))
+            .map((subItem) => ({ ...subItem, url: rewriteUrl(subItem.url) })),
         })),
     })).filter((section) => section.items.length > 0);
-  }, [role]);
+  }, [role, dashboardBase]);
 
   const toggleExpanded = (title: string) => {
     setExpandedItems((prev) => (prev.includes(title) ? [] : [title]));
@@ -89,7 +98,7 @@ export function Sidebar() {
         <div className="flex h-full flex-col py-10 pl-[25px] pr-[7px]">
           <div className="relative pr-4.5">
             <Link
-              href={"/2558588dca9a"}
+              href={dashboardBase}
               onClick={() => isMobile && toggleSidebar()}
               className="px-0 py-2.5 min-[850px]:py-0"
             >

@@ -7,6 +7,7 @@ import { notifyUser } from "@/lib/push/send-push";
 import { sendEmail } from "@/lib/email/send";
 import { DeliveryUpdateEmail } from "@/lib/email/templates/delivery-update";
 import { LIVRAISON_STATUS_LABEL } from "@/lib/livraison-status";
+import { revalidateDashboardPath } from "@/lib/dashboard-space-server";
 import { render } from "@react-email/render";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -112,8 +113,8 @@ export async function updateLivraisonStatus(formData: FormData) {
     }
   }
 
-  revalidatePath("/2558588dca9a/livraisons");
-  revalidatePath(`/2558588dca9a/livraisons/${id}`);
+  revalidateDashboardPath("/livraisons");
+  revalidateDashboardPath(`/livraisons/${id}`);
 }
 
 const agenceSchema = z.object({

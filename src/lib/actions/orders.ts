@@ -9,7 +9,7 @@ import {
 import { buildOrderItems } from "@/lib/orders/build-order-items";
 import { formatPrice } from "@/lib/format-price";
 import { notifyStaff } from "@/lib/push/send-push";
-import { revalidatePath } from "next/cache";
+import { revalidateDashboardPath } from "@/lib/dashboard-space-server";
 import { z } from "zod";
 
 const createOrderSchema = z.object({
@@ -79,14 +79,14 @@ export async function createOrder(input: CreateOrderInput) {
     console.error("Echec notification push:", err);
   }
 
-  revalidatePath("/2558588dca9a/orders");
+  revalidateDashboardPath("/orders");
   return order.id;
 }
 
 export async function deleteOrder(orderId: string) {
   await requireRole(["admin"]);
   await db.order.delete({ where: { id: orderId } });
-  revalidatePath("/2558588dca9a/orders");
+  revalidateDashboardPath("/orders");
 }
 
 export async function generatePaymentLink(orderId: string) {
@@ -129,7 +129,7 @@ export async function generatePaymentLink(orderId: string) {
     },
   });
 
-  revalidatePath(`/2558588dca9a/orders/${orderId}`);
+  revalidateDashboardPath(`/orders/${orderId}`);
   return payment.checkout_url;
 }
 
@@ -170,5 +170,5 @@ export async function refreshPaymentStatus(paymentId: string) {
     });
   }
 
-  revalidatePath(`/2558588dca9a/orders/${payment.orderId}`);
+  revalidateDashboardPath(`/orders/${payment.orderId}`);
 }

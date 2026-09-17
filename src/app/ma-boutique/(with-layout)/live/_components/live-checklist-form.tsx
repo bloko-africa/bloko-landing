@@ -2,6 +2,7 @@
 
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 import { startLiveSession } from "@/lib/actions/live-sessions";
+import { VENDOR_BASE } from "@/lib/dashboard-space";
 import { notifyPromise } from "@/lib/notify-promise";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
@@ -23,13 +24,13 @@ export function LiveChecklistForm({ products }: { products: Product[] }) {
         success: "Live démarré",
         error: (err) => (err instanceof Error ? err.message : "Échec"),
       });
-      router.push(`/2558588dca9a/live/${result.liveSessionId}`);
+      router.push(`${VENDOR_BASE}/live/${result.liveSessionId}`);
     } catch (err) {
       // Course avec un autre onglet/appareil qui a démarré le live entre
       // temps : plutôt que de laisser un formulaire mort, on renvoie vers
       // /live qui redirige déjà lui-même vers la session active.
       if (err instanceof Error && err.message.includes("déjà en cours")) {
-        router.push("/2558588dca9a/live");
+        router.push(`${VENDOR_BASE}/live`);
         return;
       }
       setLoading(false);

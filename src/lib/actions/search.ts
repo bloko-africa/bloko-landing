@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { requireBoutiqueAccess } from "@/lib/auth/session";
+import { getDashboardBase } from "@/lib/dashboard-space";
 
 export type SearchResult = {
   type: "product" | "order" | "collection" | "category";
@@ -12,12 +13,13 @@ export type SearchResult = {
 };
 
 export async function globalSearch(query: string): Promise<SearchResult[]> {
-  const { scopedBoutiqueId } = await requireBoutiqueAccess([
+  const { session, scopedBoutiqueId } = await requireBoutiqueAccess([
     "viewer",
     "editor",
     "admin",
     "vendeur",
   ]);
+  const dashboardBase = getDashboardBase((session.user as { role?: string }).role);
 
   const q = query.trim();
   if (q.length < 2) return [];
@@ -65,28 +67,28 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
       id: p.id,
       title: p.name,
       subtitle: p.status,
-      href: `/2558588dca9a/products/${p.id}`,
+      href: `${dashboardBase}/products/${p.id}`,
     })),
     ...orders.map((o) => ({
       type: "order" as const,
       id: o.id,
       title: o.reference,
       subtitle: `${o.customerName} — ${o.status}`,
-      href: `/2558588dca9a/orders/${o.id}`,
+      href: `${dashboardBase}/orders/${o.id}`,
     })),
     ...collections.map((c) => ({
       type: "collection" as const,
       id: c.id,
       title: c.name,
       subtitle: c.season ?? "Collection",
-      href: `/2558588dca9a/collections/${c.id}`,
+      href: `${dashboardBase}/collections/${c.id}`,
     })),
     ...categories.map((c) => ({
       type: "category" as const,
       id: c.id,
       title: c.name,
       subtitle: "Catégorie",
-      href: `/2558588dca9a/categories/${c.id}`,
+      href: `${dashboardBase}/categories/${c.id}`,
     })),
   ];
 }

@@ -1,3 +1,7 @@
+"use client";
+
+import { useSession } from "@/lib/auth/auth-client";
+import { getDashboardBase } from "@/lib/dashboard-space";
 import Link from "next/link";
 
 interface BreadcrumbProps {
@@ -5,6 +9,9 @@ interface BreadcrumbProps {
 }
 
 const Breadcrumb = ({ pageName }: BreadcrumbProps) => {
+  const session = useSession();
+  const role = (session.data?.user as { role?: string } | undefined)?.role;
+
   return (
     <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <h2 className="text-[26px] font-bold leading-[30px] text-dark dark:text-white">
@@ -14,7 +21,7 @@ const Breadcrumb = ({ pageName }: BreadcrumbProps) => {
       <nav>
         <ol className="flex items-center gap-2">
           <li>
-            <Link className="font-medium" href="/2558588dca9a">
+            <Link className="font-medium" href={getDashboardBase(role)}>
               Dashboard /
             </Link>
           </li>

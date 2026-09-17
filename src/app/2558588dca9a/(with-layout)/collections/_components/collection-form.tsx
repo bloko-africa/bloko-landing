@@ -11,6 +11,7 @@ import {
   updateCollection,
 } from "@/lib/actions/collections";
 import { notifyPromise } from "@/lib/notify-promise";
+import { useDashboardBase } from "@/lib/use-dashboard-base";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
@@ -29,6 +30,7 @@ type CollectionFormProps = {
 
 export function CollectionForm({ boutiques, initial, canDelete }: CollectionFormProps) {
   const router = useRouter();
+  const dashboardBase = useDashboardBase();
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -51,7 +53,7 @@ export function CollectionForm({ boutiques, initial, canDelete }: CollectionForm
           error: (err) => (err instanceof Error ? err.message : "Échec"),
         });
       }
-      router.push("/2558588dca9a/collections");
+      router.push(`${dashboardBase}/collections`);
       router.refresh();
     } finally {
       setLoading(false);
@@ -67,7 +69,7 @@ export function CollectionForm({ boutiques, initial, canDelete }: CollectionForm
       success: "Collection supprimée",
       error: (err) => (err instanceof Error ? err.message : "Échec"),
     });
-    router.push("/2558588dca9a/collections");
+    router.push(`${dashboardBase}/collections`);
     router.refresh();
   }
 

@@ -9,6 +9,7 @@ import {
   updateCategory,
 } from "@/lib/actions/categories";
 import { notifyPromise } from "@/lib/notify-promise";
+import { useDashboardBase } from "@/lib/use-dashboard-base";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
@@ -28,6 +29,7 @@ export function CategoryForm({
   canDelete,
 }: CategoryFormProps) {
   const router = useRouter();
+  const dashboardBase = useDashboardBase();
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -50,7 +52,7 @@ export function CategoryForm({
           error: (err) => (err instanceof Error ? err.message : "Échec"),
         });
       }
-      router.push("/2558588dca9a/categories");
+      router.push(`${dashboardBase}/categories`);
       router.refresh();
     } finally {
       setLoading(false);
@@ -66,7 +68,7 @@ export function CategoryForm({
       success: "Catégorie supprimée",
       error: (err) => (err instanceof Error ? err.message : "Échec"),
     });
-    router.push("/2558588dca9a/categories");
+    router.push(`${dashboardBase}/categories`);
     router.refresh();
   }
 

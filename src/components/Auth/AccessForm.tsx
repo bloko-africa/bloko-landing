@@ -2,6 +2,7 @@
 
 import { EmailIcon, PasswordIcon } from "@/assets/icons";
 import { authClient, signIn } from "@/lib/auth/auth-client";
+import { getDashboardBase } from "@/lib/dashboard-space";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -20,14 +21,32 @@ export function AccessForm({
   callbackURL: defaultCallbackURL,
   newUserCallbackURL,
   defaultEmail = "",
+  isDashboard = false,
 }: {
   callbackURL: string;
   newUserCallbackURL?: string;
   defaultEmail?: string;
+  // Connexion dashboard (staff/vendeuse) vs acheteuse — seul le dashboard a
+  // deux espaces URL à résoudre par rôle. Ignoré si un callbackUrl explicite
+  // est déjà présent (poussé ici par proxy.ts avec la bonne destination).
+  isDashboard?: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackURL = searchParams.get("callbackUrl") || defaultCallbackURL;
+  const explicitCallbackUrl = searchParams.get("callbackUrl");
+  const callbackURL = explicitCallbackUrl || defaultCallbackURL;
+
+  // Lien magique : le rôle n'est pas encore connu au moment de la demande
+  // (avant clic sur le lien reçu par email) — impossible de résoudre
+  // l'espace ici. proxy.ts rattrape ce cas au chargement suivant (une
+  // vendeuse arrivant sur /2558588dca9a est renvoyée vers /ma-boutique).
+  // OTP et mot de passe, eux, connaissent le rôle immédiatement après
+  // succès (voir handleVerifyOtp/handlePasswordSignIn) — zéro redirection
+  // superflue dans ce cas.
+  function resolveDashboardDestination(role: string | undefined) {
+    if (explicitCallbackUrl || !isDashboard) return callbackURL;
+    return getDashboardBase(role);
+  }
   const [step, setStep] = useState<Step>("start");
   const [email, setEmail] = useState(defaultEmail);
   const [password, setPassword] = useState("");
@@ -85,7 +104,8 @@ export function AccessForm({
       const result = await signIn.emailOtp({ email, otp });
       if (!result.data) throw new Error(result.error?.message || "Code invalide");
       toast.success("Connexion réussie");
-      router.push(callbackURL);
+      const role = (result.data.user as { role?: string } | undefined)?.role;
+      router.push(resolveDashboardDestination(role));
       router.refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Code invalide");
@@ -101,7 +121,8 @@ export function AccessForm({
       const result = await signIn.email({ email, password });
       if (!result.data) throw new Error(result.error?.message || "Échec de la connexion");
       toast.success("Connexion réussie");
-      router.push(callbackURL);
+      const role = (result.data.user as { role?: string } | undefined)?.role;
+      router.push(resolveDashboardDestination(role));
       router.refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Échec de la connexion");

@@ -1,5 +1,6 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { requireBoutiqueAccess } from "@/lib/auth/session";
+import { VENDOR_BASE } from "@/lib/dashboard-space";
 import { db } from "@/lib/db";
 import { formatPrice } from "@/lib/format-price";
 import type { Metadata } from "next";
@@ -23,7 +24,7 @@ export default async function LivePage() {
     select: { id: true },
   });
   if (activeSession) {
-    redirect(`/2558588dca9a/live/${activeSession.id}`);
+    redirect(`${VENDOR_BASE}/live/${activeSession.id}`);
   }
 
   const [products, pastSessions] = await Promise.all([
@@ -90,7 +91,7 @@ export default async function LivePage() {
                       </td>
                       <td className="px-5.5 py-4">
                         <Link
-                          href={`/2558588dca9a/live/${s.id}`}
+                          href={`${VENDOR_BASE}/live/${s.id}`}
                           className="text-body-sm text-dark-5 hover:text-primary dark:text-dark-6"
                         >
                           Détail

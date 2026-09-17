@@ -3,7 +3,7 @@
 import { db } from "@/lib/db";
 import { requireRole, requireBoutiqueAccess } from "@/lib/auth/session";
 import { slugify } from "@/lib/utils";
-import { revalidatePath } from "next/cache";
+import { revalidateDashboardPath } from "@/lib/dashboard-space-server";
 import { z } from "zod";
 
 const collectionSchema = z.object({
@@ -51,7 +51,7 @@ export async function createCollection(formData: FormData) {
     },
   });
 
-  revalidatePath("/2558588dca9a/collections");
+  revalidateDashboardPath("/collections");
 }
 
 export async function updateCollection(formData: FormData) {
@@ -76,11 +76,11 @@ export async function updateCollection(formData: FormData) {
     },
   });
 
-  revalidatePath("/2558588dca9a/collections");
+  revalidateDashboardPath("/collections");
 }
 
 export async function deleteCollection(id: string) {
   await requireRole(["admin"]);
   await db.collection.delete({ where: { id } });
-  revalidatePath("/2558588dca9a/collections");
+  revalidateDashboardPath("/collections");
 }

@@ -2,6 +2,8 @@
 
 import { db } from "@/lib/db";
 import { requireBoutiqueAccess } from "@/lib/auth/session";
+import { revalidateDashboardPath } from "@/lib/dashboard-space-server";
+import { VENDOR_BASE } from "@/lib/dashboard-space";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -40,7 +42,9 @@ export async function startLiveSession(formData: FormData) {
     },
   });
 
-  revalidatePath("/2558588dca9a/live");
+  // startLiveSession est vendeur-only (voir requireBoutiqueAccess ci-dessus)
+  // — /live (liste) n'existe désormais que sous /ma-boutique.
+  revalidatePath(`${VENDOR_BASE}/live`);
 
   return { liveSessionId: liveSession.id };
 }
@@ -58,8 +62,11 @@ export async function endLiveSession(formData: FormData) {
     data: { status: "TERMINE", endedAt: new Date() },
   });
 
-  revalidatePath("/2558588dca9a/live");
-  revalidatePath(`/2558588dca9a/live/${id}`);
+  // endLiveSession peut être appelée par le staff ou la vendeuse (voir
+  // requireBoutiqueAccess ci-dessus) — /live/[id] (détail) est partagée,
+  // /live (liste) n'existe que côté vendeuse.
+  revalidatePath(`${VENDOR_BASE}/live`);
+  revalidateDashboardPath(`/live/${id}`);
 }
 
 export async function getLiveSessionFeed(liveSessionId: string) {

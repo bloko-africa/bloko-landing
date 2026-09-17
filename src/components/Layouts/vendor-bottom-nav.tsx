@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession } from "@/lib/auth/auth-client";
+import { VENDOR_BASE } from "@/lib/dashboard-space";
 import { useSidebarContext } from "./sidebar/sidebar-context";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -24,10 +25,10 @@ export function VendorBottomNav() {
   if (role !== "vendeur") return null;
 
   const items = [
-    { href: "/2558588dca9a/orders", label: "Commandes", icon: OrdersIcon },
-    { href: "/2558588dca9a/products", label: "Produits", icon: BagIcon },
-    { href: "/2558588dca9a/live", label: "Live", icon: LiveIcon },
-    { href: "/2558588dca9a/wallet", label: "Portefeuille", icon: WalletIcon },
+    { href: `${VENDOR_BASE}/orders`, label: "Commandes", icon: OrdersIcon },
+    { href: `${VENDOR_BASE}/products`, label: "Produits", icon: BagIcon },
+    { href: `${VENDOR_BASE}/live`, label: "Live", icon: LiveIcon },
+    { href: `${VENDOR_BASE}/wallet`, label: "Portefeuille", icon: WalletIcon },
   ];
 
   return (

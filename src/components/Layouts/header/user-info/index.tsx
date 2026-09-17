@@ -54,6 +54,7 @@ export function UserInfo() {
   }
 
   const role = session?.data?.user as { role?: string } | undefined;
+  const isVendeur = role?.role === "vendeur";
   const user = {
     name: session?.data?.user?.name as string,
     email: session?.data?.user?.email as string,
@@ -130,21 +131,28 @@ export function UserInfo() {
           </figcaption>
         </figure>
 
-        <hr className="border-[#E8E8E8] dark:border-dark-3" />
+        {/* /settings est la configuration plateforme (devise, collection
+            vedette, notifs push...), admin-only — pas d'équivalent côté
+            vendeuse (voir Mes coordonnées pour ses propres réglages). */}
+        {!isVendeur && (
+          <>
+            <hr className="border-[#E8E8E8] dark:border-dark-3" />
 
-        <div className="p-2 text-base text-[#4B5563] *:cursor-pointer dark:text-dark-6">
-          <Link
-            href={"/2558588dca9a/settings"}
-            onClick={() => setIsOpen(false)}
-            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2.25 ring-primary outline-0 hover:bg-gray-2 hover:text-dark focus-visible:ring-1 dark:hover:bg-dark-3 dark:hover:text-white"
-          >
-            <SettingsIcon />
+            <div className="p-2 text-base text-[#4B5563] *:cursor-pointer dark:text-dark-6">
+              <Link
+                href={"/2558588dca9a/settings"}
+                onClick={() => setIsOpen(false)}
+                className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2.25 ring-primary outline-0 hover:bg-gray-2 hover:text-dark focus-visible:ring-1 dark:hover:bg-dark-3 dark:hover:text-white"
+              >
+                <SettingsIcon />
 
-            <span className="mr-auto text-base font-medium">
-              Account Settings
-            </span>
-          </Link>
-        </div>
+                <span className="mr-auto text-base font-medium">
+                  Account Settings
+                </span>
+              </Link>
+            </div>
+          </>
+        )}
 
         <hr className="border-[#E8E8E8] dark:border-dark-3" />
 

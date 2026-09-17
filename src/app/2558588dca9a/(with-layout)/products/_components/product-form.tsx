@@ -10,6 +10,7 @@ import {
   updateProduct,
 } from "@/lib/actions/products";
 import { notifyPromise } from "@/lib/notify-promise";
+import { useDashboardBase } from "@/lib/use-dashboard-base";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
@@ -46,6 +47,7 @@ export function ProductForm({
   canDelete,
 }: ProductFormProps) {
   const router = useRouter();
+  const dashboardBase = useDashboardBase();
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -68,7 +70,7 @@ export function ProductForm({
           success: "Produit créé",
           error: (err) => (err instanceof Error ? err.message : "Échec"),
         });
-        router.push(`/2558588dca9a/products/${id}`);
+        router.push(`${dashboardBase}/products/${id}`);
       }
     } finally {
       setLoading(false);
@@ -84,7 +86,7 @@ export function ProductForm({
       success: "Produit supprimé",
       error: (err) => (err instanceof Error ? err.message : "Échec"),
     });
-    router.push("/2558588dca9a/products");
+    router.push(`${dashboardBase}/products`);
     router.refresh();
   }
 

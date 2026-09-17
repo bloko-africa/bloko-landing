@@ -5,6 +5,7 @@ import { getCurrentSession, requireBoutiqueAccess } from "@/lib/auth/session";
 import { notifyStaff, notifyUser } from "@/lib/push/send-push";
 import { sendEmail } from "@/lib/email/send";
 import { SupportReplyEmail } from "@/lib/email/templates/support-reply";
+import { revalidateDashboardPath } from "@/lib/dashboard-space-server";
 import { render } from "@react-email/render";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -147,8 +148,8 @@ export async function replyToTicket(formData: FormData) {
     }
   }
 
-  revalidatePath("/2558588dca9a/support");
-  revalidatePath(`/2558588dca9a/support/${id}`);
+  revalidateDashboardPath("/support");
+  revalidateDashboardPath(`/support/${id}`);
 }
 
 const replyAsBuyerSchema = z.object({
@@ -213,5 +214,5 @@ export async function updateTicketStatus(formData: FormData) {
   });
 
   await db.supportTicket.update({ where: { id }, data: { status: data.status } });
-  revalidatePath("/2558588dca9a/support");
+  revalidateDashboardPath("/support");
 }

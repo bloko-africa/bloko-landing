@@ -12,9 +12,11 @@ import { UserInfo } from "./user-info";
 export function Header({
   subtitle,
   storeUrl,
+  dashboardBase,
 }: {
   subtitle: string;
   storeUrl: string | null;
+  dashboardBase: string;
 }) {
   const { toggleSidebar, isMobile } = useSidebarContext();
 
@@ -30,7 +32,7 @@ export function Header({
 
       {isMobile && (
         <Link
-          href={"/2558588dca9a"}
+          href={dashboardBase}
           className="2xsm:ml-4 ml-2 flex size-8 shrink-0 items-center justify-center rounded-lg bg-dark max-[430px]:hidden dark:bg-black"
         >
           <Image src="/brand/bloko-icon.png" width={16} height={18} alt="" role="presentation" />

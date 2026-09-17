@@ -1,10 +1,16 @@
 import { auth } from "@/lib/auth";
 import type { AppRole } from "@/lib/auth/modules/authorization/permissions";
+import { ADMIN_BASE, VENDOR_BASE } from "@/lib/dashboard-space";
 import { NextRequest, NextResponse } from "next/server";
 
-const STAFF_ROLES: AppRole[] = ["viewer", "editor", "admin", "vendeur"];
+// Deux dashboards séparés depuis la scission des espaces URL : le staff
+// plateforme (viewer/editor/admin) reste sur /2558588dca9a, la vendeuse a
+// désormais son propre espace /ma-boutique — "vendeur" n'est plus autorisé
+// sous /2558588dca9a, ni l'inverse pour le staff sous /ma-boutique.
+const ADMIN_STAFF_ROLES: AppRole[] = ["viewer", "editor", "admin"];
+const VENDOR_ROLES: AppRole[] = ["vendeur"];
 
-const ADMIN_AUTH_PATHS = ["/2558588dca9a/auth/sign-in"];
+const ADMIN_AUTH_PATHS = [`${ADMIN_BASE}/auth/sign-in`];
 
 // Compte acheteur, scopé par boutique : /b/<handle>/compte/**. Capture le
 // handle pour rediriger vers la bonne connexion/inscription plutôt qu'une
@@ -25,20 +31,33 @@ const SESSION_COOKIE_NAME =
     : "__Secure-better-auth.session_token";
 
 // /2558588dca9a/livraisons, /2558588dca9a/products, /2558588dca9a/orders, /2558588dca9a/collections
-// restent ouverts a tout le staff (y compris vendeur) : le filtrage par
-// boutique se fait au niveau requete via requireBoutiqueAccess(), pas ici.
+// restent ouverts a tout le staff : le filtrage par boutique se fait au
+// niveau requete via requireBoutiqueAccess(), pas ici.
 const ROLE_PROTECTED: { prefix: string; requiredRoles: AppRole[] }[] = [
-  { prefix: "/2558588dca9a/settings", requiredRoles: ["admin"] },
-  { prefix: "/2558588dca9a/boutiques", requiredRoles: ["admin"] },
-  { prefix: "/2558588dca9a/agences", requiredRoles: ["admin"] },
-  { prefix: "/2558588dca9a/users", requiredRoles: ["admin"] },
+  { prefix: `${ADMIN_BASE}/settings`, requiredRoles: ["admin"] },
+  { prefix: `${ADMIN_BASE}/boutiques`, requiredRoles: ["admin"] },
+  { prefix: `${ADMIN_BASE}/agences`, requiredRoles: ["admin"] },
+  { prefix: `${ADMIN_BASE}/users`, requiredRoles: ["admin"] },
 ];
 
 function isAdminPath(pathname: string) {
   return (
-    pathname.startsWith("/2558588dca9a") &&
+    pathname.startsWith(ADMIN_BASE) &&
     !ADMIN_AUTH_PATHS.some((path) => pathname.startsWith(path))
   );
+}
+
+function isVendorPath(pathname: string) {
+  return pathname.startsWith(VENDOR_BASE);
+}
+
+// Une vendeuse sur une URL admin (vieux lien email/notif, bookmark) ou un
+// staff sur une URL vendeuse est renvoyé vers son propre espace, AU MÊME
+// CHEMIN plutôt qu'à la racine — ça auto-répare les liens existants
+// (ex: /2558588dca9a/orders/abc envoyé par email à une vendeuse) sans avoir
+// à traquer chaque générateur de lien un par un.
+function swapDashboardBase(pathname: string, from: string, to: string) {
+  return to + pathname.slice(from.length);
 }
 
 export async function proxy(request: NextRequest) {
@@ -52,20 +71,24 @@ export async function proxy(request: NextRequest) {
   const isAuthOnly = isAdminAuthOnly || isCustomerAuthOnly || isPlatformAuthOnly;
 
   const needsAdminAccess = isAdminPath(pathname);
+  const needsVendorAccess = isVendorPath(pathname);
   // Session requise sur /b/<handle>/compte/** et /compte, sauf les pages
   // connexion/inscription elles-mêmes (elles gèrent leur propre état "pas
   // encore connecté").
   const needsAnySession =
     (Boolean(customerMatch) && !isCustomerAuthOnly) ||
     (isPlatformAccount && !isPlatformAuthOnly);
-  const requiresAuth = needsAdminAccess || needsAnySession;
+  const requiresAuth = needsAdminAccess || needsVendorAccess || needsAnySession;
   const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
 
   function redirectToLogin() {
     const url = request.nextUrl.clone();
     url.searchParams.set("callbackUrl", callbackUrl);
-    if (needsAdminAccess) {
-      url.pathname = "/2558588dca9a/auth/sign-in";
+    if (needsAdminAccess || needsVendorAccess) {
+      // Un seul point de connexion partagé — la redirection post-connexion
+      // (côté client, voir AccessForm) envoie ensuite vers le bon espace
+      // selon le rôle réel une fois la session connue.
+      url.pathname = `${ADMIN_BASE}/auth/sign-in`;
     } else if (customerMatch) {
       url.pathname = `/b/${customerMatch[1]}/compte/connexion`;
     } else {
@@ -89,9 +112,28 @@ export async function proxy(request: NextRequest) {
       return NextResponse.next();
     }
 
-    const sessionRole = (session.user as { role?: string } | undefined)?.role;
+    const sessionRole = (session.user as { role?: string } | undefined)?.role as
+      | AppRole
+      | undefined;
 
-    if (needsAdminAccess && !STAFF_ROLES.includes(sessionRole as AppRole)) {
+    if (needsAdminAccess && !ADMIN_STAFF_ROLES.includes(sessionRole as AppRole)) {
+      // Une vendeuse sur une URL admin est renvoyée vers l'équivalent dans
+      // son propre espace (chemin préservé) ; tout autre rôle (client,
+      // session invalide) n'a nulle part où aller côté dashboard.
+      if (sessionRole === "vendeur") {
+        return NextResponse.redirect(
+          new URL(swapDashboardBase(pathname, ADMIN_BASE, VENDOR_BASE), request.url),
+        );
+      }
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+
+    if (needsVendorAccess && !VENDOR_ROLES.includes(sessionRole as AppRole)) {
+      if (sessionRole && ADMIN_STAFF_ROLES.includes(sessionRole)) {
+        return NextResponse.redirect(
+          new URL(swapDashboardBase(pathname, VENDOR_BASE, ADMIN_BASE), request.url),
+        );
+      }
       return NextResponse.redirect(new URL("/", request.url));
     }
 
@@ -102,12 +144,14 @@ export async function proxy(request: NextRequest) {
       roleProtectedRoute &&
       !roleProtectedRoute.requiredRoles.includes(sessionRole as AppRole)
     ) {
-      return NextResponse.redirect(new URL("/2558588dca9a", request.url));
+      return NextResponse.redirect(new URL(ADMIN_BASE, request.url));
     }
 
     if (isAuthOnly) {
       const destination = isAdminAuthOnly
-        ? "/2558588dca9a"
+        ? sessionRole === "vendeur"
+          ? VENDOR_BASE
+          : ADMIN_BASE
         : isPlatformAuthOnly
           ? "/compte"
           : `/b/${customerMatch ? customerMatch[1] : pathname.split("/")[2]}/compte`;
